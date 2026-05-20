@@ -1,0 +1,1856 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Alpert World Cup Pool 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --red: #B22234;
+  --red-bright: #d42b3f;
+  --blue: #002868;
+  --blue-mid: #0a3d8f;
+  --blue-light: #1a52a8;
+  --white: #f8f9fa;
+  --gold: #f0b429;
+  --muted: #8899aa;
+  --card: #0d1e3a;
+  --card-light: #142845;
+  --border: rgba(255,255,255,0.08);
+  --radius: 12px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:'DM Sans',sans-serif;background:var(--blue);color:var(--white);min-height:100vh;line-height:1.5;}
+nav{position:sticky;top:0;z-index:100;background:rgba(0,40,104,0.97);backdrop-filter:blur(12px);border-bottom:2px solid var(--red);display:flex;align-items:center;justify-content:space-between;padding:0 20px;height:56px;}
+.nav-logo{font-family:'Bebas Neue',sans-serif;font-size:19px;letter-spacing:2px;color:var(--white);}
+.nav-logo span{color:var(--red);}
+.nav-tabs{display:flex;gap:2px;}
+.nav-tab{background:none;border:none;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;padding:7px 12px;border-radius:7px;cursor:pointer;transition:all 0.2s;}
+.nav-tab:hover{color:var(--white);background:rgba(255,255,255,0.06);}
+.nav-tab.active{color:var(--white);background:var(--red);}
+.nav-user{font-family:'DM Mono',monospace;font-size:12px;color:var(--gold);background:rgba(240,180,41,0.1);border:1px solid rgba(240,180,41,0.2);border-radius:20px;padding:4px 12px;cursor:pointer;}
+.page{display:none;max-width:920px;margin:0 auto;padding:32px 18px 80px;}
+.page.active{display:block;animation:fadeUp 0.25s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+.hero{text-align:center;padding:52px 18px 40px;border-bottom:1px solid var(--border);background:linear-gradient(180deg,rgba(178,34,52,0.1) 0%,transparent 100%);}
+.hero-flag{font-size:36px;margin-bottom:10px;}
+.hero h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(36px,7vw,70px);letter-spacing:3px;line-height:1;margin-bottom:8px;}
+.hero h1 .red{color:var(--red);}
+.hero h1 .gold{color:var(--gold);}
+.hero-sub{color:var(--muted);font-size:14px;max-width:500px;margin:0 auto 26px;line-height:1.75;}
+.hero-sub strong{color:var(--white);}
+.hero-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
+.btn-hero{background:var(--red);color:#fff;border:none;border-radius:9px;padding:12px 26px;font-family:'DM Sans',sans-serif;font-weight:600;font-size:14px;cursor:pointer;transition:all 0.2s;}
+.btn-hero:hover{background:var(--red-bright);transform:translateY(-1px);}
+.btn-hero-outline{background:transparent;color:var(--white);border:1px solid rgba(255,255,255,0.22);border-radius:9px;padding:12px 26px;font-family:'DM Sans',sans-serif;font-weight:500;font-size:14px;cursor:pointer;transition:all 0.2s;}
+.btn-hero-outline:hover{background:rgba(255,255,255,0.05);}
+.hero-stats{display:flex;justify-content:center;gap:32px;margin-top:32px;padding-top:24px;border-top:1px solid var(--border);}
+.hero-stat{text-align:center;}
+.hero-stat-n{font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--gold);}
+.hero-stat-l{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;}
+.section-title{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:2px;color:var(--white);margin-bottom:4px;}
+.section-sub{color:var(--muted);font-size:12px;margin-bottom:22px;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:12px;}
+.card-title{font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:1px;margin-bottom:13px;color:var(--gold);display:flex;align-items:center;gap:7px;}
+.badge{background:var(--red);color:#fff;border-radius:4px;font-family:'DM Mono',monospace;font-size:10px;padding:2px 7px;}
+.form-group{margin-bottom:13px;}
+label{display:block;font-size:11px;font-weight:600;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:0.5px;}
+input[type=text],input[type=email],input[type=password],input[type=number],select{width:100%;background:var(--card-light);border:1px solid var(--border);border-radius:8px;color:var(--white);font-family:'DM Sans',sans-serif;font-size:14px;padding:9px 12px;outline:none;transition:border-color 0.2s;appearance:none;-webkit-appearance:none;}
+input:focus,select:focus{border-color:var(--red);}
+select option{background:var(--card);}
+.pin-input{letter-spacing:6px;font-family:'DM Mono',monospace;font-size:18px;text-align:center;}
+.btn-primary{background:var(--red);color:#fff;border:none;border-radius:9px;padding:12px 26px;font-family:'DM Sans',sans-serif;font-weight:600;font-size:14px;cursor:pointer;transition:all 0.2s;width:100%;}
+.btn-primary:hover{background:var(--red-bright);}
+.btn-save{background:var(--blue-light);color:#fff;border:none;border-radius:9px;padding:12px 26px;font-family:'DM Sans',sans-serif;font-weight:600;font-size:14px;cursor:pointer;transition:all 0.2s;width:100%;}
+.btn-save:hover{background:var(--blue-mid);}
+.btn-secondary{background:transparent;color:var(--white);border:1px solid var(--border);border-radius:9px;padding:8px 18px;font-family:'DM Sans',sans-serif;font-weight:500;font-size:13px;cursor:pointer;transition:all 0.2s;}
+.btn-secondary:hover{background:rgba(255,255,255,0.05);}
+.btn-danger{background:rgba(178,34,52,0.12);color:#ff8a8a;border:1px solid rgba(178,34,52,0.25);border-radius:9px;padding:8px 18px;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap;}
+.alert{padding:11px 13px;border-radius:8px;font-size:13px;margin-bottom:13px;line-height:1.5;}
+.alert-success{background:rgba(45,158,72,0.12);border:1px solid rgba(45,158,72,0.25);color:#7ee8a2;}
+.alert-warn{background:rgba(240,180,41,0.1);border:1px solid rgba(240,180,41,0.2);color:var(--gold);}
+.alert-error{background:rgba(178,34,52,0.12);border:1px solid rgba(178,34,52,0.3);color:#ff8a8a;}
+.alert-info{background:rgba(26,82,168,0.18);border:1px solid rgba(26,82,168,0.35);color:#89b4ff;}
+.groups-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:9px;}
+.group-card{background:var(--card-light);border:1px solid var(--border);border-radius:9px;padding:13px;}
+.group-letter{font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:2px;color:var(--red);margin-bottom:9px;}
+.rank-row{display:flex;align-items:center;gap:7px;margin-bottom:6px;}
+.rank-num{width:20px;height:20px;border-radius:50%;background:var(--blue-mid);font-family:'DM Mono',monospace;font-size:10px;display:flex;align-items:center;justify-content:center;color:var(--muted);flex-shrink:0;}
+.rank-row select{flex:1;font-size:12px;padding:5px 8px;}
+.team-chips{display:flex;flex-wrap:wrap;gap:6px;}
+.team-chip{background:var(--card-light);border:1px solid var(--border);border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;transition:all 0.15s;user-select:none;}
+.team-chip:hover{border-color:var(--red);}
+.team-chip.selected{background:rgba(178,34,52,0.16);border-color:var(--red);color:#fff;font-weight:500;}
+.team-chip.champion-chip.selected{background:rgba(240,180,41,0.16);border-color:var(--gold);color:var(--gold);}
+.knockout-section{margin-bottom:22px;}
+.round-label{font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:1.5px;color:var(--muted);margin-bottom:9px;display:flex;align-items:center;gap:7px;}
+.round-pts{font-family:'DM Mono',monospace;font-size:10px;color:var(--gold);background:rgba(240,180,41,0.08);border-radius:4px;padding:2px 6px;}
+.scoring-toggle{background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:7px;padding:9px 13px;cursor:pointer;font-size:12px;color:var(--muted);display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+.scoring-toggle:hover{color:var(--white);}
+.scoring-collapse{display:none;}
+.scoring-collapse.open{display:block;}
+.scoring-mini{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:12px;}
+.scoring-mini-item{display:flex;justify-content:space-between;font-size:12px;padding:7px 10px;background:var(--card-light);border-radius:6px;}
+.scoring-pts{font-family:'DM Mono',monospace;color:var(--gold);}
+.lb-table{width:100%;border-collapse:collapse;}
+.lb-table th{font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);padding:8px 13px;text-align:left;border-bottom:1px solid var(--border);}
+.lb-table td{padding:10px 13px;border-bottom:1px solid var(--border);font-size:13px;}
+.lb-table tr:hover td{background:rgba(255,255,255,0.02);cursor:pointer;}
+.pts-badge{background:rgba(240,180,41,0.12);color:var(--gold);border-radius:5px;font-family:'DM Mono',monospace;font-size:12px;padding:2px 8px;}
+.pts-possible{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);}
+.rank-cell{font-family:'Bebas Neue',sans-serif;font-size:16px;}
+.payout-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;}
+.payout-item{background:var(--card-light);border-radius:9px;padding:14px;text-align:center;}
+.payout-place{font-family:'Bebas Neue',sans-serif;font-size:28px;}
+.payout-place.gold{color:var(--gold);}
+.payout-place.silver{color:#aab8c2;}
+.payout-place.bronze{color:#cd7f32;}
+.payout-pct{font-family:'DM Mono',monospace;font-size:17px;color:var(--white);margin:3px 0;}
+.payout-note{font-size:11px;color:var(--muted);}
+.detail-row{display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:7px 0;border-bottom:1px solid var(--border);}
+.detail-row:last-child{border:none;}
+.detail-label{color:var(--muted);}
+.scoring-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
+.scoring-item{display:flex;justify-content:space-between;align-items:center;padding:8px 11px;background:var(--card-light);border-radius:7px;font-size:13px;}
+.auth-wrap{max-width:360px;margin:44px auto;}
+.auth-tabs{display:flex;background:var(--card-light);border-radius:8px;padding:3px;margin-bottom:18px;}
+.auth-tab{flex:1;padding:8px;text-align:center;border-radius:6px;cursor:pointer;font-size:13px;font-weight:500;color:var(--muted);transition:all 0.2s;border:none;background:none;}
+.auth-tab.active{background:var(--red);color:#fff;}
+.venmo-box{background:rgba(0,159,225,0.08);border:1px solid rgba(0,159,225,0.2);border-radius:9px;padding:16px;margin-top:14px;text-align:center;}
+.venmo-box h3{font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:1px;margin-bottom:5px;color:#60cfff;}
+.venmo-handle{font-family:'DM Mono',monospace;font-size:20px;color:#fff;margin:7px 0;}
+.venmo-note{font-size:12px;color:var(--muted);}
+.reset-btn{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:8px;padding:8px 14px;font-size:13px;color:var(--muted);cursor:pointer;text-decoration:none;transition:all 0.2s;}
+.reset-btn:hover{color:var(--white);}
+.submitted-wrap{text-align:center;padding:44px 18px;}
+.submitted-wrap .big-icon{font-size:52px;margin-bottom:12px;}
+.submitted-wrap h2{font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--gold);letter-spacing:2px;margin-bottom:7px;}
+.lock-badge{display:inline-block;background:rgba(178,34,52,0.12);color:#ff8a8a;border:1px solid rgba(178,34,52,0.25);border-radius:5px;font-family:'DM Mono',monospace;font-size:11px;padding:3px 9px;margin-bottom:14px;}
+.tp-counter{font-family:'DM Mono',monospace;font-size:12px;margin-bottom:8px;color:var(--muted);}
+.tp-counter span{color:var(--gold);}
+.entry-list{display:flex;flex-wrap:wrap;gap:6px;}
+.entry-pill{background:var(--card-light);border:1px solid var(--border);border-radius:18px;padding:5px 12px;font-size:12px;cursor:pointer;transition:all 0.15s;}
+.entry-pill:hover{border-color:var(--red);}
+.profile-header{display:flex;align-items:center;gap:14px;margin-bottom:18px;}
+.profile-avatar{width:48px;height:48px;border-radius:50%;background:var(--red);font-family:'Bebas Neue',sans-serif;font-size:20px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.profile-name{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px;}
+.profile-meta{font-size:12px;color:var(--muted);}
+.score-breakdown{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:7px;margin-bottom:14px;}
+.breakdown-item{background:var(--card-light);border-radius:8px;padding:11px;text-align:center;}
+.breakdown-n{font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--gold);}
+.breakdown-l{font-size:11px;color:var(--muted);margin-top:2px;}
+.admin-group{background:var(--card-light);border:1px solid var(--border);border-radius:9px;padding:13px;margin-bottom:9px;}
+.admin-group-title{font-family:'Bebas Neue',sans-serif;font-size:13px;color:var(--gold);margin-bottom:9px;letter-spacing:1px;}
+.admin-row{display:flex;align-items:center;gap:7px;margin-bottom:6px;font-size:13px;}
+.pos-label{width:24px;color:var(--muted);font-size:11px;font-family:'DM Mono',monospace;}
+.admin-chips{display:flex;flex-wrap:wrap;gap:5px;}
+.admin-chip{background:var(--card-light);border:1px solid var(--border);border-radius:5px;padding:4px 8px;font-size:11px;cursor:pointer;transition:all 0.15s;}
+.admin-chip.selected{background:rgba(45,158,72,0.14);border-color:#2d9e48;color:#7ee8a2;}
+.admin-round{background:var(--card-light);border:1px solid var(--border);border-radius:9px;padding:13px;margin-bottom:9px;}
+.admin-round-title{font-family:'Bebas Neue',sans-serif;font-size:12px;color:var(--muted);margin-bottom:9px;letter-spacing:1px;}
+.loading{text-align:center;padding:36px;color:var(--muted);font-size:14px;}
+.save-bar{position:sticky;bottom:0;background:rgba(0,40,104,0.97);border-top:1px solid var(--border);padding:12px 18px;display:flex;gap:8px;z-index:50;}
+@media(max-width:600px){nav{padding:0 10px;}.nav-tab{padding:6px 8px;font-size:12px;}.payout-grid{grid-template-columns:1fr;}.scoring-grid{grid-template-columns:1fr;}.score-breakdown{grid-template-columns:repeat(3,1fr);}}
+.bracket-match{background:var(--card-light);border:1px solid var(--border);border-radius:9px;margin-bottom:9px;overflow:hidden;}
+.bracket-match-header{background:rgba(255,255,255,0.03);padding:5px 11px;font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:0.5px;border-bottom:1px solid var(--border);}
+.bracket-team{display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer;border-bottom:1px solid var(--border);transition:background 0.15s;font-size:13px;}
+.bracket-team:last-child{border-bottom:none;}
+.bracket-team:hover{background:rgba(255,255,255,0.04);}
+.bracket-team.selected{background:rgba(178,34,52,0.14);}
+.bracket-team.selected .bracket-team-name{color:#fff;font-weight:600;}
+.bracket-radio{width:16px;height:16px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.15s;}
+.bracket-team.selected .bracket-radio{border-color:var(--red);background:var(--red);}
+.bracket-team.selected .bracket-radio::after{content:'';width:5px;height:5px;border-radius:50%;background:#fff;}
+.bracket-team-name{flex:1;}
+.bracket-team-name.tbd{color:var(--muted);font-style:italic;}
+.bracket-team-seed{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">⚽ <span>ALPERT</span> WC POOL</div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showPage('home')">Home</button>
+    <button class="nav-tab" onclick="showPage('submit')">My Picks</button>
+    <button class="nav-tab" onclick="showPage('leaderboard')">Leaderboard</button>
+    <button class="nav-tab" onclick="showPage('scoring')">Scoring</button>
+    <button class="nav-tab" onclick="showPage('admin')">Admin</button>
+  </div>
+  <div id="nav-user" class="nav-user" style="display:none;" onclick="showPage('submit')"></div>
+</nav>
+
+<!-- HOME -->
+<div id="page-home" class="page active">
+  <div class="hero">
+    <div class="hero-flag">🇺🇸⚽🏆</div>
+    <h1>ALPERT <span class="red">WORLD CUP</span> <span class="gold">POOL</span></h1>
+    <div class="hero-sub">
+      I built this to make the 2026 World Cup more fun for everyone, whether you watch every match or are just here for the vibes.<br><br>
+      Pick your group standings, choose which teams you think will go deep, and earn points based on how far they actually make it.<br><br>
+      <strong>Everything you need is inside. Good luck.</strong>
+    </div>
+    <div class="hero-actions">
+      <button class="btn-hero" onclick="showPage('submit')">Make Your Picks</button>
+      <button class="btn-hero-outline" onclick="showPage('leaderboard')">View Leaderboard</button>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat"><div class="hero-stat-n">48</div><div class="hero-stat-l">Teams</div></div>
+      <div class="hero-stat"><div class="hero-stat-n">12</div><div class="hero-stat-l">Groups</div></div>
+      <div class="hero-stat"><div class="hero-stat-n" id="home-entry-count">0</div><div class="hero-stat-l">Entries</div></div>
+      <div class="hero-stat"><div class="hero-stat-n" id="home-days-left">23</div><div class="hero-stat-l">Days Left</div></div>
+    </div>
+  </div>
+  <div style="padding-top:24px;">
+      <div class="card-title">📅 Key Dates</div>
+      <div class="detail-row"><span class="detail-label">Picks Lock</span><span style="color:var(--red);font-weight:600;">June 11, 2026 at Kickoff</span></div>
+      <div class="detail-row"><span class="detail-label">Opening Match</span><span>Mexico vs South Africa</span></div>
+      <div class="detail-row"><span class="detail-label">Group Stage Ends</span><span>June 27, 2026</span></div>
+      <div class="detail-row"><span class="detail-label">World Cup Final</span><span>July 19, 2026 at MetLife Stadium, NJ</span></div>
+    </div>
+    <div class="card">
+      <div class="card-title">💰 Prizes</div>
+      <div class="payout-grid">
+        <div class="payout-item"><div class="payout-place gold">🥇</div><div class="payout-pct">70%</div><div class="payout-note">1st Place</div></div>
+        <div class="payout-item"><div class="payout-place silver">🥈</div><div class="payout-pct">20%</div><div class="payout-note">2nd Place</div></div>
+        <div class="payout-item"><div class="payout-place bronze">🥉</div><div class="payout-pct">10%</div><div class="payout-note">3rd Place</div></div>
+      </div>
+      <p style="font-size:12px;color:var(--muted);margin-top:11px;line-height:1.6;">Tied players combine their prize shares and split equally. Entry is $20 via Venmo to @andrew-alpert.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">👥 Who Has Entered</div>
+      <div id="home-entry-list" class="entry-list"><span style="color:var(--muted);font-size:13px;">Loading...</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- MY PICKS -->
+<div id="page-submit" class="page">
+  <!-- AUTH GATE -->
+  <div id="auth-area">
+    <div class="auth-wrap">
+      <div class="auth-tabs">
+        <button class="auth-tab active" onclick="switchAuthTab('login',event)">Sign In</button>
+        <button class="auth-tab" onclick="switchAuthTab('register',event)">Create Account</button>
+      </div>
+      <div id="auth-alert"></div>
+      <div id="login-form">
+        <div class="form-group"><label>Username</label><input type="text" id="login-username" placeholder="your username" autocomplete="off"/></div>
+        <div class="form-group"><label>PIN</label><input type="password" id="login-pin" placeholder="4-digit PIN" maxlength="4" inputmode="numeric" class="pin-input"/></div>
+        <button class="btn-primary" onclick="doLogin()">Sign In</button>
+      </div>
+      <div id="register-form" style="display:none;">
+        <div class="form-group"><label>Display Name</label><input type="text" id="reg-name" placeholder="Your Name"/></div>
+        <div class="form-group"><label>Username</label><input type="text" id="reg-username" placeholder="lowercase, no spaces" autocomplete="off"/></div>
+        <div class="form-group"><label>PIN</label><input type="password" id="reg-pin" placeholder="choose 4 digits" maxlength="4" inputmode="numeric" class="pin-input"/></div>
+        <div class="form-group"><label>Confirm PIN</label><input type="password" id="reg-pin2" placeholder="repeat PIN" maxlength="4" inputmode="numeric" class="pin-input"/></div>
+        <button class="btn-primary" onclick="doRegister()">Create Account</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PICKS AREA -->
+  <div id="picks-area" style="display:none;">
+    <div id="picks-alert"></div>
+    <div id="locked-banner" style="display:none;"><div class="alert alert-warn">🔒 Picks are locked. The tournament has started!</div></div>
+
+    <!-- STEP WIZARD -->
+    <div id="picks-wizard">
+      <!-- Step tabs -->
+      <div style="display:flex;gap:0;margin-bottom:20px;border-radius:8px;overflow:hidden;border:1px solid var(--border);">
+        <div id="step-tab-0" style="flex:1;padding:10px 4px;text-align:center;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;cursor:pointer;background:var(--red);color:#fff;border-right:1px solid var(--border);" onclick="tryGoToStep(0)">1. Groups</div>
+        <div id="step-tab-1" style="flex:1;padding:10px 4px;text-align:center;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;cursor:pointer;background:var(--card-light);color:var(--muted);border-right:1px solid var(--border);" onclick="tryGoToStep(1)">2. 3rd Place</div>
+        <div id="step-tab-2" style="flex:1;padding:10px 4px;text-align:center;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;cursor:pointer;background:var(--card-light);color:var(--muted);" onclick="tryGoToStep(2)">3. Bracket</div>
+      </div>
+
+      <!-- STEP 1: GROUPS -->
+      <div id="step-0">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;flex-wrap:wrap;gap:10px;">
+          <div><div class="section-title" id="picks-greeting">My Picks</div><div class="section-sub">Rank all 12 groups. Picks lock June 11.</div></div>
+          <button class="btn-danger" onclick="wipepicks()">🗑 Start Over</button>
+        </div>
+        <div id="save-reminder" class="alert alert-warn" style="display:none;">You have unsaved changes.</div>
+        <div class="card">
+          <div class="card-title">🏁 Group Stage <span class="badge">12 GROUPS</span></div>
+          <div class="scoring-toggle" onclick="toggleScoring('group-scoring')">How does group scoring work? <span>▼</span></div>
+          <div class="scoring-collapse" id="group-scoring">
+            <div class="scoring-mini">
+              <div class="scoring-mini-item"><span>Exact 1st place</span><span class="scoring-pts">8 pts</span></div>
+              <div class="scoring-mini-item"><span>Exact 2nd place</span><span class="scoring-pts">6 pts</span></div>
+              <div class="scoring-mini-item"><span>Exact 3rd place</span><span class="scoring-pts">4 pts</span></div>
+              <div class="scoring-mini-item"><span>Exact 4th place</span><span class="scoring-pts">2 pts</span></div>
+              <div class="scoring-mini-item"><span>Advances, wrong position</span><span class="scoring-pts">3 pts</span></div>
+              <div class="scoring-mini-item"><span>Perfect group bonus</span><span class="scoring-pts">+5 pts</span></div>
+            </div>
+          </div>
+          <div class="groups-grid" id="groups-grid"></div>
+        </div>
+        <button class="btn-primary" id="groups-next-btn" onclick="advanceFromGroups()" style="margin-bottom:80px;">Continue to Third Place Picks</button>
+      </div>
+
+      <!-- STEP 2: THIRD PLACE -->
+      <div id="step-1" style="display:none;">
+        <div style="margin-bottom:14px;">
+          <div class="section-title">Third Place Qualifiers</div>
+          <div class="section-sub">Pick 8 of 12 third-place teams to advance.</div>
+        </div>
+        <div class="card">
+          <div class="card-title">🥉 Best Third-Place Teams <span class="badge">PICK 8</span></div>
+          <p style="color:var(--muted);font-size:13px;margin-bottom:6px;">In 2026, only 8 of the 12 third-place teams advance. FIFA ranks them by points, then goal difference, then goals scored. Pick the 8 you think qualify.</p>
+          <p style="color:var(--muted);font-size:13px;margin-bottom:10px;">Below are the teams you predicted to finish 3rd. Select the 8 that advance.</p>
+          <div class="tp-counter">Selected: <span id="tp-count">0</span> / 8</div>
+          <div class="team-chips" id="tp-chips"></div>
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:80px;">
+          <button class="btn-secondary" onclick="goToStep(0)" style="flex:1;">Back</button>
+          <button class="btn-primary" id="tp-next-btn" onclick="advanceFromThirdPlace()" style="flex:1;">Generate My Bracket</button>
+        </div>
+      </div>
+
+      <!-- STEP 3: BRACKET -->
+      <div id="step-2" style="display:none;">
+        <div style="margin-bottom:14px;">
+          <div class="section-title">Your Bracket</div>
+          <div class="section-sub">Pick a winner for each matchup. Winners advance automatically.</div>
+        </div>
+        <div class="alert alert-info" style="margin-bottom:14px;font-size:12px;">
+          Bonus points: +2 for correct R32 pick, +3 R16, +5 QF, +8 SF, +10 finalist. Base points follow the team regardless of bracket path.
+        </div>
+        <div id="bracket-r32-section" class="knockout-section">
+          <div class="round-label">Round of 32 <span class="round-pts">3 pts + 2 bonus</span></div>
+          <div id="bracket-r32"></div>
+        </div>
+        <div id="bracket-r16-section" class="knockout-section">
+          <div class="round-label">Round of 16 <span class="round-pts">6 pts + 3 bonus</span></div>
+          <div id="bracket-r16"></div>
+        </div>
+        <div id="bracket-qf-section" class="knockout-section">
+          <div class="round-label">Quarterfinals <span class="round-pts">11 pts + 5 bonus</span></div>
+          <div id="bracket-qf"></div>
+        </div>
+        <div id="bracket-sf-section" class="knockout-section">
+          <div class="round-label">Semifinals <span class="round-pts">22 pts + 8 bonus</span></div>
+          <div id="bracket-sf"></div>
+        </div>
+        <div id="bracket-final-section" class="knockout-section">
+          <div class="round-label">Final <span class="round-pts">44 pts + 10 bonus</span></div>
+          <div id="bracket-final"></div>
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:80px;">
+          <button class="btn-secondary" onclick="goToStep(1)" style="flex:1;">Back</button>
+          <button class="btn-primary" onclick="submitPicks()" style="flex:1;">Submit My Picks</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUBMITTED VIEW -->
+    <div id="submitted-area" style="display:none;">
+      <div class="submitted-wrap">
+        <div class="big-icon">⚽</div>
+        <div class="lock-badge">PICKS SUBMITTED</div>
+        <h2>You are in!</h2>
+        <p style="color:var(--muted);font-size:13px;margin-bottom:18px;">Your picks are saved. You can edit them until June 11.</p>
+        <div class="venmo-box">
+          <h3>One Last Step</h3>
+          <p style="font-size:12px;color:var(--muted);margin-bottom:7px;">Venmo $20 to secure your spot</p>
+          <div class="venmo-handle">@andrew-alpert</div>
+          <p class="venmo-note">Include your username in the Venmo note so we can confirm your entry.</p>
+        </div>
+        <div class="btn-row" style="margin-top:18px;justify-content:center;">
+          <button class="btn-secondary" onclick="showPicksForm()">Edit My Picks</button>
+          <button class="btn-secondary" onclick="showPage('leaderboard')">View Leaderboard</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="save-bar" id="save-bar">
+      <button class="btn-save" onclick="saveDraft()" style="flex:1;">💾 Save Progress</button>
+    </div>
+  </div>
+</div>
+
+<!-- LEADERBOARD -->
+<div id="page-leaderboard" class="page">
+  <div class="section-title">Leaderboard</div>
+  <div class="section-sub">Click any name to see their full picks. Updates as results come in.</div>
+  <div id="leaderboard-content"><div class="loading">Loading...</div></div>
+</div>
+
+<!-- PROFILE -->
+<div id="page-profile" class="page">
+  <button class="btn-secondary" onclick="showPage('leaderboard')" style="margin-bottom:14px;">Back to Leaderboard</button>
+  <div id="profile-content"></div>
+</div>
+
+<!-- SCORING -->
+<div id="page-scoring" class="page">
+  <div class="section-title">Scoring System</div>
+  <div class="section-sub">Points follow the team, not the bracket slot.</div>
+  <div class="card">
+    <div class="card-title">🏁 Group Stage</div>
+    <div class="scoring-grid">
+      <div class="scoring-item"><span>Correct 1st place</span><span class="scoring-pts">8 pts</span></div>
+      <div class="scoring-item"><span>Correct 2nd place</span><span class="scoring-pts">6 pts</span></div>
+      <div class="scoring-item"><span>Correct 3rd place</span><span class="scoring-pts">4 pts</span></div>
+      <div class="scoring-item"><span>Correct 4th place</span><span class="scoring-pts">2 pts</span></div>
+      <div class="scoring-item"><span>Team advances, wrong position</span><span class="scoring-pts">3 pts</span></div>
+      <div class="scoring-item"><span>Perfect group bonus</span><span class="scoring-pts">+5 pts</span></div>
+    </div>
+    <div class="alert alert-info" style="margin-top:11px;font-size:12px;">Position points and advancement points are mutually exclusive. You get whichever is higher, not both.</div>
+  </div>
+  <div class="card">
+    <div class="card-title">🏆 Knockout Rounds</div>
+    <div class="scoring-grid">
+      <div class="scoring-item"><span>Team reaches Round of 32</span><span class="scoring-pts">3 pts</span></div>
+      <div class="scoring-item"><span>Team reaches Round of 16</span><span class="scoring-pts">6 pts</span></div>
+      <div class="scoring-item"><span>Team reaches Quarterfinals</span><span class="scoring-pts">11 pts</span></div>
+      <div class="scoring-item"><span>Team reaches Semifinals</span><span class="scoring-pts">22 pts</span></div>
+      <div class="scoring-item"><span>Team reaches Final</span><span class="scoring-pts">44 pts</span></div>
+      <div class="scoring-item"><span>Correct Champion</span><span class="scoring-pts">88 pts</span></div>
+    </div>
+    <div class="alert alert-info" style="margin-top:11px;font-size:12px;">Points stack as your team advances. Pick a champion and they go out in the semis? You still earn R32, R16, QF, and SF points for that team.</div>
+  </div>
+  <div class="card">
+    <div class="card-title">🥉 How Third Place Qualifying Works</div>
+    <p style="color:var(--muted);font-size:13px;line-height:1.8;margin-bottom:12px;">This is one of the trickiest parts of the 2026 format. Here is how FIFA decides which 8 of the 12 third-place teams advance:</p>
+    <div style="background:var(--card-light);border-radius:8px;padding:13px;font-size:13px;line-height:2;">
+      <div style="border-bottom:1px solid var(--border);padding-bottom:6px;margin-bottom:6px;"><span style="color:var(--gold);font-family:'DM Mono',monospace;margin-right:8px;">1.</span><span style="color:var(--white);">Most points in group stage</span></div>
+      <div style="border-bottom:1px solid var(--border);padding-bottom:6px;margin-bottom:6px;"><span style="color:var(--gold);font-family:'DM Mono',monospace;margin-right:8px;">2.</span><span style="color:var(--white);">Best goal difference</span></div>
+      <div style="border-bottom:1px solid var(--border);padding-bottom:6px;margin-bottom:6px;"><span style="color:var(--gold);font-family:'DM Mono',monospace;margin-right:8px;">3.</span><span style="color:var(--white);">Most goals scored</span></div>
+      <div style="border-bottom:1px solid var(--border);padding-bottom:6px;margin-bottom:6px;"><span style="color:var(--gold);font-family:'DM Mono',monospace;margin-right:8px;">4.</span><span style="color:var(--white);">Fair play score</span></div>
+      <div><span style="color:var(--gold);font-family:'DM Mono',monospace;margin-right:8px;">5.</span><span style="color:var(--white);">FIFA world ranking</span></div>
+    </div>
+    <div class="alert alert-info" style="margin-top:12px;font-size:12px;">A third place team from a tough group might finish with 4 points and still miss out, while a third place team from an easier group with the same points advances on goal difference. That is why picking the right 8 is genuinely hard and worth points.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">💡 Example — Meet Sonny</div>
+    <p style="color:var(--muted);font-size:13px;line-height:1.8;margin-bottom:14px;">Sonny makes these picks for South Korea:</p>
+    <div style="background:var(--card-light);border-radius:8px;padding:13px;margin-bottom:14px;font-size:13px;line-height:1.9;">
+      <div>Finishes <strong style="color:var(--white)">2nd in Group A</strong></div>
+      <div>Advances through R32, R16, and reaches the <strong style="color:var(--white)">Quarterfinals</strong></div>
+    </div>
+    <p style="color:var(--muted);font-size:13px;line-height:1.8;margin-bottom:14px;"><strong style="color:var(--white)">What actually happens:</strong> South Korea finishes <strong style="color:var(--white)">3rd</strong> in Group A but still qualifies as one of the 8 best third-place teams. They beat their R32 opponent, win again in R16, and reach the QF before getting knocked out.</p>
+    <p style="color:var(--muted);font-size:13px;margin-bottom:10px;"><strong style="color:var(--white)">Sonny's score for South Korea:</strong></p>
+    <div style="background:var(--card-light);border-radius:8px;padding:13px;font-size:13px;line-height:2;">
+      <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--border);padding-bottom:6px;margin-bottom:6px;"><span style="color:var(--muted);">Group position (wrong, but team advanced)</span><span style="color:var(--gold);font-family:'DM Mono',monospace;">3 pts</span></div>
+      <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--border);padding-bottom:6px;margin-bottom:6px;"><span style="color:var(--muted);">Round of 32</span><span style="color:var(--gold);font-family:'DM Mono',monospace;">3 pts</span></div>
+      <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--border);padding-bottom:6px;margin-bottom:6px;"><span style="color:var(--muted);">Round of 16</span><span style="color:var(--gold);font-family:'DM Mono',monospace;">6 pts</span></div>
+      <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--border);padding-bottom:6px;margin-bottom:6px;"><span style="color:var(--muted);">Quarterfinals</span><span style="color:var(--gold);font-family:'DM Mono',monospace;">11 pts</span></div>
+      <div style="display:flex;justify-content:space-between;"><span style="color:var(--white);font-weight:600;">Total for South Korea</span><span style="color:var(--white);font-family:'DM Mono',monospace;font-weight:600;">23 pts</span></div>
+    </div>
+    <div class="alert alert-info" style="margin-top:12px;font-size:12px;">Sonny got the position wrong but still got full credit for everything South Korea accomplished. That is what makes this pool different from a standard bracket.</div>
+  </div>
+  <div class="card">
+    <div class="card-title">💰 Prize Payouts</div>
+    <div class="payout-grid">
+      <div class="payout-item"><div class="payout-place gold">🥇</div><div class="payout-pct">70%</div><div class="payout-note">1st Place</div></div>
+      <div class="payout-item"><div class="payout-place silver">🥈</div><div class="payout-pct">20%</div><div class="payout-note">2nd Place</div></div>
+      <div class="payout-item"><div class="payout-place bronze">🥉</div><div class="payout-pct">10%</div><div class="payout-note">3rd Place</div></div>
+    </div>
+    <div class="alert alert-warn" style="margin-top:11px;font-size:12px;"><strong>Ties:</strong> Tied players combine their prize shares and split equally. Two people tied for 1st split the combined 1st and 2nd prize (90%) evenly, and 3rd gets 10% as normal. Three or more tied for 1st split the entire pot equally. Ties at 3rd split that 10% however many ways needed.</div>
+  </div>
+</div>
+
+<!-- ADMIN -->
+<div id="page-admin" class="page">
+  <div id="admin-login-area">
+    <div class="auth-wrap">
+      <div class="section-title" style="text-align:center;">Admin Panel</div>
+      <p style="color:var(--muted);font-size:13px;text-align:center;margin-bottom:18px;">Commissioner access only.</p>
+      <div id="admin-alert"></div>
+      <div class="form-group"><label>Admin Password</label><input type="password" id="admin-pw-input" placeholder="Enter password" /></div>
+      <button class="btn-primary" onclick="checkAdminPw()">Enter Admin Panel</button>
+    </div>
+  </div>
+  <div id="admin-panel" style="display:none;">
+    <div class="section-title">Admin Panel</div>
+    <div class="section-sub">Enter results, manage entries, update settings.</div>
+    <div class="card">
+      <div class="card-title">📋 Entries</div>
+      <p id="admin-entry-summary" style="color:var(--muted);font-size:13px;margin-bottom:11px;">Loading...</p>
+      <div class="btn-row">
+        <button class="btn-secondary" onclick="adminExportCSV()">Export CSV</button>
+        <button class="btn-secondary" onclick="adminToggleLock()">Toggle Picks Lock</button>
+      </div>
+      <div style="margin-top:11px;" id="admin-entries-list"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">🏁 Group Stage Results</div>
+      <p style="color:var(--muted);font-size:12px;margin-bottom:11px;">Enter actual final group standings. Leave blank if not played yet.</p>
+      <div id="admin-groups-grid"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">🏆 Knockout Results</div>
+      <p style="color:var(--muted);font-size:12px;margin-bottom:11px;">Select teams that actually reached each round.</p>
+      <div id="admin-knockout-area"></div>
+    </div>
+    <button class="btn-primary" onclick="adminSaveResults()" style="margin-bottom:11px;">Save All Results</button>
+    <div class="card">
+      <div class="card-title">🔢 Reset a User PIN</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <select id="reset-pin-user" style="flex:1;min-width:130px;"><option value="">Select user...</option></select>
+        <input type="text" id="reset-pin-val" placeholder="New PIN" maxlength="4" style="width:90px;" />
+        <button class="btn-secondary" onclick="adminResetPin()">Reset</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">🔑 Admin Password</div>
+      <div style="display:flex;gap:8px;">
+        <input type="text" id="new-admin-pw" placeholder="New password" style="flex:1;" />
+        <button class="btn-secondary" onclick="changeAdminPw()">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, doc, getDoc, setDoc, collection, getDocs, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+// =====================================================================
+// ANNEX C LOOKUP — FIFA 2026 Third-Place Combination Table
+// Key: sorted 8-char string of groups whose 3rd-place teams advance
+// Value: [W-A vs, W-B vs, W-D vs, W-E vs, W-G vs, W-I vs, W-K vs, W-L vs]
+// Each entry is "3X" meaning "3rd place from Group X"
+// =====================================================================
+const ANNEX_C = {
+  "ABCDEFGH":["3H","3G","3B","3C","3A","3F","3D","3E"],
+  "ABCDEFGI":["3C","3G","3B","3D","3A","3F","3E","3I"],
+  "ABCDEFGJ":["3C","3G","3B","3D","3A","3F","3E","3J"],
+  "ABCDEFGK":["3C","3G","3B","3D","3A","3F","3E","3K"],
+  "ABCDEFGL":["3C","3G","3B","3D","3A","3F","3L","3E"],
+  "ABCDEFHI":["3H","3E","3B","3C","3A","3F","3D","3I"],
+  "ABCDEFHJ":["3H","3J","3B","3C","3A","3F","3D","3E"],
+  "ABCDEFHK":["3H","3E","3B","3C","3A","3F","3D","3K"],
+  "ABCDEFHL":["3H","3F","3B","3C","3A","3D","3L","3E"],
+  "ABCDEFIJ":["3C","3J","3B","3D","3A","3F","3E","3I"],
+  "ABCDEFIK":["3C","3E","3B","3D","3A","3F","3I","3K"],
+  "ABCDEFIL":["3C","3E","3B","3D","3A","3F","3L","3I"],
+  "ABCDEFJK":["3C","3J","3B","3D","3A","3F","3E","3K"],
+  "ABCDEFJL":["3C","3J","3B","3D","3A","3F","3L","3E"],
+  "ABCDEFKL":["3C","3E","3B","3D","3A","3F","3L","3K"],
+  "ABCDEGHI":["3H","3G","3B","3C","3A","3D","3E","3I"],
+  "ABCDEGHJ":["3H","3G","3B","3C","3A","3D","3E","3J"],
+  "ABCDEGHK":["3H","3G","3B","3C","3A","3D","3E","3K"],
+  "ABCDEGHL":["3H","3G","3B","3C","3A","3D","3L","3E"],
+  "ABCDEGIJ":["3E","3G","3B","3C","3A","3D","3I","3J"],
+  "ABCDEGIK":["3E","3G","3B","3C","3A","3D","3I","3K"],
+  "ABCDEGIL":["3E","3G","3B","3C","3A","3D","3L","3I"],
+  "ABCDEGJK":["3E","3G","3B","3C","3A","3D","3J","3K"],
+  "ABCDEGJL":["3E","3G","3B","3C","3A","3D","3L","3J"],
+  "ABCDEGKL":["3E","3G","3B","3C","3A","3D","3L","3K"],
+  "ABCDEHIJ":["3H","3J","3B","3C","3A","3D","3E","3I"],
+  "ABCDEHIK":["3H","3E","3B","3C","3A","3D","3I","3K"],
+  "ABCDEHIL":["3H","3E","3B","3C","3A","3D","3L","3I"],
+  "ABCDEHJK":["3H","3J","3B","3C","3A","3D","3E","3K"],
+  "ABCDEHJL":["3H","3J","3B","3C","3A","3D","3L","3E"],
+  "ABCDEHKL":["3H","3E","3B","3C","3A","3D","3L","3K"],
+  "ABCDEIJK":["3E","3J","3B","3C","3A","3D","3I","3K"],
+  "ABCDEIJL":["3E","3J","3B","3C","3A","3D","3L","3I"],
+  "ABCDEIKL":["3E","3I","3B","3C","3A","3D","3L","3K"],
+  "ABCDEJKL":["3E","3J","3B","3C","3A","3D","3L","3K"],
+  "ABCDFGHI":["3H","3G","3B","3C","3A","3F","3D","3I"],
+  "ABCDFGHJ":["3H","3G","3B","3C","3A","3F","3D","3J"],
+  "ABCDFGHK":["3H","3G","3B","3C","3A","3F","3D","3K"],
+  "ABCDFGHL":["3C","3G","3B","3D","3A","3F","3L","3H"],
+  "ABCDFGIJ":["3C","3G","3B","3D","3A","3F","3I","3J"],
+  "ABCDFGIK":["3C","3G","3B","3D","3A","3F","3I","3K"],
+  "ABCDFGIL":["3C","3G","3B","3D","3A","3F","3L","3I"],
+  "ABCDFGJK":["3C","3G","3B","3D","3A","3F","3J","3K"],
+  "ABCDFGJL":["3C","3G","3B","3D","3A","3F","3L","3J"],
+  "ABCDFGKL":["3C","3G","3B","3D","3A","3F","3L","3K"],
+  "ABCDFHIJ":["3H","3J","3B","3C","3A","3F","3D","3I"],
+  "ABCDFHIK":["3H","3F","3B","3C","3A","3D","3I","3K"],
+  "ABCDFHIL":["3H","3F","3B","3C","3A","3D","3L","3I"],
+  "ABCDFHJK":["3H","3J","3B","3C","3A","3F","3D","3K"],
+  "ABCDFHJL":["3C","3J","3B","3D","3A","3F","3L","3H"],
+  "ABCDFHKL":["3H","3F","3B","3C","3A","3D","3L","3K"],
+  "ABCDFIJK":["3C","3J","3B","3D","3A","3F","3I","3K"],
+  "ABCDFIJL":["3C","3J","3B","3D","3A","3F","3L","3I"],
+  "ABCDFIKL":["3C","3I","3B","3D","3A","3F","3L","3K"],
+  "ABCDFJKL":["3C","3J","3B","3D","3A","3F","3L","3K"],
+  "ABCDGHIJ":["3H","3G","3B","3C","3A","3D","3I","3J"],
+  "ABCDGHIK":["3H","3G","3B","3C","3A","3D","3I","3K"],
+  "ABCDGHIL":["3H","3G","3B","3C","3A","3D","3L","3I"],
+  "ABCDGHJK":["3H","3G","3B","3C","3A","3D","3J","3K"],
+  "ABCDGHJL":["3H","3G","3B","3C","3A","3D","3L","3J"],
+  "ABCDGHKL":["3H","3G","3B","3C","3A","3D","3L","3K"],
+  "ABCDGIJK":["3C","3J","3B","3D","3A","3G","3I","3K"],
+  "ABCDGIJL":["3C","3J","3B","3D","3A","3G","3L","3I"],
+  "ABCDGIKL":["3I","3G","3B","3C","3A","3D","3L","3K"],
+  "ABCDGJKL":["3C","3J","3B","3D","3A","3G","3L","3K"],
+  "ABCDHIJK":["3H","3J","3B","3C","3A","3D","3I","3K"],
+  "ABCDHIJL":["3H","3J","3B","3C","3A","3D","3L","3I"],
+  "ABCDHIKL":["3H","3I","3B","3C","3A","3D","3L","3K"],
+  "ABCDHJKL":["3H","3J","3B","3C","3A","3D","3L","3K"],
+  "ABCDIJKL":["3I","3J","3B","3C","3A","3D","3L","3K"],
+  "ABCEFGHI":["3H","3G","3B","3C","3A","3F","3E","3I"],
+  "ABCEFGHJ":["3H","3G","3B","3C","3A","3F","3E","3J"],
+  "ABCEFGHK":["3H","3G","3B","3C","3A","3F","3E","3K"],
+  "ABCEFGHL":["3H","3G","3B","3C","3A","3F","3L","3E"],
+  "ABCEFGIJ":["3E","3G","3B","3C","3A","3F","3I","3J"],
+  "ABCEFGIK":["3E","3G","3B","3C","3A","3F","3I","3K"],
+  "ABCEFGIL":["3E","3G","3B","3C","3A","3F","3L","3I"],
+  "ABCEFGJK":["3E","3G","3B","3C","3A","3F","3J","3K"],
+  "ABCEFGJL":["3E","3G","3B","3C","3A","3F","3L","3J"],
+  "ABCEFGKL":["3E","3G","3B","3C","3A","3F","3L","3K"],
+  "ABCEFHIJ":["3H","3J","3B","3C","3A","3F","3E","3I"],
+  "ABCEFHIK":["3H","3E","3B","3C","3A","3F","3I","3K"],
+  "ABCEFHIL":["3H","3E","3B","3C","3A","3F","3L","3I"],
+  "ABCEFHJK":["3H","3J","3B","3C","3A","3F","3E","3K"],
+  "ABCEFHJL":["3H","3J","3B","3C","3A","3F","3L","3E"],
+  "ABCEFHKL":["3H","3E","3B","3C","3A","3F","3L","3K"],
+  "ABCEFIJK":["3E","3J","3B","3C","3A","3F","3I","3K"],
+  "ABCEFIJL":["3E","3J","3B","3C","3A","3F","3L","3I"],
+  "ABCEFIKL":["3E","3I","3B","3C","3A","3F","3L","3K"],
+  "ABCEFJKL":["3E","3J","3B","3C","3A","3F","3L","3K"],
+  "ABCEGHIJ":["3H","3J","3B","3C","3A","3G","3E","3I"],
+  "ABCEGHIK":["3E","3G","3B","3C","3A","3H","3I","3K"],
+  "ABCEGHIL":["3E","3G","3B","3C","3A","3H","3L","3I"],
+  "ABCEGHJK":["3H","3J","3B","3C","3A","3G","3E","3K"],
+  "ABCEGHJL":["3H","3J","3B","3C","3A","3G","3L","3E"],
+  "ABCEGHKL":["3E","3G","3B","3C","3A","3H","3L","3K"],
+  "ABCEGIJK":["3E","3J","3B","3C","3A","3G","3I","3K"],
+  "ABCEGIJL":["3E","3J","3B","3C","3A","3G","3L","3I"],
+  "ABCEGIKL":["3E","3G","3B","3A","3I","3C","3L","3K"],
+  "ABCEGJKL":["3E","3J","3B","3C","3A","3G","3L","3K"],
+  "ABCEHIJK":["3E","3J","3B","3C","3A","3H","3I","3K"],
+  "ABCEHIJL":["3E","3J","3B","3C","3A","3H","3L","3I"],
+  "ABCEHIKL":["3E","3I","3B","3C","3A","3H","3L","3K"],
+  "ABCEHJKL":["3E","3J","3B","3C","3A","3H","3L","3K"],
+  "ABCEIJKL":["3E","3J","3B","3A","3I","3C","3L","3K"],
+  "ABCFGHIJ":["3H","3G","3B","3C","3A","3F","3I","3J"],
+  "ABCFGHIK":["3H","3G","3B","3C","3A","3F","3I","3K"],
+  "ABCFGHIL":["3H","3G","3B","3C","3A","3F","3L","3I"],
+  "ABCFGHJK":["3H","3G","3B","3C","3A","3F","3J","3K"],
+  "ABCFGHJL":["3H","3G","3B","3C","3A","3F","3L","3J"],
+  "ABCFGHKL":["3H","3G","3B","3C","3A","3F","3L","3K"],
+  "ABCFGIJK":["3C","3J","3B","3F","3A","3G","3I","3K"],
+  "ABCFGIJL":["3C","3J","3B","3F","3A","3G","3L","3I"],
+  "ABCFGIKL":["3I","3G","3B","3C","3A","3F","3L","3K"],
+  "ABCFGJKL":["3C","3J","3B","3F","3A","3G","3L","3K"],
+  "ABCFHIJK":["3H","3J","3B","3C","3A","3F","3I","3K"],
+  "ABCFHIJL":["3H","3J","3B","3C","3A","3F","3L","3I"],
+  "ABCFHIKL":["3H","3I","3B","3C","3A","3F","3L","3K"],
+  "ABCFHJKL":["3H","3J","3B","3C","3A","3F","3L","3K"],
+  "ABCFIJKL":["3I","3J","3B","3C","3A","3F","3L","3K"],
+  "ABCGHIJK":["3H","3J","3B","3C","3A","3G","3I","3K"],
+  "ABCGHIJL":["3H","3J","3B","3C","3A","3G","3L","3I"],
+  "ABCGHIKL":["3I","3G","3B","3C","3A","3H","3L","3K"],
+  "ABCGHJKL":["3H","3J","3B","3C","3A","3G","3L","3K"],
+  "ABCGIJKL":["3I","3J","3B","3C","3A","3G","3L","3K"],
+  "ABCHIJKL":["3I","3J","3B","3C","3A","3H","3L","3K"],
+  "ABDEFGHI":["3H","3G","3B","3D","3A","3F","3E","3I"],
+  "ABDEFGHJ":["3H","3G","3B","3D","3A","3F","3E","3J"],
+  "ABDEFGHK":["3H","3G","3B","3D","3A","3F","3E","3K"],
+  "ABDEFGHL":["3H","3G","3B","3D","3A","3F","3L","3E"],
+  "ABDEFGIJ":["3E","3G","3B","3D","3A","3F","3I","3J"],
+  "ABDEFGIK":["3E","3G","3B","3D","3A","3F","3I","3K"],
+  "ABDEFGIL":["3E","3G","3B","3D","3A","3F","3L","3I"],
+  "ABDEFGJK":["3E","3G","3B","3D","3A","3F","3J","3K"],
+  "ABDEFGJL":["3E","3G","3B","3D","3A","3F","3L","3J"],
+  "ABDEFGKL":["3E","3G","3B","3D","3A","3F","3L","3K"],
+  "ABDEFHIJ":["3H","3J","3B","3D","3A","3F","3E","3I"],
+  "ABDEFHIK":["3H","3E","3B","3D","3A","3F","3I","3K"],
+  "ABDEFHIL":["3H","3E","3B","3D","3A","3F","3L","3I"],
+  "ABDEFHJK":["3H","3J","3B","3D","3A","3F","3E","3K"],
+  "ABDEFHJL":["3H","3J","3B","3D","3A","3F","3L","3E"],
+  "ABDEFHKL":["3H","3E","3B","3D","3A","3F","3L","3K"],
+  "ABDEFIJK":["3E","3J","3B","3D","3A","3F","3I","3K"],
+  "ABDEFIJL":["3E","3J","3B","3D","3A","3F","3L","3I"],
+  "ABDEFIKL":["3E","3I","3B","3D","3A","3F","3L","3K"],
+  "ABDEFJKL":["3E","3J","3B","3D","3A","3F","3L","3K"],
+  "ABDEGHIJ":["3H","3J","3B","3D","3A","3G","3E","3I"],
+  "ABDEGHIK":["3E","3G","3B","3D","3A","3H","3I","3K"],
+  "ABDEGHIL":["3E","3G","3B","3D","3A","3H","3L","3I"],
+  "ABDEGHJK":["3H","3J","3B","3D","3A","3G","3E","3K"],
+  "ABDEGHJL":["3H","3J","3B","3D","3A","3G","3L","3E"],
+  "ABDEGHKL":["3E","3G","3B","3D","3A","3H","3L","3K"],
+  "ABDEGIJK":["3E","3J","3B","3D","3A","3G","3I","3K"],
+  "ABDEGIJL":["3E","3J","3B","3D","3A","3G","3L","3I"],
+  "ABDEGIKL":["3E","3G","3B","3A","3I","3D","3L","3K"],
+  "ABDEGJKL":["3E","3J","3B","3D","3A","3G","3L","3K"],
+  "ABDEHIJK":["3E","3J","3B","3D","3A","3H","3I","3K"],
+  "ABDEHIJL":["3E","3J","3B","3D","3A","3H","3L","3I"],
+  "ABDEHIKL":["3E","3I","3B","3D","3A","3H","3L","3K"],
+  "ABDEHJKL":["3E","3J","3B","3D","3A","3H","3L","3K"],
+  "ABDEIJKL":["3E","3J","3B","3A","3I","3D","3L","3K"],
+  "ABDFGHIJ":["3H","3G","3B","3D","3A","3F","3I","3J"],
+  "ABDFGHIK":["3H","3G","3B","3D","3A","3F","3I","3K"],
+  "ABDFGHIL":["3H","3G","3B","3D","3A","3F","3L","3I"],
+  "ABDFGHJK":["3H","3G","3B","3D","3A","3F","3J","3K"],
+  "ABDFGHJL":["3H","3G","3B","3D","3A","3F","3L","3J"],
+  "ABDFGHKL":["3H","3G","3B","3D","3A","3F","3L","3K"],
+  "ABDFGIJK":["3F","3J","3B","3D","3A","3G","3I","3K"],
+  "ABDFGIJL":["3F","3J","3B","3D","3A","3G","3L","3I"],
+  "ABDFGIKL":["3I","3G","3B","3D","3A","3F","3L","3K"],
+  "ABDFGJKL":["3F","3J","3B","3D","3A","3G","3L","3K"],
+  "ABDFHIJK":["3H","3J","3B","3D","3A","3F","3I","3K"],
+  "ABDFHIJL":["3H","3J","3B","3D","3A","3F","3L","3I"],
+  "ABDFHIKL":["3H","3I","3B","3D","3A","3F","3L","3K"],
+  "ABDFHJKL":["3H","3J","3B","3D","3A","3F","3L","3K"],
+  "ABDFIJKL":["3I","3J","3B","3D","3A","3F","3L","3K"],
+  "ABDGHIJK":["3H","3J","3B","3D","3A","3G","3I","3K"],
+  "ABDGHIJL":["3H","3J","3B","3D","3A","3G","3L","3I"],
+  "ABDGHIKL":["3I","3G","3B","3D","3A","3H","3L","3K"],
+  "ABDGHJKL":["3H","3J","3B","3D","3A","3G","3L","3K"],
+  "ABDGIJKL":["3I","3J","3B","3D","3A","3G","3L","3K"],
+  "ABDHIJKL":["3I","3J","3B","3D","3A","3H","3L","3K"],
+  "ABEFGHIJ":["3H","3J","3B","3F","3A","3G","3E","3I"],
+  "ABEFGHIK":["3E","3G","3B","3F","3A","3H","3I","3K"],
+  "ABEFGHIL":["3E","3G","3B","3F","3A","3H","3L","3I"],
+  "ABEFGHJK":["3H","3J","3B","3F","3A","3G","3E","3K"],
+  "ABEFGHJL":["3H","3J","3B","3F","3A","3G","3L","3E"],
+  "ABEFGHKL":["3E","3G","3B","3F","3A","3H","3L","3K"],
+  "ABEFGIJK":["3E","3J","3B","3F","3A","3G","3I","3K"],
+  "ABEFGIJL":["3E","3J","3B","3F","3A","3G","3L","3I"],
+  "ABEFGIKL":["3E","3G","3B","3A","3I","3F","3L","3K"],
+  "ABEFGJKL":["3E","3J","3B","3F","3A","3G","3L","3K"],
+  "ABEFHIJK":["3E","3J","3B","3F","3A","3H","3I","3K"],
+  "ABEFHIJL":["3E","3J","3B","3F","3A","3H","3L","3I"],
+  "ABEFHIKL":["3E","3I","3B","3F","3A","3H","3L","3K"],
+  "ABEFHJKL":["3E","3J","3B","3F","3A","3H","3L","3K"],
+  "ABEFIJKL":["3E","3J","3B","3A","3I","3F","3L","3K"],
+  "ABEGHIJK":["3E","3J","3B","3A","3H","3G","3I","3K"],
+  "ABEGHIJL":["3E","3J","3B","3A","3H","3G","3L","3I"],
+  "ABEGHIKL":["3E","3G","3B","3A","3I","3H","3L","3K"],
+  "ABEGHJKL":["3E","3J","3B","3A","3H","3G","3L","3K"],
+  "ABEGIJKL":["3E","3J","3B","3A","3I","3G","3L","3K"],
+  "ABEHIJKL":["3E","3J","3B","3A","3I","3H","3L","3K"],
+  "ABFGHIJK":["3H","3J","3B","3F","3A","3G","3I","3K"],
+  "ABFGHIJL":["3H","3J","3B","3F","3A","3G","3L","3I"],
+  "ABFGHIKL":["3H","3G","3B","3A","3I","3F","3L","3K"],
+  "ABFGHJKL":["3H","3J","3B","3F","3A","3G","3L","3K"],
+  "ABFGIJKL":["3I","3J","3B","3F","3A","3G","3L","3K"],
+  "ABFHIJKL":["3H","3J","3B","3A","3I","3F","3L","3K"],
+  "ABGHIJKL":["3H","3J","3B","3A","3I","3G","3L","3K"],
+  "ACDEFGHI":["3H","3G","3E","3C","3A","3F","3D","3I"],
+  "ACDEFGHJ":["3H","3G","3J","3C","3A","3F","3D","3E"],
+  "ACDEFGHK":["3H","3G","3E","3C","3A","3F","3D","3K"],
+  "ACDEFGHL":["3H","3G","3F","3C","3A","3D","3L","3E"],
+  "ACDEFGIJ":["3C","3G","3J","3D","3A","3F","3E","3I"],
+  "ACDEFGIK":["3C","3G","3E","3D","3A","3F","3I","3K"],
+  "ACDEFGIL":["3C","3G","3E","3D","3A","3F","3L","3I"],
+  "ACDEFGJK":["3C","3G","3J","3D","3A","3F","3E","3K"],
+  "ACDEFGJL":["3C","3G","3J","3D","3A","3F","3L","3E"],
+  "ACDEFGKL":["3C","3G","3E","3D","3A","3F","3L","3K"],
+  "ACDEFHIJ":["3H","3J","3E","3C","3A","3F","3D","3I"],
+  "ACDEFHIK":["3H","3E","3F","3C","3A","3D","3I","3K"],
+  "ACDEFHIL":["3H","3E","3F","3C","3A","3D","3L","3I"],
+  "ACDEFHJK":["3H","3J","3E","3C","3A","3F","3D","3K"],
+  "ACDEFHJL":["3H","3J","3F","3C","3A","3D","3L","3E"],
+  "ACDEFHKL":["3H","3E","3F","3C","3A","3D","3L","3K"],
+  "ACDEFIJK":["3C","3J","3E","3D","3A","3F","3I","3K"],
+  "ACDEFIJL":["3C","3J","3E","3D","3A","3F","3L","3I"],
+  "ACDEFIKL":["3C","3E","3I","3D","3A","3F","3L","3K"],
+  "ACDEFJKL":["3C","3J","3E","3D","3A","3F","3L","3K"],
+  "ACDEGHIJ":["3H","3G","3J","3C","3A","3D","3E","3I"],
+  "ACDEGHIK":["3H","3G","3E","3C","3A","3D","3I","3K"],
+  "ACDEGHIL":["3H","3G","3E","3C","3A","3D","3L","3I"],
+  "ACDEGHJK":["3H","3G","3J","3C","3A","3D","3E","3K"],
+  "ACDEGHJL":["3H","3G","3J","3C","3A","3D","3L","3E"],
+  "ACDEGHKL":["3H","3G","3E","3C","3A","3D","3L","3K"],
+  "ACDEGIJK":["3E","3G","3J","3C","3A","3D","3I","3K"],
+  "ACDEGIJL":["3E","3G","3J","3C","3A","3D","3L","3I"],
+  "ACDEGIKL":["3E","3G","3I","3C","3A","3D","3L","3K"],
+  "ACDEGJKL":["3E","3G","3J","3C","3A","3D","3L","3K"],
+  "ACDEHIJK":["3H","3J","3E","3C","3A","3D","3I","3K"],
+  "ACDEHIJL":["3H","3J","3E","3C","3A","3D","3L","3I"],
+  "ACDEHIKL":["3H","3E","3I","3C","3A","3D","3L","3K"],
+  "ACDEHJKL":["3H","3J","3E","3C","3A","3D","3L","3K"],
+  "ACDEIJKL":["3E","3J","3I","3C","3A","3D","3L","3K"],
+  "ACDFGHIJ":["3H","3G","3J","3C","3A","3F","3D","3I"],
+  "ACDFGHIK":["3H","3G","3F","3C","3A","3D","3I","3K"],
+  "ACDFGHIL":["3H","3G","3F","3C","3A","3D","3L","3I"],
+  "ACDFGHJK":["3H","3G","3J","3C","3A","3F","3D","3K"],
+  "ACDFGHJL":["3C","3G","3J","3D","3A","3F","3L","3H"],
+  "ACDFGHKL":["3H","3G","3F","3C","3A","3D","3L","3K"],
+  "ACDFGIJK":["3C","3G","3J","3D","3A","3F","3I","3K"],
+  "ACDFGIJL":["3C","3G","3J","3D","3A","3F","3L","3I"],
+  "ACDFGIKL":["3C","3G","3I","3D","3A","3F","3L","3K"],
+  "ACDFGJKL":["3C","3G","3J","3D","3A","3F","3L","3K"],
+  "ACDFHIJK":["3H","3J","3F","3C","3A","3D","3I","3K"],
+  "ACDFHIJL":["3H","3J","3F","3C","3A","3D","3L","3I"],
+  "ACDFHIKL":["3H","3F","3I","3C","3A","3D","3L","3K"],
+  "ACDFHJKL":["3H","3J","3F","3C","3A","3D","3L","3K"],
+  "ACDFIJKL":["3C","3J","3I","3D","3A","3F","3L","3K"],
+  "ACDGHIJK":["3H","3G","3J","3C","3A","3D","3I","3K"],
+  "ACDGHIJL":["3H","3G","3J","3C","3A","3D","3L","3I"],
+  "ACDGHIKL":["3H","3G","3I","3C","3A","3D","3L","3K"],
+  "ACDGHJKL":["3H","3G","3J","3C","3A","3D","3L","3K"],
+  "ACDGIJKL":["3I","3G","3J","3C","3A","3D","3L","3K"],
+  "ACDHIJKL":["3H","3J","3I","3C","3A","3D","3L","3K"],
+  "ACEFGHIJ":["3H","3G","3J","3C","3A","3F","3E","3I"],
+  "ACEFGHIK":["3H","3G","3E","3C","3A","3F","3I","3K"],
+  "ACEFGHIL":["3H","3G","3E","3C","3A","3F","3L","3I"],
+  "ACEFGHJK":["3H","3G","3J","3C","3A","3F","3E","3K"],
+  "ACEFGHJL":["3H","3G","3J","3C","3A","3F","3L","3E"],
+  "ACEFGHKL":["3H","3G","3E","3C","3A","3F","3L","3K"],
+  "ACEFGIJK":["3E","3G","3J","3C","3A","3F","3I","3K"],
+  "ACEFGIJL":["3E","3G","3J","3C","3A","3F","3L","3I"],
+  "ACEFGIKL":["3E","3G","3I","3C","3A","3F","3L","3K"],
+  "ACEFGJKL":["3E","3G","3J","3C","3A","3F","3L","3K"],
+  "ACEFHIJK":["3H","3J","3E","3C","3A","3F","3I","3K"],
+  "ACEFHIJL":["3H","3J","3E","3C","3A","3F","3L","3I"],
+  "ACEFHIKL":["3H","3E","3I","3C","3A","3F","3L","3K"],
+  "ACEFHJKL":["3H","3J","3E","3C","3A","3F","3L","3K"],
+  "ACEFIJKL":["3E","3J","3I","3C","3A","3F","3L","3K"],
+  "ACEGHIJK":["3E","3G","3J","3C","3A","3H","3I","3K"],
+  "ACEGHIJL":["3E","3G","3J","3C","3A","3H","3L","3I"],
+  "ACEGHIKL":["3E","3G","3I","3C","3A","3H","3L","3K"],
+  "ACEGHJKL":["3E","3G","3J","3C","3A","3H","3L","3K"],
+  "ACEGIJKL":["3E","3J","3I","3C","3A","3G","3L","3K"],
+  "ACEHIJKL":["3E","3J","3I","3C","3A","3H","3L","3K"],
+  "ACFGHIJK":["3H","3G","3J","3C","3A","3F","3I","3K"],
+  "ACFGHIJL":["3H","3G","3J","3C","3A","3F","3L","3I"],
+  "ACFGHIKL":["3H","3G","3I","3C","3A","3F","3L","3K"],
+  "ACFGHJKL":["3H","3G","3J","3C","3A","3F","3L","3K"],
+  "ACFGIJKL":["3I","3G","3J","3C","3A","3F","3L","3K"],
+  "ACFHIJKL":["3H","3J","3I","3C","3A","3F","3L","3K"],
+  "ACGHIJKL":["3H","3J","3I","3C","3A","3G","3L","3K"],
+  "ADEFGHIJ":["3H","3G","3J","3D","3A","3F","3E","3I"],
+  "ADEFGHIK":["3H","3G","3E","3D","3A","3F","3I","3K"],
+  "ADEFGHIL":["3H","3G","3E","3D","3A","3F","3L","3I"],
+  "ADEFGHJK":["3H","3G","3J","3D","3A","3F","3E","3K"],
+  "ADEFGHJL":["3H","3G","3J","3D","3A","3F","3L","3E"],
+  "ADEFGHKL":["3H","3G","3E","3D","3A","3F","3L","3K"],
+  "ADEFGIJK":["3E","3G","3J","3D","3A","3F","3I","3K"],
+  "ADEFGIJL":["3E","3G","3J","3D","3A","3F","3L","3I"],
+  "ADEFGIKL":["3E","3G","3I","3D","3A","3F","3L","3K"],
+  "ADEFGJKL":["3E","3G","3J","3D","3A","3F","3L","3K"],
+  "ADEFHIJK":["3H","3J","3E","3D","3A","3F","3I","3K"],
+  "ADEFHIJL":["3H","3J","3E","3D","3A","3F","3L","3I"],
+  "ADEFHIKL":["3H","3E","3I","3D","3A","3F","3L","3K"],
+  "ADEFHJKL":["3H","3J","3E","3D","3A","3F","3L","3K"],
+  "ADEFIJKL":["3E","3J","3I","3D","3A","3F","3L","3K"],
+  "ADEGHIJK":["3E","3G","3J","3D","3A","3H","3I","3K"],
+  "ADEGHIJL":["3E","3G","3J","3D","3A","3H","3L","3I"],
+  "ADEGHIKL":["3E","3G","3I","3D","3A","3H","3L","3K"],
+  "ADEGHJKL":["3E","3G","3J","3D","3A","3H","3L","3K"],
+  "ADEGIJKL":["3E","3J","3I","3D","3A","3G","3L","3K"],
+  "ADEHIJKL":["3E","3J","3I","3D","3A","3H","3L","3K"],
+  "ADFGHIJK":["3H","3G","3J","3D","3A","3F","3I","3K"],
+  "ADFGHIJL":["3H","3G","3J","3D","3A","3F","3L","3I"],
+  "ADFGHIKL":["3H","3G","3I","3D","3A","3F","3L","3K"],
+  "ADFGHJKL":["3H","3G","3J","3D","3A","3F","3L","3K"],
+  "ADFGIJKL":["3I","3G","3J","3D","3A","3F","3L","3K"],
+  "ADFHIJKL":["3H","3J","3I","3D","3A","3F","3L","3K"],
+  "ADGHIJKL":["3H","3J","3I","3D","3A","3G","3L","3K"],
+  "AEFGHIJK":["3E","3G","3J","3F","3A","3H","3I","3K"],
+  "AEFGHIJL":["3E","3G","3J","3F","3A","3H","3L","3I"],
+  "AEFGHIKL":["3E","3G","3I","3F","3A","3H","3L","3K"],
+  "AEFGHJKL":["3E","3G","3J","3F","3A","3H","3L","3K"],
+  "AEFGIJKL":["3E","3J","3I","3F","3A","3G","3L","3K"],
+  "AEFHIJKL":["3E","3J","3I","3F","3A","3H","3L","3K"],
+  "AEGHIJKL":["3E","3J","3I","3A","3H","3G","3L","3K"],
+  "AFGHIJKL":["3H","3J","3I","3F","3A","3G","3L","3K"],
+  "BCDEFGHI":["3C","3G","3B","3D","3H","3F","3E","3I"],
+  "BCDEFGHJ":["3H","3G","3B","3C","3J","3F","3D","3E"],
+  "BCDEFGHK":["3C","3G","3B","3D","3H","3F","3E","3K"],
+  "BCDEFGHL":["3C","3G","3B","3D","3H","3F","3L","3E"],
+  "BCDEFGIJ":["3C","3G","3B","3D","3J","3F","3E","3I"],
+  "BCDEFGIK":["3C","3G","3B","3D","3E","3F","3I","3K"],
+  "BCDEFGIL":["3C","3G","3B","3D","3E","3F","3L","3I"],
+  "BCDEFGJK":["3C","3G","3B","3D","3J","3F","3E","3K"],
+  "BCDEFGJL":["3C","3G","3B","3D","3J","3F","3L","3E"],
+  "BCDEFGKL":["3C","3G","3B","3D","3E","3F","3L","3K"],
+  "BCDEFHIJ":["3C","3J","3B","3D","3H","3F","3E","3I"],
+  "BCDEFHIK":["3C","3E","3B","3D","3H","3F","3I","3K"],
+  "BCDEFHIL":["3C","3E","3B","3D","3H","3F","3L","3I"],
+  "BCDEFHJK":["3C","3J","3B","3D","3H","3F","3E","3K"],
+  "BCDEFHJL":["3C","3J","3B","3D","3H","3F","3L","3E"],
+  "BCDEFHKL":["3C","3E","3B","3D","3H","3F","3L","3K"],
+  "BCDEFIJK":["3C","3J","3B","3D","3E","3F","3I","3K"],
+  "BCDEFIJL":["3C","3J","3B","3D","3E","3F","3L","3I"],
+  "BCDEFIKL":["3C","3E","3B","3D","3I","3F","3L","3K"],
+  "BCDEFJKL":["3C","3J","3B","3D","3E","3F","3L","3K"],
+  "BCDEGHIJ":["3H","3G","3B","3C","3J","3D","3E","3I"],
+  "BCDEGHIK":["3E","3G","3B","3C","3H","3D","3I","3K"],
+  "BCDEGHIL":["3E","3G","3B","3C","3H","3D","3L","3I"],
+  "BCDEGHJK":["3H","3G","3B","3C","3J","3D","3E","3K"],
+  "BCDEGHJL":["3H","3G","3B","3C","3J","3D","3L","3E"],
+  "BCDEGHKL":["3E","3G","3B","3C","3H","3D","3L","3K"],
+  "BCDEGIJK":["3E","3G","3B","3C","3J","3D","3I","3K"],
+  "BCDEGIJL":["3E","3G","3B","3C","3J","3D","3L","3I"],
+  "BCDEGIKL":["3E","3G","3B","3C","3I","3D","3L","3K"],
+  "BCDEGJKL":["3E","3G","3B","3C","3J","3D","3L","3K"],
+  "BCDEHIJK":["3E","3J","3B","3C","3H","3D","3I","3K"],
+  "BCDEHIJL":["3E","3J","3B","3C","3H","3D","3L","3I"],
+  "BCDEHIKL":["3E","3I","3B","3C","3H","3D","3L","3K"],
+  "BCDEHJKL":["3E","3J","3B","3C","3H","3D","3L","3K"],
+  "BCDEIJKL":["3E","3J","3B","3C","3I","3D","3L","3K"],
+  "BCDFGHIJ":["3H","3G","3B","3C","3J","3F","3D","3I"],
+  "BCDFGHIK":["3C","3G","3B","3D","3H","3F","3I","3K"],
+  "BCDFGHIL":["3C","3G","3B","3D","3H","3F","3L","3I"],
+  "BCDFGHJK":["3H","3G","3B","3C","3J","3F","3D","3K"],
+  "BCDFGHJL":["3C","3G","3B","3D","3H","3F","3L","3J"],
+  "BCDFGHKL":["3C","3G","3B","3D","3H","3F","3L","3K"],
+  "BCDFGIJK":["3C","3G","3B","3D","3J","3F","3I","3K"],
+  "BCDFGIJL":["3C","3G","3B","3D","3J","3F","3L","3I"],
+  "BCDFGIKL":["3C","3G","3B","3D","3I","3F","3L","3K"],
+  "BCDFGJKL":["3C","3G","3B","3D","3J","3F","3L","3K"],
+  "BCDFHIJK":["3C","3J","3B","3D","3H","3F","3I","3K"],
+  "BCDFHIJL":["3C","3J","3B","3D","3H","3F","3L","3I"],
+  "BCDFHIKL":["3C","3I","3B","3D","3H","3F","3L","3K"],
+  "BCDFHJKL":["3C","3J","3B","3D","3H","3F","3L","3K"],
+  "BCDFIJKL":["3C","3J","3B","3D","3I","3F","3L","3K"],
+  "BCDGHIJK":["3H","3G","3B","3C","3J","3D","3I","3K"],
+  "BCDGHIJL":["3H","3G","3B","3C","3J","3D","3L","3I"],
+  "BCDGHIKL":["3H","3G","3B","3C","3I","3D","3L","3K"],
+  "BCDGHJKL":["3H","3G","3B","3C","3J","3D","3L","3K"],
+  "BCDGIJKL":["3I","3G","3B","3C","3J","3D","3L","3K"],
+  "BCDHIJKL":["3H","3J","3B","3C","3I","3D","3L","3K"],
+  "BCEFGHIJ":["3H","3G","3B","3C","3J","3F","3E","3I"],
+  "BCEFGHIK":["3E","3G","3B","3C","3H","3F","3I","3K"],
+  "BCEFGHIL":["3E","3G","3B","3C","3H","3F","3L","3I"],
+  "BCEFGHJK":["3H","3G","3B","3C","3J","3F","3E","3K"],
+  "BCEFGHJL":["3H","3G","3B","3C","3J","3F","3L","3E"],
+  "BCEFGHKL":["3E","3G","3B","3C","3H","3F","3L","3K"],
+  "BCEFGIJK":["3E","3G","3B","3C","3J","3F","3I","3K"],
+  "BCEFGIJL":["3E","3G","3B","3C","3J","3F","3L","3I"],
+  "BCEFGIKL":["3E","3G","3B","3C","3I","3F","3L","3K"],
+  "BCEFGJKL":["3E","3G","3B","3C","3J","3F","3L","3K"],
+  "BCEFHIJK":["3E","3J","3B","3C","3H","3F","3I","3K"],
+  "BCEFHIJL":["3E","3J","3B","3C","3H","3F","3L","3I"],
+  "BCEFHIKL":["3E","3I","3B","3C","3H","3F","3L","3K"],
+  "BCEFHJKL":["3E","3J","3B","3C","3H","3F","3L","3K"],
+  "BCEFIJKL":["3E","3J","3B","3C","3I","3F","3L","3K"],
+  "BCEGHIJK":["3E","3J","3B","3C","3H","3G","3I","3K"],
+  "BCEGHIJL":["3E","3J","3B","3C","3H","3G","3L","3I"],
+  "BCEGHIKL":["3E","3G","3B","3C","3I","3H","3L","3K"],
+  "BCEGHJKL":["3E","3J","3B","3C","3H","3G","3L","3K"],
+  "BCEGIJKL":["3E","3J","3B","3C","3I","3G","3L","3K"],
+  "BCEHIJKL":["3E","3J","3B","3C","3I","3H","3L","3K"],
+  "BCFGHIJK":["3H","3G","3B","3C","3J","3F","3I","3K"],
+  "BCFGHIJL":["3H","3G","3B","3C","3J","3F","3L","3I"],
+  "BCFGHIKL":["3H","3G","3B","3C","3I","3F","3L","3K"],
+  "BCFGHJKL":["3H","3G","3B","3C","3J","3F","3L","3K"],
+  "BCFGIJKL":["3I","3G","3B","3C","3J","3F","3L","3K"],
+  "BCFHIJKL":["3H","3J","3B","3C","3I","3F","3L","3K"],
+  "BCGHIJKL":["3H","3J","3B","3C","3I","3G","3L","3K"],
+  "BDEFGHIJ":["3H","3G","3B","3D","3J","3F","3E","3I"],
+  "BDEFGHIK":["3E","3G","3B","3D","3H","3F","3I","3K"],
+  "BDEFGHIL":["3E","3G","3B","3D","3H","3F","3L","3I"],
+  "BDEFGHJK":["3H","3G","3B","3D","3J","3F","3E","3K"],
+  "BDEFGHJL":["3H","3G","3B","3D","3J","3F","3L","3E"],
+  "BDEFGHKL":["3E","3G","3B","3D","3H","3F","3L","3K"],
+  "BDEFGIJK":["3E","3G","3B","3D","3J","3F","3I","3K"],
+  "BDEFGIJL":["3E","3G","3B","3D","3J","3F","3L","3I"],
+  "BDEFGIKL":["3E","3G","3B","3D","3I","3F","3L","3K"],
+  "BDEFGJKL":["3E","3G","3B","3D","3J","3F","3L","3K"],
+  "BDEFHIJK":["3E","3J","3B","3D","3H","3F","3I","3K"],
+  "BDEFHIJL":["3E","3J","3B","3D","3H","3F","3L","3I"],
+  "BDEFHIKL":["3E","3I","3B","3D","3H","3F","3L","3K"],
+  "BDEFHJKL":["3E","3J","3B","3D","3H","3F","3L","3K"],
+  "BDEFIJKL":["3E","3J","3B","3D","3I","3F","3L","3K"],
+  "BDEGHIJK":["3E","3J","3B","3D","3H","3G","3I","3K"],
+  "BDEGHIJL":["3E","3J","3B","3D","3H","3G","3L","3I"],
+  "BDEGHIKL":["3E","3G","3B","3D","3I","3H","3L","3K"],
+  "BDEGHJKL":["3E","3J","3B","3D","3H","3G","3L","3K"],
+  "BDEGIJKL":["3E","3J","3B","3D","3I","3G","3L","3K"],
+  "BDEHIJKL":["3E","3J","3B","3D","3I","3H","3L","3K"],
+  "BDFGHIJK":["3H","3G","3B","3D","3J","3F","3I","3K"],
+  "BDFGHIJL":["3H","3G","3B","3D","3J","3F","3L","3I"],
+  "BDFGHIKL":["3H","3G","3B","3D","3I","3F","3L","3K"],
+  "BDFGHJKL":["3H","3G","3B","3D","3J","3F","3L","3K"],
+  "BDFGIJKL":["3I","3G","3B","3D","3J","3F","3L","3K"],
+  "BDFHIJKL":["3H","3J","3B","3D","3I","3F","3L","3K"],
+  "BDGHIJKL":["3H","3J","3B","3D","3I","3G","3L","3K"],
+  "BEFGHIJK":["3E","3J","3B","3F","3H","3G","3I","3K"],
+  "BEFGHIJL":["3E","3J","3B","3F","3H","3G","3L","3I"],
+  "BEFGHIKL":["3E","3G","3B","3F","3I","3H","3L","3K"],
+  "BEFGHJKL":["3E","3J","3B","3F","3H","3G","3L","3K"],
+  "BEFGIJKL":["3E","3J","3B","3F","3I","3G","3L","3K"],
+  "BEFHIJKL":["3E","3J","3B","3F","3I","3H","3L","3K"],
+  "BEGHIJKL":["3E","3J","3I","3B","3H","3G","3L","3K"],
+  "BFGHIJKL":["3H","3J","3B","3F","3I","3G","3L","3K"],
+  "CDEFGHIJ":["3C","3G","3J","3D","3H","3F","3E","3I"],
+  "CDEFGHIK":["3C","3G","3E","3D","3H","3F","3I","3K"],
+  "CDEFGHIL":["3C","3G","3E","3D","3H","3F","3L","3I"],
+  "CDEFGHJK":["3C","3G","3J","3D","3H","3F","3E","3K"],
+  "CDEFGHJL":["3C","3G","3J","3D","3H","3F","3L","3E"],
+  "CDEFGHKL":["3C","3G","3E","3D","3H","3F","3L","3K"],
+  "CDEFGIJK":["3C","3G","3E","3D","3J","3F","3I","3K"],
+  "CDEFGIJL":["3C","3G","3E","3D","3J","3F","3L","3I"],
+  "CDEFGIKL":["3C","3G","3E","3D","3I","3F","3L","3K"],
+  "CDEFGJKL":["3C","3G","3E","3D","3J","3F","3L","3K"],
+  "CDEFHIJK":["3C","3J","3E","3D","3H","3F","3I","3K"],
+  "CDEFHIJL":["3C","3J","3E","3D","3H","3F","3L","3I"],
+  "CDEFHIKL":["3C","3E","3I","3D","3H","3F","3L","3K"],
+  "CDEFHJKL":["3C","3J","3E","3D","3H","3F","3L","3K"],
+  "CDEFIJKL":["3C","3J","3E","3D","3I","3F","3L","3K"],
+  "CDEGHIJK":["3E","3G","3J","3C","3H","3D","3I","3K"],
+  "CDEGHIJL":["3E","3G","3J","3C","3H","3D","3L","3I"],
+  "CDEGHIKL":["3E","3G","3I","3C","3H","3D","3L","3K"],
+  "CDEGHJKL":["3E","3G","3J","3C","3H","3D","3L","3K"],
+  "CDEGIJKL":["3E","3G","3I","3C","3J","3D","3L","3K"],
+  "CDEHIJKL":["3E","3J","3I","3C","3H","3D","3L","3K"],
+  "CDFGHIJK":["3C","3G","3J","3D","3H","3F","3I","3K"],
+  "CDFGHIJL":["3C","3G","3J","3D","3H","3F","3L","3I"],
+  "CDFGHIKL":["3C","3G","3I","3D","3H","3F","3L","3K"],
+  "CDFGHJKL":["3C","3G","3J","3D","3H","3F","3L","3K"],
+  "CDFGIJKL":["3C","3G","3I","3D","3J","3F","3L","3K"],
+  "CDFHIJKL":["3C","3J","3I","3D","3H","3F","3L","3K"],
+  "CDGHIJKL":["3H","3G","3I","3C","3J","3D","3L","3K"],
+  "CEFGHIJK":["3E","3G","3J","3C","3H","3F","3I","3K"],
+  "CEFGHIJL":["3E","3G","3J","3C","3H","3F","3L","3I"],
+  "CEFGHIKL":["3E","3G","3I","3C","3H","3F","3L","3K"],
+  "CEFGHJKL":["3E","3G","3J","3C","3H","3F","3L","3K"],
+  "CEFGIJKL":["3E","3G","3I","3C","3J","3F","3L","3K"],
+  "CEFHIJKL":["3E","3J","3I","3C","3H","3F","3L","3K"],
+  "CEGHIJKL":["3E","3J","3I","3C","3H","3G","3L","3K"],
+  "CFGHIJKL":["3H","3G","3I","3C","3J","3F","3L","3K"],
+  "DEFGHIJK":["3E","3G","3J","3D","3H","3F","3I","3K"],
+  "DEFGHIJL":["3E","3G","3J","3D","3H","3F","3L","3I"],
+  "DEFGHIKL":["3E","3G","3I","3D","3H","3F","3L","3K"],
+  "DEFGHJKL":["3E","3G","3J","3D","3H","3F","3L","3K"],
+  "DEFGIJKL":["3E","3G","3I","3D","3J","3F","3L","3K"],
+  "DEFHIJKL":["3E","3J","3I","3D","3H","3F","3L","3K"],
+  "DEGHIJKL":["3E","3J","3I","3D","3H","3G","3L","3K"],
+  "DFGHIJKL":["3H","3G","3I","3D","3J","3F","3L","3K"],
+  "EFGHIJKL":["3E","3J","3I","3F","3H","3G","3L","3K"],
+};
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAYTkImmWD88o39w-9oHTy9W2zP5IvBEv4",
+  authDomain: "alpert-wc-pool.firebaseapp.com",
+  projectId: "alpert-wc-pool",
+  storageBucket: "alpert-wc-pool.firebasestorage.app",
+  messagingSenderId: "481435031082",
+  appId: "1:481435031082:web:327dfbc17c886b5cd19553"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const LOCK_DATE = new Date('2026-06-11T15:00:00Z');
+const ADMIN_PW_DEFAULT = 'wc2026admin';
+
+const GROUPS = {
+  A:['🇲🇽 Mexico','🇿🇦 South Africa','🇰🇷 South Korea','🇨🇿 Czechia'],
+  B:['🇨🇦 Canada','🇨🇭 Switzerland','🇶🇦 Qatar','🇧🇦 Bosnia & Herzegovina'],
+  C:['🇧🇷 Brazil','🇲🇦 Morocco','🇭🇹 Haiti','🇬🇧 Scotland'],
+  D:['🇺🇸 USA','🇵🇾 Paraguay','🇦🇺 Australia','🇹🇷 Türkiye'],
+  E:['🇩🇪 Germany','🇨🇼 Curaçao','🇨🇮 Ivory Coast','🇪🇨 Ecuador'],
+  F:['🇳🇱 Netherlands','🇯🇵 Japan','🇸🇪 Sweden','🇹🇳 Tunisia'],
+  G:['🇧🇪 Belgium','🇪🇬 Egypt','🇮🇷 Iran','🇳🇿 New Zealand'],
+  H:['🇪🇸 Spain','🇨🇻 Cape Verde','🇸🇦 Saudi Arabia','🇺🇾 Uruguay'],
+  I:['🇫🇷 France','🇸🇳 Senegal','🇳🇴 Norway','🇮🇶 Iraq'],
+  J:['🇦🇷 Argentina','🇩🇿 Algeria','🇦🇹 Austria','🇯🇴 Jordan'],
+  K:['🇵🇹 Portugal','🇨🇩 DR Congo','🇺🇿 Uzbekistan','🇨🇴 Colombia'],
+  L:['🏴󠁧󠁢󠁥󠁮󠁧󠁿 England','🇭🇷 Croatia','🇬🇭 Ghana','🇵🇦 Panama']
+};
+const ALL_TEAMS = Object.values(GROUPS).flat();
+const SCORING = {pos1:8,pos2:6,pos3:4,pos4:2,adv:3,perf:5,r32:3,r16:6,qf:11,sf:22,final:44,champ:88};
+
+let currentUser = null;
+let allEntries = [];
+let results = {groups:{},knockout:{r32:[],r16:[],qf:[],sf:[],final:[],champion:[]}};
+let picksLocked = false;
+let adminLoggedIn = false;
+
+window.showPage = showPage;
+window.switchAuthTab = switchAuthTab;
+window.doLogin = doLogin;
+window.doRegister = doRegister;
+window.toggleScoring = toggleScoring;
+window.checkAdminPw = checkAdminPw;
+window.adminSaveResults = adminSaveResults;
+window.adminExportCSV = adminExportCSV;
+window.adminToggleLock = adminToggleLock;
+window.adminResetPin = adminResetPin;
+window.changeAdminPw = changeAdminPw;
+window.viewProfile = viewProfile;
+
+async function init() {
+  buildForm();
+  updateDaysLeft();
+  const saved = sessionStorage.getItem('wc_user');
+  if (saved) { currentUser = JSON.parse(saved); updateNavUser(); }
+  await loadResults();
+  await loadEntries();
+  updateHomePage();
+  picksLocked = new Date() >= LOCK_DATE;
+}
+
+function updateDaysLeft() {
+  const days = Math.max(0, Math.ceil((LOCK_DATE - new Date()) / 86400000));
+  const el = document.getElementById('home-days-left');
+  if (el) el.textContent = days;
+}
+
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  ['home','submit','leaderboard','scoring','admin'].forEach((p,i) => {
+    if (p===id) document.querySelectorAll('.nav-tab')[i].classList.add('active');
+  });
+  window.scrollTo(0,0);
+  if (id==='submit') renderSubmitPage();
+  if (id==='leaderboard') renderLeaderboard();
+  if (id==='admin') { if (!adminLoggedIn) { document.getElementById('admin-login-area').style.display='block'; document.getElementById('admin-panel').style.display='none'; } }
+  if (id==='home') updateHomePage();
+}
+
+async function loadResults() {
+  try {
+    const snap = await getDoc(doc(db,'settings','results'));
+    if (snap.exists()) results = snap.data();
+  } catch(e) {}
+}
+
+async function loadEntries() {
+  try {
+    const snap = await getDocs(collection(db,'entries'));
+    allEntries = [];
+    snap.forEach(d => allEntries.push({id:d.id,...d.data()}));
+  } catch(e) {}
+}
+
+function switchAuthTab(tab, e) {
+  document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+  if (e && e.target) e.target.classList.add('active');
+  document.getElementById('login-form').style.display = tab==='login'?'block':'none';
+  document.getElementById('register-form').style.display = tab==='register'?'block':'none';
+  document.getElementById('auth-alert').innerHTML='';
+}
+
+async function doLogin() {
+  const username = document.getElementById('login-username').value.trim().toLowerCase();
+  const pin = document.getElementById('login-pin').value.trim();
+  if (!username||!pin) { showAlert('auth-alert','error','Please enter your username and PIN.'); return; }
+  try {
+    const snap = await getDoc(doc(db,'users',username));
+    if (!snap.exists()) { showAlert('auth-alert','error','Username not found.'); return; }
+    const user = snap.data();
+    if (user.pin!==pin) { showAlert('auth-alert','error','Incorrect PIN.'); return; }
+    currentUser = user;
+    sessionStorage.setItem('wc_user', JSON.stringify(user));
+    updateNavUser();
+    renderSubmitPage();
+  } catch(e) { showAlert('auth-alert','error','Error logging in. Try again.'); }
+}
+
+async function doRegister() {
+  const username = document.getElementById('reg-username').value.trim().toLowerCase();
+  const name = document.getElementById('reg-name').value.trim();
+  const pin = document.getElementById('reg-pin').value.trim();
+  const pin2 = document.getElementById('reg-pin2').value.trim();
+  if (!username||!name||!pin) { showAlert('auth-alert','error','Please fill out all fields.'); return; }
+  if (pin!==pin2) { showAlert('auth-alert','error','PINs do not match.'); return; }
+  if (pin.length!==4||!/^\d+$/.test(pin)) { showAlert('auth-alert','error','PIN must be exactly 4 digits.'); return; }
+  try {
+    const existing = await getDoc(doc(db,'users',username));
+    if (existing.exists()) { showAlert('auth-alert','error','That username is taken.'); return; }
+    const user = {username,name,pin,createdAt:new Date().toISOString()};
+    await setDoc(doc(db,'users',username), user);
+    currentUser = user;
+    sessionStorage.setItem('wc_user', JSON.stringify(user));
+    updateNavUser();
+    renderSubmitPage();
+  } catch(e) { showAlert('auth-alert','error','Error creating account. Try again.'); }
+}
+
+function updateNavUser() {
+  const el = document.getElementById('nav-user');
+  if (currentUser) { el.style.display='block'; el.textContent=currentUser.name||currentUser.username; }
+  else el.style.display='none';
+}
+
+async function renderSubmitPage() {
+  if (!currentUser) { document.getElementById('auth-area').style.display='block'; document.getElementById('picks-area').style.display='none'; return; }
+  document.getElementById('auth-area').style.display='none';
+  document.getElementById('picks-area').style.display='block';
+  document.getElementById('picks-greeting').textContent = (currentUser.name||currentUser.username)+"'s Picks";
+  picksLocked = new Date() >= LOCK_DATE;
+  if (picksLocked) { document.getElementById('locked-banner').style.display='block'; document.getElementById('save-bar').style.display='none'; }
+  buildForm();
+  try {
+    const snap = await getDoc(doc(db,'entries',currentUser.username.toLowerCase()));
+    if (snap.exists()) {
+      const entry = snap.data();
+      loadPicksIntoForm(entry);
+      if (entry.submitted) {
+        document.getElementById('picks-wizard').style.display='none';
+        document.getElementById('submitted-area').style.display='block';
+        document.getElementById('save-bar').style.display='none';
+      } else {
+        showPicksWizard();
+      }
+    } else {
+      showPicksWizard();
+    }
+  } catch(e) { showPicksWizard(); }
+}
+
+
+
+
+
+// =====================================================================
+// BRACKET STATE
+// matchups[matchId] = { home: teamName, away: teamName, label: string }\n// bracketPicks[matchId] = teamName (winner picked by user)\n// Downstream: R16 matchups derive from R32 winners, QF from R16, etc.\n
+// =====================================================================
+let bracketMatchups = {}; // generated from group picks + annexC
+let bracketPicks = {};    // user's matchup winner picks
+let currentStep = 0;      // 0=groups, 1=thirdplace, 2=bracket
+
+// R16 bracket: each entry {id, m1, m2} means winner of m1 vs winner of m2
+const R16 = [
+  {id:'R16-1', m1:'M74', m2:'M77'},
+  {id:'R16-2', m1:'M73', m2:'M75'},
+  {id:'R16-3', m1:'M76', m2:'M78'},
+  {id:'R16-4', m1:'M79', m2:'M80'},
+  {id:'R16-5', m1:'M83', m2:'M84'},
+  {id:'R16-6', m1:'M81', m2:'M82'},
+  {id:'R16-7', m1:'M85', m2:'M87'},
+  {id:'R16-8', m1:'M86', m2:'M88'},
+];
+const QF = [
+  {id:'QF1', m1:'R16-1', m2:'R16-2'},
+  {id:'QF2', m1:'R16-3', m2:'R16-4'},
+  {id:'QF3', m1:'R16-5', m2:'R16-6'},
+  {id:'QF4', m1:'R16-7', m2:'R16-8'},
+];
+const SF = [
+  {id:'SF1', m1:'QF1', m2:'QF2'},
+  {id:'SF2', m1:'QF3', m2:'QF4'},
+];
+const FIN = [{id:'FINAL', m1:'SF1', m2:'SF2'}];
+
+// Get clean team name (strip emoji for storage)
+function cleanName(t) { return t.replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF} ]+/gu,'').trim(); }
+
+function groupWinner(letter) {
+  const v = document.getElementById(`g${letter}-1`)?.value || '';
+  return v || `W-${letter}`;
+}
+function groupRunnerUp(letter) {
+  const v = document.getElementById(`g${letter}-2`)?.value || '';
+  return v || `RU-${letter}`;
+}
+function groupThird(letter) {
+  const v = document.getElementById(`g${letter}-3`)?.value || '';
+  return v || `3rd-${letter}`;
+}
+
+function getSelectedThirdGroups() {
+  return [...document.querySelectorAll('#tp-chips .team-chip.selected')].map(c => c.dataset.grp);
+}
+
+function generateBracketMatchups() {
+  const tpGroups = getSelectedThirdGroups();
+  const tpKey = [...tpGroups].sort().join('');
+  const combo = ANNEX_C[tpKey] || null;
+
+  // Resolve "3X" slot to team name
+  function resolve3rd(slot) {
+    if (!slot) return 'TBD';
+    const g = slot.replace('3','');
+    return groupThird(g);
+  }
+
+  // Fixed R32 matchups (not dependent on 3rd place combo)
+  const fixed = {
+    M73: { home: groupRunnerUp('A'), away: groupRunnerUp('B'), label: 'RU-A vs RU-B' },
+    M75: { home: groupWinner('F'), away: groupRunnerUp('C'), label: 'W-F vs RU-C' },
+    M76: { home: groupWinner('C'), away: groupRunnerUp('F'), label: 'W-C vs RU-F' },
+    M78: { home: groupRunnerUp('E'), away: groupRunnerUp('I'), label: 'RU-E vs RU-I' },
+    M83: { home: groupRunnerUp('K'), away: groupRunnerUp('L'), label: 'RU-K vs RU-L' },
+    M84: { home: groupWinner('H'), away: groupRunnerUp('J'), label: 'W-H vs RU-J' },
+    M86: { home: groupWinner('J'), away: groupRunnerUp('H'), label: 'W-J vs RU-H' },
+    M88: { home: groupRunnerUp('D'), away: groupRunnerUp('G'), label: 'RU-D vs RU-G' },
+  };
+
+  // Variable matchups (Annex C)
+  // Slots: [W-A, W-B, W-D, W-E, W-G, W-I, W-K, W-L]
+  let variable;
+  if (combo) {
+    variable = {
+      M79: { home: groupWinner('A'), away: resolve3rd(combo[0]), label: `W-A vs ${combo[0]}` },
+      M85: { home: groupWinner('B'), away: resolve3rd(combo[1]), label: `W-B vs ${combo[1]}` },
+      M81: { home: groupWinner('D'), away: resolve3rd(combo[2]), label: `W-D vs ${combo[2]}` },
+      M74: { home: groupWinner('E'), away: resolve3rd(combo[3]), label: `W-E vs ${combo[3]}` },
+      M82: { home: groupWinner('G'), away: resolve3rd(combo[4]), label: `W-G vs ${combo[4]}` },
+      M77: { home: groupWinner('I'), away: resolve3rd(combo[5]), label: `W-I vs ${combo[5]}` },
+      M87: { home: groupWinner('K'), away: resolve3rd(combo[6]), label: `W-K vs ${combo[6]}` },
+      M80: { home: groupWinner('L'), away: resolve3rd(combo[7]), label: `W-L vs ${combo[7]}` },
+    };
+  } else {
+    // Fallback: best-effort without exact combo
+    const tpTeams = tpGroups.map(g => groupThird(g));
+    let tpIdx = 0;
+    const nextTp = () => tpTeams[tpIdx++] || 'TBD';
+    variable = {
+      M74: { home: groupWinner('E'), away: nextTp(), label: 'W-E vs 3rd (A/B/C/D/F)' },
+      M77: { home: groupWinner('I'), away: nextTp(), label: 'W-I vs 3rd (C/D/F/G/H)' },
+      M79: { home: groupWinner('A'), away: nextTp(), label: 'W-A vs 3rd (C/E/F/H/I)' },
+      M80: { home: groupWinner('L'), away: nextTp(), label: 'W-L vs 3rd (E/H/I/J/K)' },
+      M81: { home: groupWinner('D'), away: nextTp(), label: 'W-D vs 3rd (B/E/F/I/J)' },
+      M82: { home: groupWinner('G'), away: nextTp(), label: 'W-G vs 3rd (A/E/H/I/J)' },
+      M85: { home: groupWinner('B'), away: nextTp(), label: 'W-B vs 3rd (E/F/G/I/J)' },
+      M87: { home: groupWinner('K'), away: nextTp(), label: 'W-K vs 3rd (D/E/I/J/L)' },
+    };
+  }
+
+  bracketMatchups = { ...fixed, ...variable };
+
+  // Clear picks that no longer make sense (team changed)
+  // Cascade clear all bracket picks when regenerating
+  bracketPicks = {};
+}
+
+// Get the winner of a match (from bracketPicks)
+function matchWinner(matchId) {
+  return bracketPicks[matchId] || null;
+}
+
+// Get home/away for downstream matches (R16, QF, SF, Final)
+function downstreamTeam(matchId) {
+  return matchWinner(matchId) || null;
+}
+
+window.tryGoToStep = function(step) {
+  if (step === 0) { goToStep(0); return; }
+  if (step >= 1) {
+    if (!allGroupsDone()) { showAlert('picks-alert','error','Complete all 12 group picks first.'); return; }
+    goToStep(1);
+  }
+  if (step >= 2) {
+    const tpCount = [...document.querySelectorAll('#tp-chips .team-chip.selected')].length;
+    if (tpCount !== 8) { showAlert('picks-alert','error','Select exactly 8 third-place qualifiers first.'); return; }
+    goToStep(2);
+  }
+};
+
+window.goToStep = function(step) {
+  currentStep = step;
+  [0,1,2].forEach(i => {
+    document.getElementById(`step-${i}`).style.display = i === step ? 'block' : 'none';
+    const tab = document.getElementById(`step-tab-${i}`);
+    tab.style.background = i === step ? 'var(--red)' : 'var(--card-light)';
+    tab.style.color = i === step ? '#fff' : 'var(--muted)';
+  });
+  if (step === 2) renderBracket();
+  window.scrollTo(0,0);
+};
+
+window.advanceFromGroups = function() {
+  if (!allGroupsDone()) { showAlert('picks-alert','error','Please complete all 12 groups before continuing.'); return; }
+  updateThirdPlaceChips();
+  goToStep(1);
+};
+
+window.advanceFromThirdPlace = function() {
+  const tpCount = [...document.querySelectorAll('#tp-chips .team-chip.selected')].length;
+  if (tpCount !== 8) { showAlert('picks-alert','error','Please select exactly 8 third-place teams.'); return; }
+  generateBracketMatchups();
+  goToStep(2);
+};
+
+function allGroupsDone() {
+  return Object.keys(GROUPS).every(l => [1,2,3,4].every(r => document.getElementById(`g${l}-${r}`)?.value));
+}
+
+// =====================================================================
+// BRACKET RENDERING
+// =====================================================================
+function renderBracket() {
+  generateBracketMatchups();
+  const R32_ORDER = ['M73','M74','M75','M76','M77','M78','M79','M80','M81','M82','M83','M84','M85','M86','M87','M88'];
+  renderMatchList('bracket-r32', R32_ORDER.map(id => ({ id, ...bracketMatchups[id] })));
+  renderMatchList('bracket-r16', R16.map(r => ({
+    id: r.id,
+    home: downstreamTeam(r.m1),
+    away: downstreamTeam(r.m2),
+    label: `${r.m1} winner vs ${r.m2} winner`
+  })));
+  renderMatchList('bracket-qf', QF.map(r => ({
+    id: r.id,
+    home: downstreamTeam(r.m1),
+    away: downstreamTeam(r.m2),
+    label: `${r.m1} winner vs ${r.m2} winner`
+  })));
+  renderMatchList('bracket-sf', SF.map(r => ({
+    id: r.id,
+    home: downstreamTeam(r.m1),
+    away: downstreamTeam(r.m2),
+    label: `${r.m1} winner vs ${r.m2} winner`
+  })));
+  renderMatchList('bracket-final', FIN.map(r => ({
+    id: r.id,
+    home: downstreamTeam(r.m1),
+    away: downstreamTeam(r.m2),
+    label: 'World Cup Final'
+  })));
+}
+
+function renderMatchList(containerId, matches) {
+  const c = document.getElementById(containerId); if (!c) return;
+  c.innerHTML = matches.map(m => renderMatch(m)).join('');
+  // Attach click handlers
+  c.querySelectorAll('.bracket-team[data-match]').forEach(el => {
+    el.addEventListener('click', () => {
+      const matchId = el.dataset.match;
+      const team = el.dataset.team;
+      if (!team || team === 'TBD') return;
+      setBracketPick(matchId, team);
+    });
+  });
+}
+
+function renderMatch({id, home, away, label}) {
+  const sel = bracketPicks[id];
+  const homeSel = sel && sel === home;
+  const awaySel = sel && sel === away;
+  const noHome = !home || home === 'TBD';
+  const noAway = !away || away === 'TBD';
+  return `<div class="bracket-match">
+    <div class="bracket-match-header">${id} &mdash; ${label||''}</div>
+    <div class="bracket-team ${homeSel?'selected':''}" data-match="${id}" data-team="${home||''}">
+      <div class="bracket-radio"></div>
+      <span class="bracket-team-name ${noHome?'tbd':''}">${home||'TBD'}</span>
+    </div>
+    <div class="bracket-team ${awaySel?'selected':''}" data-match="${id}" data-team="${away||''}">
+      <div class="bracket-radio"></div>
+      <span class="bracket-team-name ${noAway?'tbd':''}">${away||'TBD'}</span>
+    </div>
+  </div>`;
+}
+
+function setBracketPick(matchId, team) {
+  const prev = bracketPicks[matchId];
+  bracketPicks[matchId] = team;
+  // Cascade: if pick changed, clear downstream picks that depended on old winner
+  if (prev && prev !== team) {
+    clearDownstream(matchId);
+  }
+  markUnsaved();
+  renderBracket();
+}
+
+function clearDownstream(matchId) {
+  // Find matches in later rounds that used this match's winner
+  const allRounds = [...R16, ...QF, ...SF, ...FIN];
+  allRounds.forEach(r => {
+    if (r.m1 === matchId || r.m2 === matchId) {
+      const downPrev = bracketPicks[r.id];
+      if (downPrev) {
+        // Check if downstream pick was the old winner of this match
+        delete bracketPicks[r.id];
+        clearDownstream(r.id);
+      }
+    }
+  });
+}
+
+// =====================================================================
+// COLLECT PICKS for saving
+// =====================================================================
+function collectPicks() {
+  const groupPicks={};
+  Object.keys(GROUPS).forEach(l=>{ groupPicks[l]=[1,2,3,4].map(r=>document.getElementById(`g${l}-${r}`)?.value||''); });
+  const thirdPlacePicks=[...document.querySelectorAll('#tp-chips .team-chip.selected')].map(c=>c.dataset.team);
+  const thirdPlaceGroups=[...document.querySelectorAll('#tp-chips .team-chip.selected')].map(c=>c.dataset.grp);
+  // Also store bracket
+  const bracket = { matchups: bracketMatchups, picks: bracketPicks };
+  // For compatibility with old scoring: derive knockout chip arrays
+  const r32Winners = Object.values(bracketPicks).filter(Boolean);
+  const r16Ids = R16.map(r=>r.id);
+  const qfIds = QF.map(r=>r.id);
+  const sfIds = SF.map(r=>r.id);
+  const knockout = {
+    r32: ['M73','M74','M75','M76','M77','M78','M79','M80','M81','M82','M83','M84','M85','M86','M87','M88'].map(id=>bracketPicks[id]).filter(Boolean),
+    r16: r16Ids.map(id=>bracketPicks[id]).filter(Boolean),
+    qf: qfIds.map(id=>bracketPicks[id]).filter(Boolean),
+    sf: sfIds.map(id=>bracketPicks[id]).filter(Boolean),
+    final: ['FINAL'].map(id=>bracketPicks[id]).filter(Boolean),
+    champion: bracketPicks['FINAL'] ? [bracketPicks['FINAL']] : [],
+  };
+  return {groupPicks, thirdPlacePicks, thirdPlaceGroups, bracket, knockout};
+}
+
+function loadPicksIntoForm(entry) {
+  if (entry.groupPicks) {
+    Object.entries(entry.groupPicks).forEach(([l,picks])=>{
+      picks.forEach((t,i)=>{ const sel=document.getElementById(`g${l}-${i+1}`); if(sel&&t) sel.value=t; });
+      updateGroupDropdowns(l);
+    });
+    updateThirdPlaceChips();
+  }
+  if (entry.thirdPlacePicks) {
+    const c=document.getElementById('tp-chips');
+    if(c) c.querySelectorAll('.team-chip').forEach(chip=>{if(entry.thirdPlacePicks.includes(chip.dataset.team))chip.classList.add('selected');});
+    const cnt = document.getElementById('tp-count');
+    if(cnt) cnt.textContent=(c?.querySelectorAll('.team-chip.selected').length)||0;
+  }
+  // Load bracket picks
+  if (entry.bracket && entry.bracket.picks) {
+    bracketPicks = entry.bracket.picks;
+    bracketMatchups = entry.bracket.matchups || {};
+  } else if (entry.knockout) {
+    // Legacy: convert chip-based picks to bracket (best effort)
+    bracketPicks = {};
+  }
+}
+
+// Step tabs / wizard state
+function showPicksWizard() {
+  document.getElementById('picks-wizard').style.display = 'block';
+  document.getElementById('submitted-area').style.display = 'none';
+  goToStep(currentStep);
+}
+
+window.showPicksForm = function() {
+  showPicksWizard();
+};
+
+// =====================================================================
+// CORE APP (preserved from original)
+// =====================================================================
+
+function buildForm() {
+  const gg=document.getElementById('groups-grid'); if(!gg) return;
+  gg.innerHTML='';
+  Object.entries(GROUPS).forEach(([l,teams])=>{
+    const card=document.createElement('div'); card.className='group-card';
+    card.innerHTML=`<div class="group-letter">GROUP ${l}</div>`;
+    [1,2,3,4].forEach(rank=>{
+      const row=document.createElement('div'); row.className='rank-row';
+      const num=document.createElement('div'); num.className='rank-num'; num.textContent=rank;
+      const sel=document.createElement('select'); sel.id=`g${l}-${rank}`;
+      sel.innerHTML=`<option value="">pick team</option>`+teams.map(t=>`<option value="${t}">${t}</option>`).join('');
+      sel.addEventListener('change',()=>{updateGroupDropdowns(l);updateThirdPlaceChips();markUnsaved();});
+      row.appendChild(num); row.appendChild(sel); card.appendChild(row);
+    });
+    gg.appendChild(card);
+  });
+}
+
+function updateGroupDropdowns(letter) {
+  const teams = GROUPS[letter];
+  const selected = [1,2,3,4].map(r => document.getElementById(`g${letter}-${r}`)?.value).filter(Boolean);
+  [1,2,3,4].forEach(rank => {
+    const sel = document.getElementById(`g${letter}-${rank}`);
+    if (!sel) return;
+    const current = sel.value;
+    sel.innerHTML = `<option value="">pick team</option>`;
+    teams.forEach(t => {
+      const opt = document.createElement('option');
+      opt.value = t;
+      opt.textContent = (selected.includes(t) && t !== current) ? `· ${t}` : t;
+      if (t === current) opt.selected = true;
+      sel.appendChild(opt);
+    });
+  });
+}
+
+
+
+function updateThirdPlaceChips() {
+  const thirds=[]; 
+  Object.keys(GROUPS).forEach(l=>{
+    const el=document.getElementById(`g${l}-3`);
+    if(el&&el.value) thirds.push({team:el.value, grp:l});
+  });
+  const c=document.getElementById('tp-chips'); if(!c) return;
+  const prev=[...c.querySelectorAll('.team-chip.selected')].map(x=>x.dataset.team);
+  c.innerHTML='';
+  thirds.forEach(({team:t, grp:l})=>{
+    const chip=document.createElement('div'); 
+    chip.className='team-chip'+(prev.includes(t)?' selected':'');
+    chip.dataset.team=t; 
+    chip.dataset.grp=l;
+    chip.textContent=t;
+    chip.addEventListener('click',()=>{
+      const sel=[...c.querySelectorAll('.team-chip.selected')];
+      if(chip.classList.contains('selected')){
+        chip.classList.remove('selected');
+      } else if(sel.length<8){
+        chip.classList.add('selected');
+      }
+      document.getElementById('tp-count').textContent=c.querySelectorAll('.team-chip.selected').length;
+      markUnsaved();
+    });
+    c.appendChild(chip);
+  });
+  document.getElementById('tp-count').textContent=c.querySelectorAll('.team-chip.selected').length;
+}
+
+function markUnsaved() { document.getElementById('save-reminder').style.display='block'; }
+function toggleScoring(id) { document.getElementById(id)?.classList.toggle('open'); }
+
+function scoreEntry(entry) {
+  let groupScore=0,koScore=0;
+  const breakdown={r32:0,r16:0,qf:0,sf:0,final:0,champion:0,groups:0};
+  Object.keys(GROUPS).forEach(l=>{
+    if(!results.groups[l]) return;
+    const actual=results.groups[l]; const predicted=entry.groupPicks?.[l]||[];
+    let gScore=0,perfect=true;
+    [0,1,2,3].forEach(i=>{
+      const pred=predicted[i],act=actual[i];
+      if(!pred||!act){perfect=false;return;}
+      if(pred===act){gScore+=[SCORING.pos1,SCORING.pos2,SCORING.pos3,SCORING.pos4][i];}
+      else{const pp=actual.indexOf(pred);if(pp===0||pp===1)gScore+=SCORING.adv;perfect=false;}
+    });
+    if(perfect)gScore+=SCORING.perf;
+    groupScore+=gScore;
+  });
+  breakdown.groups=groupScore;
+  ['r32','r16','qf','sf','champion'].forEach((r,i)=>{
+    const actual=results.knockout[r]||[],predicted=entry.knockout?.[r]||[];
+    const pts=[SCORING.r32,SCORING.r16,SCORING.qf,SCORING.sf,SCORING.champ][i];
+    predicted.forEach(t=>{if(actual.includes(t)){koScore+=pts;breakdown[r]+=pts;}});
+    // Champion also earns final points if they made the final
+    if(r==='champion'){
+      predicted.forEach(t=>{
+        if(actual.includes(t) && (results.knockout?.final||[]).includes(t)){
+          koScore+=SCORING.final; breakdown['final']=(breakdown['final']||0)+SCORING.final;
+        }
+      });
+    }
+  });
+  return {total:groupScore+koScore,groupScore,koScore,breakdown};
+}
+
+function maxPossibleScore(entry) {
+  let max=0;
+  Object.keys(GROUPS).forEach(l=>{if(!results.groups[l])max+=(SCORING.pos1+SCORING.pos2+SCORING.pos3+SCORING.pos4+SCORING.perf);});
+  ['r32','r16','qf','sf','final','champion'].forEach((r,i)=>{
+    if(!results.knockout[r]?.length){
+      const pts=[SCORING.r32,SCORING.r16,SCORING.qf,SCORING.sf,SCORING.final,SCORING.champ][i];
+      max+=(entry.knockout?.[r]?.length||0)*pts;
+    }
+  });
+  return max;
+}
+
+async function renderLeaderboard() {
+  await loadEntries(); await loadResults();
+  const c=document.getElementById('leaderboard-content');
+  const submitted=allEntries.filter(e=>e.submitted);
+  if(!submitted.length){c.innerHTML='<div class="alert alert-warn">No entries yet.</div>';return;}
+  const hasResults=Object.keys(results.groups).length>0||results.knockout?.r32?.length>0;
+  const scored=submitted.map(e=>({...e,...scoreEntry(e)})).sort((a,b)=>b.total-a.total);
+  let html='';
+  if(!hasResults)html+='<div class="alert alert-info" style="margin-bottom:12px;">Tournament has not started. Scores will appear once results are entered.</div>';
+  html+=`<div class="card" style="padding:0;overflow:hidden;"><table class="lb-table"><thead><tr><th style="width:40px;">#</th><th>Name</th><th>Score</th><th>Max Left</th><th>Group</th><th>KO</th></tr></thead><tbody>`;
+  scored.forEach((e,i)=>{
+    const medals=['🥇','🥈','🥉'];
+    const rank=medals[i]||`<span style="color:var(--muted);font-size:12px;">${i+1}</span>`;
+    html+=`<tr onclick="viewProfile('${e.username}')"><td><span class="rank-cell">${rank}</span></td><td><strong>${e.name}</strong></td><td><span class="pts-badge">${e.total}</span></td><td><span class="pts-possible">+${maxPossibleScore(e)}</span></td><td style="color:var(--muted);font-size:12px;">${e.breakdown?.groups||0}</td><td style="color:var(--muted);font-size:12px;">${e.koScore||0}</td></tr>`;
+  });
+  html+=`</tbody></table></div><p style="color:var(--muted);font-size:12px;margin-top:7px;">${submitted.length} ${submitted.length===1?'entry':'entries'} total${!picksLocked?' · Picks hidden until June 11':''}</p>`;
+  c.innerHTML=html;
+}
+
+async function viewProfile(username) {
+  const entry=allEntries.find(e=>e.username===username); if(!entry) return;
+  const score=scoreEntry(entry);
+  showPage('profile');
+  const locked=picksLocked;
+  let html=`<div class="profile-header"><div class="profile-avatar">${(entry.name||'?')[0].toUpperCase()}</div><div><div class="profile-name">${entry.name}</div><div class="profile-meta">@${entry.username} · Submitted ${new Date(entry.submittedAt||entry.savedAt||Date.now()).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}</div></div></div>`;
+  html+=`<div class="score-breakdown"><div class="breakdown-item"><div class="breakdown-n">${score.total}</div><div class="breakdown-l">Total</div></div><div class="breakdown-item"><div class="breakdown-n">${score.groupScore}</div><div class="breakdown-l">Groups</div></div><div class="breakdown-item"><div class="breakdown-n">${score.koScore}</div><div class="breakdown-l">Knockout</div></div><div class="breakdown-item"><div class="breakdown-n">${score.breakdown?.r32||0}</div><div class="breakdown-l">R32</div></div><div class="breakdown-item"><div class="breakdown-n">${score.breakdown?.r16||0}</div><div class="breakdown-l">R16</div></div><div class="breakdown-item"><div class="breakdown-n">${score.breakdown?.qf||0}</div><div class="breakdown-l">QF</div></div><div class="breakdown-item"><div class="breakdown-n">${score.breakdown?.sf||0}</div><div class="breakdown-l">SF</div></div><div class="breakdown-item"><div class="breakdown-n">${score.breakdown?.final||0}</div><div class="breakdown-l">Final</div></div><div class="breakdown-item"><div class="breakdown-n">${score.breakdown?.champion||0}</div><div class="breakdown-l">Champ</div></div></div>`;
+  if(locked){
+    html+=`<div class="card"><div class="card-title">🏆 Champion Pick</div><div style="font-size:18px;font-weight:600;">${entry.knockout?.champion?.[0]||'None'}</div></div>`;
+    html+=`<div class="card"><div class="card-title">🏁 Group Picks</div><div class="groups-grid">`;
+    Object.entries(GROUPS).forEach(([l])=>{
+      const picks=entry.groupPicks?.[l]||[];
+      html+=`<div class="group-card"><div class="group-letter">GROUP ${l}</div>`;
+      [0,1,2,3].forEach(i=>{
+        const t=picks[i]||'?',act=results.groups[l]?.[i],correct=act&&t===act;
+        html+=`<div style="font-size:12px;padding:3px 0;display:flex;gap:5px;align-items:center;"><span style="color:var(--muted);font-family:'DM Mono',monospace;font-size:10px;width:12px;">${i+1}</span><span style="color:${correct?'#7ee8a2':'var(--white)'}">${t}</span>${correct?'<span style="font-size:10px;">✓</span>':''}</div>`;
+      });
+      html+=`</div>`;
+    });
+    html+=`</div></div>`;
+  } else { html+=`<div class="alert alert-info">Picks will be visible to everyone after the tournament starts on June 11.</div>`; }
+  document.getElementById('profile-content').innerHTML=html;
+}
+
+function updateHomePage() {
+  const submitted=allEntries.filter(e=>e.submitted);
+  const el=document.getElementById('home-entry-count'); if(el) el.textContent=submitted.length;
+  const list=document.getElementById('home-entry-list');
+  if(list){if(!submitted.length){list.innerHTML='<span style="color:var(--muted);font-size:13px;">No entries yet.</span>';return;}list.innerHTML=submitted.map(e=>`<span class="entry-pill" onclick="viewProfile('${e.username}')">${e.name}</span>`).join('');}
+}
+
+async function checkAdminPw() {
+  const pw=document.getElementById('admin-pw-input').value;
+  let storedPw=ADMIN_PW_DEFAULT;
+  try{const snap=await getDoc(doc(db,'settings','admin'));if(snap.exists())storedPw=snap.data().password;}catch(e){}
+  if(pw===storedPw){adminLoggedIn=true;document.getElementById('admin-login-area').style.display='none';document.getElementById('admin-panel').style.display='block';renderAdminPanel();}
+  else showAlert('admin-alert','error','Incorrect password.');
+}
+
+async function renderAdminPanel() {
+  await loadEntries();
+  const submitted=allEntries.filter(e=>e.submitted);
+  document.getElementById('admin-entry-summary').textContent=`${submitted.length} entries submitted, ${allEntries.length} total accounts.`;
+  document.getElementById('admin-entries-list').innerHTML=submitted.map(e=>`<span class="entry-pill">${e.name} (@${e.username})</span>`).join(' ');
+  const rpSel=document.getElementById('reset-pin-user');
+  rpSel.innerHTML='<option value="">Select user...</option>'+allEntries.map(e=>`<option value="${e.username}">${e.name} (@${e.username})</option>`).join('');
+  const gg=document.getElementById('admin-groups-grid'); gg.innerHTML='';
+  Object.entries(GROUPS).forEach(([l,teams])=>{
+    const div=document.createElement('div'); div.className='admin-group';
+    div.innerHTML=`<div class="admin-group-title">GROUP ${l}</div>`;
+    [1,2,3,4].forEach(rank=>{
+      const row=document.createElement('div'); row.className='admin-row';
+      const lbl=document.createElement('span'); lbl.className='pos-label'; lbl.textContent=`${rank}${['st','nd','rd','th'][rank-1]}`;
+      const sel=document.createElement('select'); sel.id=`ar-g${l}-${rank}`;
+      sel.innerHTML=`<option value="">not yet</option>`+teams.map(t=>`<option value="${t}">${t}</option>`).join('');
+      const cur=results.groups[l]?.[rank-1]; if(cur) sel.value=cur;
+      row.appendChild(lbl); row.appendChild(sel); div.appendChild(row);
+    });
+    gg.appendChild(div);
+  });
+  const ko=document.getElementById('admin-knockout-area'); ko.innerHTML='';
+  [{id:'r32',label:'Round of 32'},{id:'r16',label:'Round of 16'},{id:'qf',label:'Quarterfinals'},{id:'sf',label:'Semifinals'},{id:'final',label:'Final'},{id:'champion',label:'Champion'}].forEach(({id,label})=>{
+    const div=document.createElement('div'); div.className='admin-round';
+    div.innerHTML=`<div class="admin-round-title">${label}</div><div class="admin-chips" id="admin-ko-${id}"></div>`;
+    ko.appendChild(div);
+    const c=div.querySelector('.admin-chips');
+    ALL_TEAMS.forEach(t=>{
+      const chip=document.createElement('div'); chip.className='admin-chip'+(results.knockout?.[id]?.includes(t)?' selected':'');
+      chip.dataset.team=t; chip.textContent=t;
+      chip.addEventListener('click',()=>chip.classList.toggle('selected'));
+      c.appendChild(chip);
+    });
+  });
+}
+
+async function adminSaveResults() {
+  const res={groups:{},knockout:{}};
+  Object.keys(GROUPS).forEach(l=>{ res.groups[l]=[1,2,3,4].map(r=>document.getElementById(`ar-g${l}-${r}`)?.value||''); });
+  ['r32','r16','qf','sf','final','champion'].forEach(id=>{ res.knockout[id]=[...document.querySelectorAll(`#admin-ko-${id} .admin-chip.selected`)].map(c=>c.dataset.team); });
+  try { await setDoc(doc(db,'settings','results'),res); results=res; alert('Results saved!'); } catch(e) { alert('Error saving.'); }
+}
+
+async function adminExportCSV() {
+  await loadEntries(); if(!allEntries.length){alert('No entries.');return;}
+  const rows=[['Name','Username','Submitted','Champion','Date']];
+  allEntries.forEach(e=>rows.push([e.name,e.username,e.submitted?'Yes':'Draft',e.knockout?.champion?.[0]||'',e.submittedAt||e.savedAt||'']));
+  const csv=rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'})); a.download='alpert_wc_pool.csv'; a.click();
+}
+
+function adminToggleLock() { picksLocked=!picksLocked; alert('Picks are now '+(picksLocked?'LOCKED':'UNLOCKED')); }
+
+async function adminResetPin() {
+  const username=document.getElementById('reset-pin-user').value;
+  const pin=document.getElementById('reset-pin-val').value;
+  if(!username||!pin){alert('Select a user and enter a PIN.');return;}
+  if(pin.length!==4||!/^\d+$/.test(pin)){alert('PIN must be 4 digits.');return;}
+  try { await updateDoc(doc(db,'users',username),{pin}); alert(`PIN reset for ${username}.`); } catch(e) { alert('Error.'); }
+}
+
+async function changeAdminPw() {
+  const pw=document.getElementById('new-admin-pw').value.trim(); if(!pw){alert('Enter a password.');return;}
+  try { await setDoc(doc(db,'settings','admin'),{password:pw}); alert('Password updated!'); } catch(e) { alert('Error.'); }
+}
+
+function showAlert(id,type,msg) {
+  const el=document.getElementById(id); if(!el) return;
+  el.innerHTML=`<div class="alert alert-${type}">${msg}</div>`;
+  el.scrollIntoView({behavior:'smooth',block:'center'});
+}
+
+function tryGoToStep(step) {
+  if (step === 0) { goToStep(0); return; }
+  if (step >= 1) {
+    if (!allGroupsDone()) { showAlert('picks-alert','error','Complete all 12 group picks first.'); return; }
+    goToStep(1);
+  }
+  if (step >= 2) {
+    const tpCount = [...document.querySelectorAll('#tp-chips .team-chip.selected')].length;
+    if (tpCount !== 8) { showAlert('picks-alert','error','Select exactly 8 third-place qualifiers first.'); return; }
+    goToStep(2);
+  }
+}
+
+function goToStep(step) {
+  currentStep = step;
+  [0,1,2].forEach(i => {
+    document.getElementById(`step-${i}`).style.display = i === step ? 'block' : 'none';
+    const tab = document.getElementById(`step-tab-${i}`);
+    tab.style.background = i === step ? 'var(--red)' : 'var(--card-light)';
+    tab.style.color = i === step ? '#fff' : 'var(--muted)';
+  });
+  if (step === 2) renderBracket();
+  window.scrollTo(0,0);
+}
+
+function advanceFromGroups() {
+  if (!allGroupsDone()) { showAlert('picks-alert','error','Please complete all 12 groups before continuing.'); return; }
+  updateThirdPlaceChips();
+  saveDraft();
+  goToStep(1);
+}
+
+function advanceFromThirdPlace() {
+  const tpCount = [...document.querySelectorAll('#tp-chips .team-chip.selected')].length;
+  if (tpCount !== 8) { showAlert('picks-alert','error','Please select exactly 8 third-place teams.'); return; }
+  generateBracketMatchups();
+  goToStep(2);
+}
+
+async function wipepicks() {
+  if (!confirm('Clear all your picks and start over?')) return;
+  try {
+    await deleteDoc(doc(db,'entries',currentUser.username.toLowerCase()));
+    document.querySelectorAll('#groups-grid select').forEach(s=>s.value='');
+    document.querySelectorAll('.team-chip').forEach(c=>c.classList.remove('selected'));
+    const tc = document.getElementById('tp-count'); if(tc) tc.textContent='0';
+    bracketPicks={}; bracketMatchups={};
+    currentStep=0; goToStep(0);
+    showAlert('picks-alert','success','Picks cleared. Start fresh!');
+  } catch(e) { showAlert('picks-alert','error','Error clearing picks.'); }
+}
+
+async function saveDraft() {
+  if (!currentUser) return;
+  const picks = collectPicks();
+  const entry = {username:currentUser.username,name:currentUser.name,draft:true,submitted:false,savedAt:new Date().toISOString(),...picks};
+  try {
+    await setDoc(doc(db,'entries',currentUser.username.toLowerCase()), entry);
+    document.getElementById('save-reminder').style.display='none';
+    showAlert('picks-alert','success','Progress saved!');
+    setTimeout(()=>document.getElementById('picks-alert').innerHTML='', 2000);
+    await loadEntries(); updateHomePage();
+  } catch(e) { showAlert('picks-alert','error','Error saving: '+e.message); }
+}
+
+async function submitPicks() {
+  if (!currentUser) return;
+  if (picksLocked) { showAlert('picks-alert','error','Picks are locked. The tournament has started.'); return; }
+  if (!bracketPicks['FINAL']) { showAlert('picks-alert','error','Please pick a champion to submit.'); return; }
+  const picks = collectPicks();
+  const entry = {username:currentUser.username,name:currentUser.name,submitted:true,draft:false,submittedAt:new Date().toISOString(),...picks};
+  try {
+    await setDoc(doc(db,'entries',currentUser.username.toLowerCase()), entry);
+    await loadEntries(); updateHomePage();
+    document.getElementById('picks-wizard').style.display='none';
+    document.getElementById('submitted-area').style.display='block';
+    document.getElementById('save-bar').style.display='none';
+  } catch(e) { showAlert('picks-alert','error','Error submitting.'); }
+}
+
+// Expose all functions to window (must be after all definitions)
+window.wipepicks = wipepicks;
+window.saveDraft = saveDraft;
+window.submitPicks = submitPicks;
+window.goToStep = goToStep;
+window.tryGoToStep = tryGoToStep;
+window.advanceFromGroups = advanceFromGroups;
+window.advanceFromThirdPlace = advanceFromThirdPlace;
+window.showPicksForm = showPicksWizard;
+
+init();
+</script>
+</body>
+</html>

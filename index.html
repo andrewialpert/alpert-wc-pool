@@ -1398,18 +1398,31 @@ function renderBracket() {
     away: downstreamTeam(r.m2),
     label: 'World Cup Final'
   })));
+  attachBracketClickHandlers();
 }
 
 function renderMatchList(containerId, matches) {
   const c = document.getElementById(containerId); if (!c) return;
   c.innerHTML = matches.map(m => renderMatch(m)).join('');
-  // Attach click handlers
-  c.querySelectorAll('.bracket-team[data-match]').forEach(el => {
-    el.addEventListener('click', () => {
+  // No per-element listeners needed -- handled by delegated listener below
+}
+
+// Attach delegated click handlers once on static bracket section containers
+function attachBracketClickHandlers() {
+  ['bracket-r32','bracket-r16','bracket-qf','bracket-sf','bracket-final'].forEach(containerId => {
+    const section = document.getElementById(containerId + '-section') || document.getElementById(containerId)?.parentElement;
+    const c = document.getElementById(containerId);
+    if (!c) return;
+    // Use the knockout-section parent which is static
+    const parent = c.closest('.knockout-section') || c.parentElement;
+    if (!parent || parent._bracketListenerAttached) return;
+    parent._bracketListenerAttached = true;
+    parent.addEventListener('click', (e) => {
+      const el = e.target.closest('.bracket-team[data-match]');
+      if (!el) return;
       const matchId = el.dataset.match;
-      // Get team from the span text content to avoid HTML entity issues with emoji
       const teamSpan = el.querySelector('.bracket-team-name');
-      const team = teamSpan ? teamSpan.textContent.trim() : el.dataset.team;
+      const team = teamSpan ? teamSpan.textContent.trim() : '';
       if (!team || team === 'TBD') return;
       setBracketPick(matchId, team);
     });
@@ -1716,7 +1729,7 @@ async function renderAdminPanel() {
     gg.appendChild(div);
   });
   const ko=document.getElementById('admin-knockout-area'); ko.innerHTML='';
-  [{id:'r32',label:'Round of 32'},{id:'r16',label:'Round of 16'},{id:'qf',label:'Quarterfinals'},{id:'sf',label:'Semifinals'},{id:'final',label:'Final'},{id:'champion',label:'Champion'}].forEach(({id,label})=>{
+  [{id:'r32',label:'Round of 32'},{id:'r16',label:'Round of 16'},{id:'qf',label:'Quarterfinals'},{id:'sf',label:'Semifinals'},{id:'champion',label:'Champion'}].forEach(({id,label})=>{
     const div=document.createElement('div'); div.className='admin-round';
     div.innerHTML=`<div class="admin-round-title">${label}</div><div class="admin-chips" id="admin-ko-${id}"></div>`;
     ko.appendChild(div);
@@ -1733,7 +1746,7 @@ async function renderAdminPanel() {
 async function adminSaveResults() {
   const res={groups:{},knockout:{}};
   Object.keys(GROUPS).forEach(l=>{ res.groups[l]=[1,2,3,4].map(r=>document.getElementById(`ar-g${l}-${r}`)?.value||''); });
-  ['r32','r16','qf','sf','final','champion'].forEach(id=>{ res.knockout[id]=[...document.querySelectorAll(`#admin-ko-${id} .admin-chip.selected`)].map(c=>c.dataset.team); });
+  ['r32','r16','qf','sf','champion'].forEach(id=>{ res.knockout[id]=[...document.querySelectorAll(`#admin-ko-${id} .admin-chip.selected`)].map(c=>c.dataset.team); });
   try { await setDoc(doc(db,'settings','results'),res); results=res; alert('Results saved!'); } catch(e) { alert('Error saving.'); }
 }
 
@@ -1802,6 +1815,7 @@ function advanceFromThirdPlace() {
   const tpCount = [...document.querySelectorAll('#tp-chips .team-chip.selected')].length;
   if (tpCount !== 8) { showAlert('picks-alert','error','Please select exactly 8 third-place teams.'); return; }
   generateBracketMatchups();
+  saveDraft();
   goToStep(2);
 }
 

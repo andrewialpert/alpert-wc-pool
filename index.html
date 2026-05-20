@@ -1787,7 +1787,10 @@ function tryGoToStep(step) {
 function goToStep(step) {
   currentStep = step;
   [0,1,2].forEach(i => {
-    document.getElementById(`step-${i}`).style.display = i === step ? 'block' : 'none';
+    const el = document.getElementById(`step-${i}`);
+    el.style.display = i === step ? 'block' : 'none';
+    el.style.visibility = i === step ? 'visible' : 'hidden';
+    el.style.pointerEvents = i === step ? 'auto' : 'none';
     const tab = document.getElementById(`step-tab-${i}`);
     tab.style.background = i === step ? 'var(--red)' : 'var(--card-light)';
     tab.style.color = i === step ? '#fff' : 'var(--muted)';

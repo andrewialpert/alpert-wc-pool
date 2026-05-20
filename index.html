@@ -1367,45 +1367,29 @@ function renderMatchList(containerId, matches) {
   c.innerHTML = matches.map(m => renderMatch(m)).join('');
 }
 
-function attachBracketClickHandlers() {
-  const step2 = document.getElementById('step-2');
-  if (!step2) return;
-  step2._bracketListenerAttached = false;
-  if (step2._bracketListenerAttached) return;
-  step2._bracketListenerAttached = true;
-  step2.addEventListener('click', (e) => {
-    const el = e.target.closest('.bracket-team');
-    if (!el) return;
-    const matchId = el.dataset.match;
-    if (!matchId) return;
-    const teamSpan = el.querySelector('.bracket-team-name');
-    const team = teamSpan ? teamSpan.textContent.trim() : '';
-    if (!team || team === 'TBD') return;
-    console.log('BRACKET CLICK:', matchId, team);
-    setBracketPick(matchId, team);
-  });
-  console.log('Bracket click handlers attached to step-2');
-}
-
 function renderMatch({id, home, away, label}) {
   const sel = bracketPicks[id];
   const homeSel = sel && sel === home;
   const awaySel = sel && sel === away;
   const noHome = !home || home === 'TBD';
   const noAway = !away || away === 'TBD';
-  const homeEsc = (home||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;');
-  const awayEsc = (away||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;');
+  const homeClick = noHome ? '' : `onclick="setBracketPick('${id}', this.querySelector('.bracket-team-name').textContent.trim())"`;
+  const awayClick = noAway ? '' : `onclick="setBracketPick('${id}', this.querySelector('.bracket-team-name').textContent.trim())"`;
   return `<div class="bracket-match">
     <div class="bracket-match-header">${label||id}</div>
-    <div class="bracket-team ${homeSel?'selected':''}" data-match="${id}" data-team="${homeEsc}">
+    <div class="bracket-team ${homeSel?'selected':''}" ${homeClick}>
       <div class="bracket-radio"></div>
       <span class="bracket-team-name ${noHome?'tbd':''}">${home||'TBD'}</span>
     </div>
-    <div class="bracket-team ${awaySel?'selected':''}" data-match="${id}" data-team="${awayEsc}">
+    <div class="bracket-team ${awaySel?'selected':''}" ${awayClick}>
       <div class="bracket-radio"></div>
       <span class="bracket-team-name ${noAway?'tbd':''}">${away||'TBD'}</span>
     </div>
   </div>`;
+}
+
+function attachBracketClickHandlers() {
+  // No-op - using inline onclick instead
 }
 
 function setBracketPick(matchId, team) {
@@ -1833,6 +1817,7 @@ window.tryGoToStep = tryGoToStep;
 window.advanceFromGroups = advanceFromGroups;
 window.advanceFromThirdPlace = advanceFromThirdPlace;
 window.showPicksForm = showPicksWizard;
+window.setBracketPick = setBracketPick;
 
 init();
 </script>

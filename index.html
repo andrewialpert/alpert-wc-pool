@@ -342,13 +342,13 @@ select option{background:var(--card);}
           <div class="section-sub">Pick a winner for each matchup. Winners advance automatically.</div>
         </div>
         <div class="alert alert-info" style="margin-bottom:10px;font-size:13px;line-height:1.7;">
-          <strong style="display:block;margin-bottom:6px;">This is the real bracket — if your picks are right.</strong>
-          Your bracket was generated directly from the official FIFA World Cup 26 regulations (Article 12.6 and Annex C). It shows the exact real-world knockout matchups that would occur if your group stage predictions are correct. This is not a guess — it is the deterministic output of FIFA's published rules applied to your picks.<br><br>
+          <strong style="display:block;margin-bottom:6px;">This is the real bracket, if your picks are right.</strong>
+          Your bracket was generated directly from the official FIFA World Cup 26 regulations (Article 12.6 and Annex C). It shows the exact real-world knockout matchups that would occur if your group stage predictions are correct. This is not a guess. It is the deterministic output of FIFA's published rules applied to your picks.<br><br>
           Pick a winner for every matchup from R32 all the way to the Champion to complete your entry.
         </div>
         <div class="alert alert-info" style="margin-bottom:10px;font-size:13px;line-height:1.7;">
           <strong style="display:block;margin-bottom:6px;">Points follow the team, not the matchup.</strong>
-          If you pick England to beat Morocco in R32 but England actually beats Norway instead, you still get full points for England advancing. What matters is whether your picked team reaches that round — not who they beat to get there.
+          If you pick England to beat Morocco in R32 but England actually beats Norway instead, you still get full points for England advancing. What matters is whether your picked team reaches that round, not who they beat to get there.
         </div>
         <div class="bracket-warning">
           ⚠️ <strong>Heads up:</strong> If you go back and change your group stage picks or your 8 third-place qualifiers, your bracket will be regenerated and your bracket picks will reset. Make sure your group and third place picks are final before filling out the bracket.
@@ -464,7 +464,7 @@ select option{background:var(--card);}
   </div>
 
   <div class="card">
-    <div class="card-title">💡 Example — Meet Sonny</div>
+    <div class="card-title">💡 Example: Meet Sonny</div>
     <p style="color:var(--muted);font-size:13px;line-height:1.8;margin-bottom:14px;">Sonny makes these picks for South Korea:</p>
     <div style="background:var(--card-light);border-radius:8px;padding:13px;margin-bottom:14px;font-size:13px;line-height:1.9;">
       <div>Finishes <strong style="color:var(--white)">2nd in Group A</strong></div>
@@ -483,10 +483,10 @@ select option{background:var(--card);}
   </div>
   <div class="card">
     <div class="card-title">📋 How Your Bracket Is Generated</div>
-    <p style="color:var(--muted);font-size:13px;line-height:1.8;margin-bottom:12px;">This is the part of the pool that makes it unique. Your bracket is not a random draw — it is generated directly from the official FIFA World Cup 26 regulations.</p>
+    <p style="color:var(--muted);font-size:13px;line-height:1.8;margin-bottom:12px;">This is the part of the pool that makes it unique. Your bracket is not a random draw. It is generated directly from the official FIFA World Cup 26 regulations.</p>
     <div style="background:var(--card-light);border-radius:8px;padding:13px;font-size:13px;line-height:1.9;margin-bottom:12px;">
-      <div style="border-bottom:1px solid var(--border);padding-bottom:8px;margin-bottom:8px;"><strong style="color:var(--white);">Article 12.6</strong> <span style="color:var(--muted);">— fixes all 16 Round of 32 matchups based on group finishing positions. Group winners face third-place teams. Group runners-up face other runners-up. Teams from the same group cannot meet in R32.</span></div>
-      <div><strong style="color:var(--white);">Annex C</strong> <span style="color:var(--muted);">— a pre-published table of all 495 possible combinations of which 8 of 12 third-place teams qualify, and exactly which group winner each faces. FIFA published this before the tournament so there is no ambiguity once the group stage ends.</span></div>
+      <div style="border-bottom:1px solid var(--border);padding-bottom:8px;margin-bottom:8px;"><strong style="color:var(--white);">Article 12.6</strong> <span style="color:var(--muted);">: fixes all 16 Round of 32 matchups based on group finishing positions. Group winners face third-place teams. Group runners-up face other runners-up. Teams from the same group cannot meet in R32.</span></div>
+      <div><strong style="color:var(--white);">Annex C</strong> <span style="color:var(--muted);">: a pre-published table of all 495 possible combinations of which 8 of 12 third-place teams qualify, and exactly which group winner each faces. FIFA published this before the tournament so there is no ambiguity once the group stage ends.</span></div>
     </div>
     <p style="color:var(--muted);font-size:13px;line-height:1.8;margin-bottom:12px;">When you pick your group standings and your 8 third-place qualifiers, the site applies these exact FIFA rules to generate your personal bracket. <strong style="color:var(--white);">If your group picks come true in real life, your bracket IS the actual tournament bracket.</strong></p>
     <div class="alert alert-warn" style="font-size:12px;line-height:1.7;">⚠️ <strong>Important:</strong> If you change your group stage picks or your 8 third-place qualifiers after filling out your bracket, your bracket will be regenerated and your bracket picks will reset. Lock in your group picks before completing the bracket.</div>
@@ -559,7 +559,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/fireba
 import { getFirestore, doc, getDoc, setDoc, collection, getDocs, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 // =====================================================================
-// ANNEX C LOOKUP — FIFA 2026 Third-Place Combination Table
+// ANNEX C LOOKUP - FIFA 2026 Third-Place Combination Table
 // Key: sorted 8-char string of groups whose 3rd-place teams advance
 // Value: [W-A vs, W-B vs, W-D vs, W-E vs, W-G vs, W-I vs, W-K vs, W-L vs]
 // Each entry is "3X" meaning "3rd place from Group X"

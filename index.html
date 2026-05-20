@@ -1370,6 +1370,7 @@ function renderMatchList(containerId, matches) {
 function attachBracketClickHandlers() {
   const step2 = document.getElementById('step-2');
   if (!step2) return;
+  step2._bracketListenerAttached = false;
   if (step2._bracketListenerAttached) return;
   step2._bracketListenerAttached = true;
   step2.addEventListener('click', (e) => {

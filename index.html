@@ -175,6 +175,11 @@ select option{background:var(--card);}
 .bracket-team-name{flex:1;}
 .bracket-team-name.tbd{color:var(--muted);font-style:italic;}
 .bracket-team-seed{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;}
+.entry-status{display:inline-flex;align-items:center;gap:5px;font-family:'DM Mono',monospace;font-size:11px;border-radius:20px;padding:3px 10px;margin-top:3px;cursor:pointer;}
+.entry-status.incomplete{color:#ff6b6b;background:rgba(178,34,52,0.15);border:1px solid rgba(178,34,52,0.35);}
+.entry-status.complete{color:#7ee8a2;background:rgba(45,158,72,0.12);border:1px solid rgba(45,158,72,0.25);}
+.nav-user-wrap{display:none;flex-direction:column;align-items:flex-end;cursor:pointer;}
+.bracket-warning{background:rgba(178,34,52,0.1);border:1px solid rgba(178,34,52,0.3);border-radius:8px;padding:10px 13px;font-size:12px;color:#ff8a8a;margin-bottom:12px;line-height:1.6;}
 </style>
 </head>
 <body>
@@ -188,7 +193,10 @@ select option{background:var(--card);}
     <button class="nav-tab" onclick="showPage('scoring')">Scoring</button>
     <button class="nav-tab" onclick="showPage('admin')">Admin</button>
   </div>
-  <div id="nav-user" class="nav-user" style="display:none;" onclick="showPage('submit')"></div>
+  <div id="nav-user-wrap" class="nav-user-wrap" onclick="showPage('submit')">
+    <div id="nav-user" class="nav-user"></div>
+    <div id="nav-status" class="entry-status incomplete" style="display:none;">⚠ Incomplete Entry</div>
+  </div>
 </nav>
 
 <!-- HOME -->
@@ -333,12 +341,19 @@ select option{background:var(--card);}
           <div class="section-title">Your Bracket</div>
           <div class="section-sub">Pick a winner for each matchup. Winners advance automatically.</div>
         </div>
-        <div class="alert alert-info" style="margin-bottom:14px;font-size:13px;line-height:1.7;">
-          <strong style="display:block;margin-bottom:6px;">How this works:</strong>
-          Your bracket was generated automatically based on your group picks and the official FIFA bracket rules. Every matchup below is who you would face if your group picks were exactly right.<br><br>
-          Now pick a winner for each game. Work your way from R32 all the way to the Champion.<br><br>
-          <strong>Important:</strong> Points follow the team, not the matchup. If you pick England to beat Morocco but England actually beats Norway instead, you still get full points for England advancing. You just need to get the team right.
+        <div class="alert alert-info" style="margin-bottom:10px;font-size:13px;line-height:1.7;">
+          <strong style="display:block;margin-bottom:6px;">This is the real bracket — if your picks are right.</strong>
+          Your bracket was generated directly from the official FIFA World Cup 26 regulations (Article 12.6 and Annex C). It shows the exact real-world knockout matchups that would occur if your group stage predictions are correct. This is not a guess — it is the deterministic output of FIFA's published rules applied to your picks.<br><br>
+          Pick a winner for every matchup from R32 all the way to the Champion to complete your entry.
         </div>
+        <div class="alert alert-info" style="margin-bottom:10px;font-size:13px;line-height:1.7;">
+          <strong style="display:block;margin-bottom:6px;">Points follow the team, not the matchup.</strong>
+          If you pick England to beat Morocco in R32 but England actually beats Norway instead, you still get full points for England advancing. What matters is whether your picked team reaches that round — not who they beat to get there.
+        </div>
+        <div class="bracket-warning">
+          ⚠️ <strong>Heads up:</strong> If you go back and change your group stage picks or your 8 third-place qualifiers, your bracket will be regenerated and your bracket picks will reset. Make sure your group and third place picks are final before filling out the bracket.
+        </div>
+        <div id="bracket-complete-status" style="margin-bottom:14px;display:none;"></div>
         <div id="bracket-r32-section" class="knockout-section">
           <div class="round-label">Round of 32 <span class="round-pts">4 pts per team advancing</span></div>
           <div id="bracket-r32"></div>
@@ -465,6 +480,16 @@ select option{background:var(--card);}
       <div style="display:flex;justify-content:space-between;"><span style="color:var(--white);font-weight:600;">Total for South Korea</span><span style="color:var(--white);font-family:'DM Mono',monospace;font-weight:600;">29 pts</span></div>
     </div>
     <div class="alert alert-info" style="margin-top:12px;font-size:12px;">Sonny got the position wrong but still got full credit for everything South Korea accomplished. That is what makes this pool different from a standard bracket.</div>
+  </div>
+  <div class="card">
+    <div class="card-title">📋 How Your Bracket Is Generated</div>
+    <p style="color:var(--muted);font-size:13px;line-height:1.8;margin-bottom:12px;">This is the part of the pool that makes it unique. Your bracket is not a random draw — it is generated directly from the official FIFA World Cup 26 regulations.</p>
+    <div style="background:var(--card-light);border-radius:8px;padding:13px;font-size:13px;line-height:1.9;margin-bottom:12px;">
+      <div style="border-bottom:1px solid var(--border);padding-bottom:8px;margin-bottom:8px;"><strong style="color:var(--white);">Article 12.6</strong> <span style="color:var(--muted);">— fixes all 16 Round of 32 matchups based on group finishing positions. Group winners face third-place teams. Group runners-up face other runners-up. Teams from the same group cannot meet in R32.</span></div>
+      <div><strong style="color:var(--white);">Annex C</strong> <span style="color:var(--muted);">— a pre-published table of all 495 possible combinations of which 8 of 12 third-place teams qualify, and exactly which group winner each faces. FIFA published this before the tournament so there is no ambiguity once the group stage ends.</span></div>
+    </div>
+    <p style="color:var(--muted);font-size:13px;line-height:1.8;margin-bottom:12px;">When you pick your group standings and your 8 third-place qualifiers, the site applies these exact FIFA rules to generate your personal bracket. <strong style="color:var(--white);">If your group picks come true in real life, your bracket IS the actual tournament bracket.</strong></p>
+    <div class="alert alert-warn" style="font-size:12px;line-height:1.7;">⚠️ <strong>Important:</strong> If you change your group stage picks or your 8 third-place qualifiers after filling out your bracket, your bracket will be regenerated and your bracket picks will reset. Lock in your group picks before completing the bracket.</div>
   </div>
   <div class="card">
     <div class="card-title">💰 Prize Payouts</div>
@@ -1179,9 +1204,56 @@ async function doRegister() {
 }
 
 function updateNavUser() {
+  const wrap = document.getElementById('nav-user-wrap');
   const el = document.getElementById('nav-user');
-  if (currentUser) { el.style.display='block'; el.textContent=currentUser.name||currentUser.username; }
-  else el.style.display='none';
+  const statusEl = document.getElementById('nav-status');
+  if (currentUser) {
+    wrap.style.display = 'flex';
+    el.textContent = currentUser.name || currentUser.username;
+    statusEl.style.display = 'inline-flex';
+    updateEntryStatus();
+  } else {
+    wrap.style.display = 'none';
+    statusEl.style.display = 'none';
+  }
+}
+
+function isEntryComplete() {
+  // All 12 groups fully ranked
+  const groupsDone = Object.keys(GROUPS).every(l =>
+    [1,2,3,4].every(r => document.getElementById(`g${l}-${r}`)?.value)
+  );
+  if (!groupsDone) return false;
+  // Exactly 8 third place selected
+  const tpCount = [...document.querySelectorAll('#tp-chips .team-chip.selected')].length;
+  if (tpCount !== 8) return false;
+  // Every bracket matchup picked: all R32, R16, QF, SF, Final
+  const r32Ids = ['M73','M74','M75','M76','M77','M78','M79','M80','M81','M82','M83','M84','M85','M86','M87','M88'];
+  const r16Ids = R16.map(r => r.id);
+  const qfIds = QF.map(r => r.id);
+  const sfIds = SF.map(r => r.id);
+  const allIds = [...r32Ids, ...r16Ids, ...qfIds, ...sfIds, 'FINAL'];
+  if (!allIds.every(id => bracketPicks[id])) return false;
+  return true;
+}
+
+function updateEntryStatus() {
+  const statusEl = document.getElementById('nav-status');
+  if (!currentUser || !statusEl) return;
+  const complete = isEntryComplete();
+  statusEl.className = 'entry-status ' + (complete ? 'complete' : 'incomplete');
+  statusEl.textContent = complete ? '✓ Entry Complete' : '⚠ Incomplete Entry';
+  // Also update bracket step status indicator
+  const bracketStatus = document.getElementById('bracket-complete-status');
+  if (bracketStatus) {
+    if (complete) {
+      bracketStatus.style.display = 'block';
+      bracketStatus.innerHTML = '<div class="alert alert-success" style="font-size:13px;font-weight:600;">✓ Your entry is complete! Hit Save or Submit when ready.</div>';
+    } else {
+      bracketStatus.style.display = 'block';
+      bracketStatus.innerHTML = '<div class="alert alert-error" style="font-size:13px;font-weight:600;">⚠ Your entry is incomplete. Pick a winner for every matchup including the Champion.</div>';
+    }
+  }
 }
 
 async function renderSubmitPage() {
@@ -1405,12 +1477,12 @@ function attachBracketClickHandlers() {
 function setBracketPick(matchId, team) {
   const prev = bracketPicks[matchId];
   bracketPicks[matchId] = team;
-  // Cascade: if pick changed, clear downstream picks that depended on old winner
   if (prev && prev !== team) {
     clearDownstream(matchId);
   }
   markUnsaved();
   renderBracket();
+  updateEntryStatus();
 }
 
 function clearDownstream(matchId) {
@@ -1473,9 +1545,9 @@ function loadPicksIntoForm(entry) {
     bracketPicks = entry.bracket.picks;
     bracketMatchups = entry.bracket.matchups || {};
   } else if (entry.knockout) {
-    // Legacy: convert chip-based picks to bracket (best effort)
     bracketPicks = {};
   }
+  updateEntryStatus();
 }
 
 // Step tabs / wizard state
@@ -1504,7 +1576,7 @@ function buildForm() {
       const num=document.createElement('div'); num.className='rank-num'; num.textContent=rank;
       const sel=document.createElement('select'); sel.id=`g${l}-${rank}`;
       sel.innerHTML=`<option value="">pick team</option>`+teams.map(t=>`<option value="${t}">${t}</option>`).join('');
-      sel.addEventListener('change',()=>{updateGroupDropdowns(l);updateThirdPlaceChips();markUnsaved();});
+      sel.addEventListener('change',()=>{updateGroupDropdowns(l);updateThirdPlaceChips();markUnsaved();updateEntryStatus();});
       row.appendChild(num); row.appendChild(sel); card.appendChild(row);
     });
     gg.appendChild(card);
@@ -1555,6 +1627,7 @@ function updateThirdPlaceChips() {
       }
       document.getElementById('tp-count').textContent=c.querySelectorAll('.team-chip.selected').length;
       markUnsaved();
+      updateEntryStatus();
     });
     c.appendChild(chip);
   });
@@ -1614,7 +1687,18 @@ async function renderLeaderboard() {
   scored.forEach((e,i)=>{
     const medals=['🥇','🥈','🥉'];
     const rank=medals[i]||`<span style="color:var(--muted);font-size:12px;">${i+1}</span>`;
-    html+=`<tr onclick="viewProfile('${e.username}')"><td><span class="rank-cell">${rank}</span></td><td><strong>${e.name}</strong></td><td><span class="pts-badge">${e.total}</span></td><td><span class="pts-possible">+${maxPossibleScore(e)}</span></td><td style="color:var(--muted);font-size:12px;">${e.breakdown?.groups||0}</td><td style="color:var(--muted);font-size:12px;">${e.koScore||0}</td></tr>`;
+    const allR32 = ['M73','M74','M75','M76','M77','M78','M79','M80','M81','M82','M83','M84','M85','M86','M87','M88'];
+    const allR16 = ['R16-1','R16-2','R16-3','R16-4','R16-5','R16-6','R16-7','R16-8'];
+    const allQF = ['QF1','QF2','QF3','QF4'];
+    const allSF = ['SF1','SF2'];
+    const bp = e.bracket?.picks || {};
+    const entryComplete = e.groupPicks && Object.keys(GROUPS).every(l=>[0,1,2,3].every(i=>e.groupPicks[l]?.[i])) &&
+      e.thirdPlaceGroups?.length===8 &&
+      [...allR32,...allR16,...allQF,...allSF,'FINAL'].every(id=>bp[id]);
+    const statusBadge = entryComplete
+      ? `<span style="font-size:10px;color:#7ee8a2;background:rgba(45,158,72,0.12);border:1px solid rgba(45,158,72,0.25);border-radius:4px;padding:1px 6px;margin-left:6px;font-family:'DM Mono',monospace;">✓ Complete</span>`
+      : `<span style="font-size:10px;color:#ff6b6b;background:rgba(178,34,52,0.12);border:1px solid rgba(178,34,52,0.3);border-radius:4px;padding:1px 6px;margin-left:6px;font-family:'DM Mono',monospace;">⚠ Incomplete</span>`;
+    html+=`<tr onclick="viewProfile('${e.username}')"><td><span class="rank-cell">${rank}</span></td><td><strong>${e.name}</strong>${statusBadge}</td><td><span class="pts-badge">${e.total}</span></td><td><span class="pts-possible">+${maxPossibleScore(e)}</span></td><td style="color:var(--muted);font-size:12px;">${e.breakdown?.groups||0}</td><td style="color:var(--muted);font-size:12px;">${e.koScore||0}</td></tr>`;
   });
   html+=`</tbody></table></div><p style="color:var(--muted);font-size:12px;margin-top:7px;">${submitted.length} ${submitted.length===1?'entry':'entries'} total${!picksLocked?' · Picks hidden until June 11':''}</p>`;
   c.innerHTML=html;
@@ -1806,7 +1890,7 @@ async function saveDraft() {
 async function submitPicks() {
   if (!currentUser) return;
   if (picksLocked) { showAlert('picks-alert','error','Picks are locked. The tournament has started.'); return; }
-  if (!bracketPicks['FINAL']) { showAlert('picks-alert','error','Please pick a champion to submit.'); return; }
+  if (!isEntryComplete()) { showAlert('picks-alert','error','Your entry is incomplete. You must pick a winner for every matchup including the Champion before submitting.'); return; }
   const picks = collectPicks();
   const entry = {username:currentUser.username,name:currentUser.name,submitted:true,draft:false,submittedAt:new Date().toISOString(),...picks};
   try {
@@ -1828,6 +1912,7 @@ window.advanceFromGroups = advanceFromGroups;
 window.advanceFromThirdPlace = advanceFromThirdPlace;
 window.showPicksForm = showPicksWizard;
 window.setBracketPick = setBracketPick;
+window.updateEntryStatus = updateEntryStatus;
 
 init();
 </script>

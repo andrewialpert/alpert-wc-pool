@@ -1398,7 +1398,6 @@ function renderBracket() {
     away: downstreamTeam(r.m2),
     label: 'World Cup Final'
   })));
-  attachBracketClickHandlers();
 }
 
 function renderMatchList(containerId, matches) {
@@ -1793,7 +1792,10 @@ function goToStep(step) {
     tab.style.background = i === step ? 'var(--red)' : 'var(--card-light)';
     tab.style.color = i === step ? '#fff' : 'var(--muted)';
   });
-  if (step === 2) renderBracket();
+  if (step === 2) {
+    renderBracket();
+    attachBracketClickHandlers();
+  }
   window.scrollTo(0,0);
 }
 

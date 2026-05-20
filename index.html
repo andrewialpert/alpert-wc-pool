@@ -4,6 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Alpert World Cup Pool 2026</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚽</text></svg>">
+<meta property="og:title" content="Alpert World Cup Pool 2026">
+<meta property="og:description" content="Pick your groups, choose your bracket, and compete for the prize. $20 entry. Picks lock June 11.">
+<meta property="og:url" content="https://alpertworldcup.com">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Alpert World Cup Pool 2026">
+<meta name="twitter:description" content="Pick your groups, choose your bracket, and compete for the prize. $20 entry. Picks lock June 11.">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -190,7 +198,8 @@ select option{background:var(--card);}
     <h1>ALPERT <span class="red">WORLD CUP</span> <span class="gold">POOL</span></h1>
     <div class="hero-sub">
       I built this to make the 2026 World Cup more fun for everyone, whether you watch every match or are just here for the vibes.<br><br>
-      Pick your group standings, choose which teams you think will go deep, and earn points based on how far they actually make it.<br><br>
+      Pick your group standings, pick which 8 of 12 third-place teams advance, and the site builds your bracket automatically using FIFA's official rules. Then pick your winners all the way to the champion.<br><br>
+      Points follow the team, not the matchup. Pick a team to go deep and they go deep via a different path? You still get the points.<br><br>
       <strong>Everything you need is inside. Good luck.</strong>
     </div>
     <div class="hero-actions">
@@ -307,8 +316,8 @@ select option{background:var(--card);}
         </div>
         <div class="card">
           <div class="card-title">🥉 Best Third-Place Teams <span class="badge">PICK 8</span></div>
-          <p style="color:var(--muted);font-size:13px;margin-bottom:6px;">In 2026, only 8 of the 12 third-place teams advance. FIFA ranks them by points, then goal difference, then goals scored. Pick the 8 you think qualify.</p>
-          <p style="color:var(--muted);font-size:13px;margin-bottom:10px;">Below are the teams you predicted to finish 3rd. Select the 8 that advance.</p>
+          <p style="color:var(--muted);font-size:13px;margin-bottom:6px;">In 2026, only 8 of the 12 third-place teams advance to the knockout round. FIFA ranks them by points, then goal difference, then goals scored. Pick the 8 you think make it through.</p>
+          <p style="color:var(--muted);font-size:13px;margin-bottom:10px;">Once you pick your 8, the site will automatically generate your personal bracket using the official FIFA bracket rules.</p>
           <div class="tp-counter">Selected: <span id="tp-count">0</span> / 8</div>
           <div class="team-chips" id="tp-chips"></div>
         </div>
@@ -324,8 +333,11 @@ select option{background:var(--card);}
           <div class="section-title">Your Bracket</div>
           <div class="section-sub">Pick a winner for each matchup. Winners advance automatically.</div>
         </div>
-        <div class="alert alert-info" style="margin-bottom:14px;font-size:12px;">
-          Pick a winner for each matchup. Points are awarded based on how far your picked teams actually go, regardless of who they beat. If you pick England to beat Morocco but England actually beats USA, you still get full points for England advancing.
+        <div class="alert alert-info" style="margin-bottom:14px;font-size:13px;line-height:1.7;">
+          <strong style="display:block;margin-bottom:6px;">How this works:</strong>
+          Your bracket was generated automatically based on your group picks and the official FIFA bracket rules. Every matchup below is who you would face if your group picks were exactly right.<br><br>
+          Now pick a winner for each game. Work your way from R32 all the way to the Champion.<br><br>
+          <strong>Important:</strong> Points follow the team, not the matchup. If you pick England to beat Morocco but England actually beats Norway instead, you still get full points for England advancing. You just need to get the team right.
         </div>
         <div id="bracket-r32-section" class="knockout-section">
           <div class="round-label">Round of 32 <span class="round-pts">4 pts per team advancing</span></div>

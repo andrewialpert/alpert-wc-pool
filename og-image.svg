@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#002868"/>
+      <stop offset="100%" style="stop-color:#001845"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <!-- Subtle grid -->
+  <g opacity="0.04">
+    <line x1="0" y1="105" x2="1200" y2="105" stroke="white" stroke-width="1"/>
+    <line x1="0" y1="210" x2="1200" y2="210" stroke="white" stroke-width="1"/>
+    <line x1="0" y1="315" x2="1200" y2="315" stroke="white" stroke-width="1"/>
+    <line x1="0" y1="420" x2="1200" y2="420" stroke="white" stroke-width="1"/>
+    <line x1="0" y1="525" x2="1200" y2="525" stroke="white" stroke-width="1"/>
+    <line x1="200" y1="0" x2="200" y2="630" stroke="white" stroke-width="1"/>
+    <line x1="400" y1="0" x2="400" y2="630" stroke="white" stroke-width="1"/>
+    <line x1="600" y1="0" x2="600" y2="630" stroke="white" stroke-width="1"/>
+    <line x1="800" y1="0" x2="800" y2="630" stroke="white" stroke-width="1"/>
+    <line x1="1000" y1="0" x2="1000" y2="630" stroke="white" stroke-width="1"/>
+  </g>
+
+  <!-- Red bar top -->
+  <rect width="1200" height="8" fill="#B22234"/>
+  <!-- Red bar bottom -->
+  <rect y="622" width="1200" height="8" fill="#B22234"/>
+
+  <!-- Faded ball background right -->
+  <circle cx="960" cy="280" r="260" fill="none" stroke="white" stroke-width="3" opacity="0.05"/>
+  <circle cx="960" cy="280" r="200" fill="none" stroke="white" stroke-width="2" opacity="0.04"/>
+  <circle cx="960" cy="280" r="140" fill="none" stroke="white" stroke-width="2" opacity="0.03"/>
+
+  <!-- Soccer ball -->
+  <text x="80" y="200" font-size="100" font-family="serif">⚽</text>
+
+  <!-- ALPERT -->
+  <text x="90" y="318" font-family="Arial Black, Helvetica, sans-serif" font-weight="900" font-size="88" fill="white" letter-spacing="3">ALPERT</text>
+  <!-- WORLD CUP -->
+  <text x="90" y="410" font-family="Arial Black, Helvetica, sans-serif" font-weight="900" font-size="88" fill="#B22234" letter-spacing="3">WORLD CUP</text>
+  <!-- POOL 2026 -->
+  <text x="90" y="502" font-family="Arial Black, Helvetica, sans-serif" font-weight="900" font-size="88" fill="#f0b429" letter-spacing="3">POOL 2026</text>
+
+  <!-- Divider -->
+  <rect x="90" y="524" width="500" height="3" fill="#B22234" opacity="0.5"/>
+
+  <!-- Tagline -->
+  <text x="90" y="572" font-family="Arial, Helvetica, sans-serif" font-size="28" fill="#8899aa" letter-spacing="1">Pick groups. Build your bracket. Win.</text>
+
+  <!-- Right cards -->
+  <rect x="780" y="420" width="330" height="58" rx="8" fill="rgba(178,34,52,0.15)" stroke="rgba(178,34,52,0.3)" stroke-width="1"/>
+  <text x="800" y="444" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#8899aa" letter-spacing="1">PICKS LOCK</text>
+  <text x="800" y="466" font-family="Arial Black, Helvetica, sans-serif" font-size="17" fill="white" font-weight="700">June 11, 2026</text>
+
+  <rect x="780" y="492" width="330" height="58" rx="8" fill="rgba(240,180,41,0.08)" stroke="rgba(240,180,41,0.2)" stroke-width="1"/>
+  <text x="800" y="516" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#8899aa" letter-spacing="1">ENTRY FEE</text>
+  <text x="800" y="538" font-family="Arial Black, Helvetica, sans-serif" font-size="17" fill="white" font-weight="700">$20 via Venmo</text>
+
+  <!-- URL -->
+  <text x="780" y="596" font-family="Courier New, monospace" font-size="21" fill="rgba(255,255,255,0.3)" letter-spacing="1">alpertworldcup.com</text>
+</svg>

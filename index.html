@@ -1309,10 +1309,6 @@ function generateBracketMatchups() {
   }
 
   bracketMatchups = { ...fixed, ...variable };
-
-  // Clear picks that no longer make sense (team changed)
-  // Cascade clear all bracket picks when regenerating
-  bracketPicks = {};
 }
 
 // Get the winner of a match (from bracketPicks)

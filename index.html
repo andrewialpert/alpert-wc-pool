@@ -1369,7 +1369,8 @@ function renderMatchList(containerId, matches) {
 
 function attachBracketClickHandlers() {
   const step2 = document.getElementById('step-2');
-  if (!step2 || step2._bracketListenerAttached) return;
+  if (!step2) return;
+  if (step2._bracketListenerAttached) return;
   step2._bracketListenerAttached = true;
   step2.addEventListener('click', (e) => {
     const el = e.target.closest('.bracket-team');
@@ -1379,8 +1380,10 @@ function attachBracketClickHandlers() {
     const teamSpan = el.querySelector('.bracket-team-name');
     const team = teamSpan ? teamSpan.textContent.trim() : '';
     if (!team || team === 'TBD') return;
+    console.log('BRACKET CLICK:', matchId, team);
     setBracketPick(matchId, team);
   });
+  console.log('Bracket click handlers attached to step-2');
 }
 
 function renderMatch({id, home, away, label}) {

@@ -1369,8 +1369,10 @@ function renderMatch({id, home, away, label}) {
   const awaySel = sel && sel === away;
   const noHome = !home || home === 'TBD';
   const noAway = !away || away === 'TBD';
-  const homeClick = noHome ? '' : `onclick="setBracketPick('${id}', this.querySelector('.bracket-team-name').textContent.trim())"`;
-  const awayClick = noAway ? '' : `onclick="setBracketPick('${id}', this.querySelector('.bracket-team-name').textContent.trim())"`;
+  const homeEnc = (home||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+  const awayEnc = (away||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+  const homeClick = noHome ? '' : `onclick="setBracketPick('${id}','${homeEnc}')"`;
+  const awayClick = noAway ? '' : `onclick="setBracketPick('${id}','${awayEnc}')"`;
   return `<div class="bracket-match">
     <div class="bracket-match-header">${label||id}</div>
     <div class="bracket-team ${homeSel?'selected':''}" ${homeClick}>

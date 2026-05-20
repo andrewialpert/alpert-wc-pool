@@ -1325,44 +1325,6 @@ function downstreamTeam(matchId) {
   return matchWinner(matchId) || null;
 }
 
-window.tryGoToStep = function(step) {
-  if (step === 0) { goToStep(0); return; }
-  if (step >= 1) {
-    if (!allGroupsDone()) { showAlert('picks-alert','error','Complete all 12 group picks first.'); return; }
-    goToStep(1);
-  }
-  if (step >= 2) {
-    const tpCount = [...document.querySelectorAll('#tp-chips .team-chip.selected')].length;
-    if (tpCount !== 8) { showAlert('picks-alert','error','Select exactly 8 third-place qualifiers first.'); return; }
-    goToStep(2);
-  }
-};
-
-window.goToStep = function(step) {
-  currentStep = step;
-  [0,1,2].forEach(i => {
-    document.getElementById(`step-${i}`).style.display = i === step ? 'block' : 'none';
-    const tab = document.getElementById(`step-tab-${i}`);
-    tab.style.background = i === step ? 'var(--red)' : 'var(--card-light)';
-    tab.style.color = i === step ? '#fff' : 'var(--muted)';
-  });
-  if (step === 2) renderBracket();
-  window.scrollTo(0,0);
-};
-
-window.advanceFromGroups = function() {
-  if (!allGroupsDone()) { showAlert('picks-alert','error','Please complete all 12 groups before continuing.'); return; }
-  updateThirdPlaceChips();
-  goToStep(1);
-};
-
-window.advanceFromThirdPlace = function() {
-  const tpCount = [...document.querySelectorAll('#tp-chips .team-chip.selected')].length;
-  if (tpCount !== 8) { showAlert('picks-alert','error','Please select exactly 8 third-place teams.'); return; }
-  generateBracketMatchups();
-  goToStep(2);
-};
-
 function allGroupsDone() {
   return Object.keys(GROUPS).every(l => [1,2,3,4].every(r => document.getElementById(`g${l}-${r}`)?.value));
 }

@@ -1404,28 +1404,21 @@ function renderBracket() {
 function renderMatchList(containerId, matches) {
   const c = document.getElementById(containerId); if (!c) return;
   c.innerHTML = matches.map(m => renderMatch(m)).join('');
-  // No per-element listeners needed -- handled by delegated listener below
 }
 
-// Attach delegated click handlers once on static bracket section containers
 function attachBracketClickHandlers() {
-  ['bracket-r32','bracket-r16','bracket-qf','bracket-sf','bracket-final'].forEach(containerId => {
-    const section = document.getElementById(containerId + '-section') || document.getElementById(containerId)?.parentElement;
-    const c = document.getElementById(containerId);
-    if (!c) return;
-    // Use the knockout-section parent which is static
-    const parent = c.closest('.knockout-section') || c.parentElement;
-    if (!parent || parent._bracketListenerAttached) return;
-    parent._bracketListenerAttached = true;
-    parent.addEventListener('click', (e) => {
-      const el = e.target.closest('.bracket-team[data-match]');
-      if (!el) return;
-      const matchId = el.dataset.match;
-      const teamSpan = el.querySelector('.bracket-team-name');
-      const team = teamSpan ? teamSpan.textContent.trim() : '';
-      if (!team || team === 'TBD') return;
-      setBracketPick(matchId, team);
-    });
+  const step2 = document.getElementById('step-2');
+  if (!step2 || step2._bracketListenerAttached) return;
+  step2._bracketListenerAttached = true;
+  step2.addEventListener('click', (e) => {
+    const el = e.target.closest('.bracket-team');
+    if (!el) return;
+    const matchId = el.dataset.match;
+    if (!matchId) return;
+    const teamSpan = el.querySelector('.bracket-team-name');
+    const team = teamSpan ? teamSpan.textContent.trim() : '';
+    if (!team || team === 'TBD') return;
+    setBracketPick(matchId, team);
   });
 }
 

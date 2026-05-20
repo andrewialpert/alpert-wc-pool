@@ -205,6 +205,7 @@ select option{background:var(--card);}
     </div>
   </div>
   <div style="padding-top:24px;">
+    <div class="card">
       <div class="card-title">📅 Key Dates</div>
       <div class="detail-row"><span class="detail-label">Picks Lock</span><span style="color:var(--red);font-weight:600;">June 11, 2026 at Kickoff</span></div>
       <div class="detail-row"><span class="detail-label">Opening Match</span><span>Mexico vs South Africa</span></div>
@@ -285,6 +286,13 @@ select option{background:var(--card);}
               <div class="scoring-mini-item"><span>Advances, wrong position</span><span class="scoring-pts">3 pts</span></div>
               <div class="scoring-mini-item"><span>Perfect group bonus</span><span class="scoring-pts">+5 pts</span></div>
             </div>
+            <div class="scoring-mini" style="margin-top:8px;">
+              <div class="scoring-mini-item"><span>Round of 32</span><span class="scoring-pts">4 pts</span></div>
+              <div class="scoring-mini-item"><span>Round of 16</span><span class="scoring-pts">8 pts</span></div>
+              <div class="scoring-mini-item"><span>Quarterfinals</span><span class="scoring-pts">14 pts</span></div>
+              <div class="scoring-mini-item"><span>Semifinals</span><span class="scoring-pts">24 pts</span></div>
+              <div class="scoring-mini-item"><span>Champion</span><span class="scoring-pts">45 pts</span></div>
+            </div>
           </div>
           <div class="groups-grid" id="groups-grid"></div>
         </div>
@@ -317,26 +325,26 @@ select option{background:var(--card);}
           <div class="section-sub">Pick a winner for each matchup. Winners advance automatically.</div>
         </div>
         <div class="alert alert-info" style="margin-bottom:14px;font-size:12px;">
-          Bonus points: +2 for correct R32 pick, +3 R16, +5 QF, +8 SF, +10 finalist. Base points follow the team regardless of bracket path.
+          Pick a winner for each matchup. Points are awarded based on how far your picked teams actually go, regardless of who they beat. If you pick England to beat Morocco but England actually beats USA, you still get full points for England advancing.
         </div>
         <div id="bracket-r32-section" class="knockout-section">
-          <div class="round-label">Round of 32 <span class="round-pts">3 pts + 2 bonus</span></div>
+          <div class="round-label">Round of 32 <span class="round-pts">4 pts per team advancing</span></div>
           <div id="bracket-r32"></div>
         </div>
         <div id="bracket-r16-section" class="knockout-section">
-          <div class="round-label">Round of 16 <span class="round-pts">6 pts + 3 bonus</span></div>
+          <div class="round-label">Round of 16 <span class="round-pts">8 pts per team advancing</span></div>
           <div id="bracket-r16"></div>
         </div>
         <div id="bracket-qf-section" class="knockout-section">
-          <div class="round-label">Quarterfinals <span class="round-pts">11 pts + 5 bonus</span></div>
+          <div class="round-label">Quarterfinals <span class="round-pts">14 pts per team advancing</span></div>
           <div id="bracket-qf"></div>
         </div>
         <div id="bracket-sf-section" class="knockout-section">
-          <div class="round-label">Semifinals <span class="round-pts">22 pts + 8 bonus</span></div>
+          <div class="round-label">Semifinals <span class="round-pts">24 pts per team advancing</span></div>
           <div id="bracket-sf"></div>
         </div>
         <div id="bracket-final-section" class="knockout-section">
-          <div class="round-label">Final <span class="round-pts">44 pts + 10 bonus</span></div>
+          <div class="round-label">🏆 Champion <span class="round-pts">45 pts</span></div>
           <div id="bracket-final"></div>
         </div>
         <div style="display:flex;gap:8px;margin-bottom:80px;">
@@ -358,6 +366,9 @@ select option{background:var(--card);}
           <p style="font-size:12px;color:var(--muted);margin-bottom:7px;">Venmo $20 to secure your spot</p>
           <div class="venmo-handle">@andrew-alpert</div>
           <p class="venmo-note">Include your username in the Venmo note so we can confirm your entry.</p>
+        </div>
+        <div style="margin-top:14px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:8px;padding:12px;font-size:12px;color:var(--muted);text-align:center;">
+          Found a bug or need help? Text Andrew at <a href="sms:7816263131" style="color:var(--gold);">781-626-3131</a>
         </div>
         <div class="btn-row" style="margin-top:18px;justify-content:center;">
           <button class="btn-secondary" onclick="showPicksForm()">Edit My Picks</button>
@@ -404,14 +415,13 @@ select option{background:var(--card);}
   <div class="card">
     <div class="card-title">🏆 Knockout Rounds</div>
     <div class="scoring-grid">
-      <div class="scoring-item"><span>Team reaches Round of 32</span><span class="scoring-pts">3 pts</span></div>
-      <div class="scoring-item"><span>Team reaches Round of 16</span><span class="scoring-pts">6 pts</span></div>
-      <div class="scoring-item"><span>Team reaches Quarterfinals</span><span class="scoring-pts">11 pts</span></div>
-      <div class="scoring-item"><span>Team reaches Semifinals</span><span class="scoring-pts">22 pts</span></div>
-      <div class="scoring-item"><span>Team reaches Final</span><span class="scoring-pts">44 pts</span></div>
-      <div class="scoring-item"><span>Correct Champion</span><span class="scoring-pts">88 pts</span></div>
+      <div class="scoring-item"><span>Team reaches Round of 32</span><span class="scoring-pts">4 pts</span></div>
+      <div class="scoring-item"><span>Team reaches Round of 16</span><span class="scoring-pts">8 pts</span></div>
+      <div class="scoring-item"><span>Team reaches Quarterfinals</span><span class="scoring-pts">14 pts</span></div>
+      <div class="scoring-item"><span>Team reaches Semifinals</span><span class="scoring-pts">24 pts</span></div>
+      <div class="scoring-item"><span>Correct Champion</span><span class="scoring-pts">45 pts</span></div>
     </div>
-    <div class="alert alert-info" style="margin-top:11px;font-size:12px;">Points stack as your team advances. Pick a champion and they go out in the semis? You still earn R32, R16, QF, and SF points for that team.</div>
+    <div class="alert alert-info" style="margin-top:11px;font-size:12px;">Points stack as your team advances. If you pick England to reach the semis and they do, you earn R32 + R16 + QF + SF points for England. Points follow the team, not who they beat along the way.</div>
   </div>
   <div class="card">
     <div class="card-title">🥉 How Third Place Qualifying Works</div>
@@ -437,10 +447,10 @@ select option{background:var(--card);}
     <p style="color:var(--muted);font-size:13px;margin-bottom:10px;"><strong style="color:var(--white)">Sonny's score for South Korea:</strong></p>
     <div style="background:var(--card-light);border-radius:8px;padding:13px;font-size:13px;line-height:2;">
       <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--border);padding-bottom:6px;margin-bottom:6px;"><span style="color:var(--muted);">Group position (wrong, but team advanced)</span><span style="color:var(--gold);font-family:'DM Mono',monospace;">3 pts</span></div>
-      <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--border);padding-bottom:6px;margin-bottom:6px;"><span style="color:var(--muted);">Round of 32</span><span style="color:var(--gold);font-family:'DM Mono',monospace;">3 pts</span></div>
-      <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--border);padding-bottom:6px;margin-bottom:6px;"><span style="color:var(--muted);">Round of 16</span><span style="color:var(--gold);font-family:'DM Mono',monospace;">6 pts</span></div>
-      <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--border);padding-bottom:6px;margin-bottom:6px;"><span style="color:var(--muted);">Quarterfinals</span><span style="color:var(--gold);font-family:'DM Mono',monospace;">11 pts</span></div>
-      <div style="display:flex;justify-content:space-between;"><span style="color:var(--white);font-weight:600;">Total for South Korea</span><span style="color:var(--white);font-family:'DM Mono',monospace;font-weight:600;">23 pts</span></div>
+      <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--border);padding-bottom:6px;margin-bottom:6px;"><span style="color:var(--muted);">Round of 32</span><span style="color:var(--gold);font-family:'DM Mono',monospace;">4 pts</span></div>
+      <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--border);padding-bottom:6px;margin-bottom:6px;"><span style="color:var(--muted);">Round of 16</span><span style="color:var(--gold);font-family:'DM Mono',monospace;">8 pts</span></div>
+      <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--border);padding-bottom:6px;margin-bottom:6px;"><span style="color:var(--muted);">Quarterfinals</span><span style="color:var(--gold);font-family:'DM Mono',monospace;">14 pts</span></div>
+      <div style="display:flex;justify-content:space-between;"><span style="color:var(--white);font-weight:600;">Total for South Korea</span><span style="color:var(--white);font-family:'DM Mono',monospace;font-weight:600;">29 pts</span></div>
     </div>
     <div class="alert alert-info" style="margin-top:12px;font-size:12px;">Sonny got the position wrong but still got full credit for everything South Korea accomplished. That is what makes this pool different from a standard bracket.</div>
   </div>
@@ -1045,7 +1055,7 @@ const GROUPS = {
   L:['🏴󠁧󠁢󠁥󠁮󠁧󠁿 England','🇭🇷 Croatia','🇬🇭 Ghana','🇵🇦 Panama']
 };
 const ALL_TEAMS = Object.values(GROUPS).flat();
-const SCORING = {pos1:8,pos2:6,pos3:4,pos4:2,adv:3,perf:5,r32:3,r16:6,qf:11,sf:22,final:44,champ:88};
+const SCORING = {pos1:8,pos2:6,pos3:4,pos4:2,adv:3,perf:5,r32:4,r16:8,qf:14,sf:24,champ:45};
 
 let currentUser = null;
 let allEntries = [];
@@ -1397,7 +1407,9 @@ function renderMatchList(containerId, matches) {
   c.querySelectorAll('.bracket-team[data-match]').forEach(el => {
     el.addEventListener('click', () => {
       const matchId = el.dataset.match;
-      const team = el.dataset.team;
+      // Get team from the span text content to avoid HTML entity issues with emoji
+      const teamSpan = el.querySelector('.bracket-team-name');
+      const team = teamSpan ? teamSpan.textContent.trim() : el.dataset.team;
       if (!team || team === 'TBD') return;
       setBracketPick(matchId, team);
     });
@@ -1410,13 +1422,15 @@ function renderMatch({id, home, away, label}) {
   const awaySel = sel && sel === away;
   const noHome = !home || home === 'TBD';
   const noAway = !away || away === 'TBD';
+  const homeEsc = (home||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;');
+  const awayEsc = (away||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;');
   return `<div class="bracket-match">
-    <div class="bracket-match-header">${id} &mdash; ${label||''}</div>
-    <div class="bracket-team ${homeSel?'selected':''}" data-match="${id}" data-team="${home||''}">
+    <div class="bracket-match-header">${label||id}</div>
+    <div class="bracket-team ${homeSel?'selected':''}" data-match="${id}" data-team="${homeEsc}">
       <div class="bracket-radio"></div>
       <span class="bracket-team-name ${noHome?'tbd':''}">${home||'TBD'}</span>
     </div>
-    <div class="bracket-team ${awaySel?'selected':''}" data-match="${id}" data-team="${away||''}">
+    <div class="bracket-team ${awaySel?'selected':''}" data-match="${id}" data-team="${awayEsc}">
       <div class="bracket-radio"></div>
       <span class="bracket-team-name ${noAway?'tbd':''}">${away||'TBD'}</span>
     </div>
@@ -1606,14 +1620,6 @@ function scoreEntry(entry) {
     const actual=results.knockout[r]||[],predicted=entry.knockout?.[r]||[];
     const pts=[SCORING.r32,SCORING.r16,SCORING.qf,SCORING.sf,SCORING.champ][i];
     predicted.forEach(t=>{if(actual.includes(t)){koScore+=pts;breakdown[r]+=pts;}});
-    // Champion also earns final points if they made the final
-    if(r==='champion'){
-      predicted.forEach(t=>{
-        if(actual.includes(t) && (results.knockout?.final||[]).includes(t)){
-          koScore+=SCORING.final; breakdown['final']=(breakdown['final']||0)+SCORING.final;
-        }
-      });
-    }
   });
   return {total:groupScore+koScore,groupScore,koScore,breakdown};
 }
@@ -1621,9 +1627,9 @@ function scoreEntry(entry) {
 function maxPossibleScore(entry) {
   let max=0;
   Object.keys(GROUPS).forEach(l=>{if(!results.groups[l])max+=(SCORING.pos1+SCORING.pos2+SCORING.pos3+SCORING.pos4+SCORING.perf);});
-  ['r32','r16','qf','sf','final','champion'].forEach((r,i)=>{
+  ['r32','r16','qf','sf','champion'].forEach((r,i)=>{
     if(!results.knockout[r]?.length){
-      const pts=[SCORING.r32,SCORING.r16,SCORING.qf,SCORING.sf,SCORING.final,SCORING.champ][i];
+      const pts=[SCORING.r32,SCORING.r16,SCORING.qf,SCORING.sf,SCORING.champ][i];
       max+=(entry.knockout?.[r]?.length||0)*pts;
     }
   });

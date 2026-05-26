@@ -304,15 +304,15 @@ select option{background:var(--card);}
               <div class="scoring-mini-item"><span>Exact 2nd place</span><span class="scoring-pts">6 pts</span></div>
               <div class="scoring-mini-item"><span>Exact 3rd place</span><span class="scoring-pts">4 pts</span></div>
               <div class="scoring-mini-item"><span>Exact 4th place</span><span class="scoring-pts">2 pts</span></div>
-              <div class="scoring-mini-item"><span>Advances, wrong position</span><span class="scoring-pts">3 pts</span></div>
+              <div class="scoring-mini-item"><span>Advances, wrong position</span><span class="scoring-pts">2 pts</span></div>
               <div class="scoring-mini-item"><span>Perfect group bonus</span><span class="scoring-pts">+5 pts</span></div>
             </div>
             <div class="scoring-mini" style="margin-top:8px;">
               <div class="scoring-mini-item"><span>Round of 32</span><span class="scoring-pts">4 pts</span></div>
               <div class="scoring-mini-item"><span>Round of 16</span><span class="scoring-pts">8 pts</span></div>
-              <div class="scoring-mini-item"><span>Quarterfinals</span><span class="scoring-pts">14 pts</span></div>
-              <div class="scoring-mini-item"><span>Semifinals</span><span class="scoring-pts">24 pts</span></div>
-              <div class="scoring-mini-item"><span>Champion</span><span class="scoring-pts">45 pts</span></div>
+              <div class="scoring-mini-item"><span>Quarterfinals</span><span class="scoring-pts">16 pts</span></div>
+              <div class="scoring-mini-item"><span>Semifinals</span><span class="scoring-pts">28 pts</span></div>
+              <div class="scoring-mini-item"><span>Champion</span><span class="scoring-pts">55 pts</span></div>
             </div>
           </div>
           <div class="groups-grid" id="groups-grid"></div>
@@ -367,15 +367,15 @@ select option{background:var(--card);}
           <div id="bracket-r16"></div>
         </div>
         <div id="bracket-qf-section" class="knockout-section">
-          <div class="round-label">Quarterfinals <span class="round-pts">14 pts per team advancing</span></div>
+          <div class="round-label">Quarterfinals <span class="round-pts">16 pts per team advancing</span></div>
           <div id="bracket-qf"></div>
         </div>
         <div id="bracket-sf-section" class="knockout-section">
-          <div class="round-label">Semifinals <span class="round-pts">24 pts per team advancing</span></div>
+          <div class="round-label">Semifinals <span class="round-pts">28 pts per team advancing</span></div>
           <div id="bracket-sf"></div>
         </div>
         <div id="bracket-final-section" class="knockout-section">
-          <div class="round-label">🏆 Champion <span class="round-pts">45 pts</span></div>
+          <div class="round-label">🏆 Champion <span class="round-pts">55 pts</span></div>
           <div id="bracket-final"></div>
         </div>
         <div style="display:flex;gap:8px;margin-bottom:80px;">
@@ -438,7 +438,7 @@ select option{background:var(--card);}
       <div class="scoring-item"><span>Correct 2nd place</span><span class="scoring-pts">6 pts</span></div>
       <div class="scoring-item"><span>Correct 3rd place</span><span class="scoring-pts">4 pts</span></div>
       <div class="scoring-item"><span>Correct 4th place</span><span class="scoring-pts">2 pts</span></div>
-      <div class="scoring-item"><span>Team advances, wrong position</span><span class="scoring-pts">3 pts</span></div>
+      <div class="scoring-item"><span>Team advances, wrong position</span><span class="scoring-pts">2 pts</span></div>
       <div class="scoring-item"><span>Perfect group bonus</span><span class="scoring-pts">+5 pts</span></div>
     </div>
     <div class="alert alert-info" style="margin-top:11px;font-size:12px;">Position points and advancement points are mutually exclusive. You get whichever is higher, not both.</div>
@@ -448,9 +448,9 @@ select option{background:var(--card);}
     <div class="scoring-grid">
       <div class="scoring-item"><span>Team reaches Round of 32</span><span class="scoring-pts">4 pts</span></div>
       <div class="scoring-item"><span>Team reaches Round of 16</span><span class="scoring-pts">8 pts</span></div>
-      <div class="scoring-item"><span>Team reaches Quarterfinals</span><span class="scoring-pts">14 pts</span></div>
-      <div class="scoring-item"><span>Team reaches Semifinals</span><span class="scoring-pts">24 pts</span></div>
-      <div class="scoring-item"><span>Correct Champion</span><span class="scoring-pts">45 pts</span></div>
+      <div class="scoring-item"><span>Team reaches Quarterfinals</span><span class="scoring-pts">16 pts</span></div>
+      <div class="scoring-item"><span>Team reaches Semifinals</span><span class="scoring-pts">28 pts</span></div>
+      <div class="scoring-item"><span>Correct Champion</span><span class="scoring-pts">55 pts</span></div>
     </div>
     <div class="alert alert-info" style="margin-top:11px;font-size:12px;">Points stack as your team advances. If you pick England to reach the semis and they do, you earn R32 + R16 + QF + SF points for England. Points follow the team, not who they beat along the way.</div>
   </div>
@@ -477,11 +477,11 @@ select option{background:var(--card);}
     <p style="color:var(--muted);font-size:13px;line-height:1.8;margin-bottom:14px;"><strong style="color:var(--white)">What actually happens:</strong> South Korea finishes <strong style="color:var(--white)">3rd</strong> in Group A but still qualifies as one of the 8 best third-place teams. They beat their R32 opponent, win again in R16, and reach the QF before getting knocked out.</p>
     <p style="color:var(--muted);font-size:13px;margin-bottom:10px;"><strong style="color:var(--white)">Sonny's score for South Korea:</strong></p>
     <div style="background:var(--card-light);border-radius:8px;padding:13px;font-size:13px;line-height:2;">
-      <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--border);padding-bottom:6px;margin-bottom:6px;"><span style="color:var(--muted);">Group position (wrong, but team advanced)</span><span style="color:var(--gold);font-family:'DM Mono',monospace;">3 pts</span></div>
+      <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--border);padding-bottom:6px;margin-bottom:6px;"><span style="color:var(--muted);">Group position (wrong, but team advanced)</span><span style="color:var(--gold);font-family:'DM Mono',monospace;">2 pts</span></div>
       <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--border);padding-bottom:6px;margin-bottom:6px;"><span style="color:var(--muted);">Round of 32</span><span style="color:var(--gold);font-family:'DM Mono',monospace;">4 pts</span></div>
       <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--border);padding-bottom:6px;margin-bottom:6px;"><span style="color:var(--muted);">Round of 16</span><span style="color:var(--gold);font-family:'DM Mono',monospace;">8 pts</span></div>
-      <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--border);padding-bottom:6px;margin-bottom:6px;"><span style="color:var(--muted);">Quarterfinals</span><span style="color:var(--gold);font-family:'DM Mono',monospace;">14 pts</span></div>
-      <div style="display:flex;justify-content:space-between;"><span style="color:var(--white);font-weight:600;">Total for South Korea</span><span style="color:var(--white);font-family:'DM Mono',monospace;font-weight:600;">29 pts</span></div>
+      <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--border);padding-bottom:6px;margin-bottom:6px;"><span style="color:var(--muted);">Quarterfinals</span><span style="color:var(--gold);font-family:'DM Mono',monospace;">16 pts</span></div>
+      <div style="display:flex;justify-content:space-between;"><span style="color:var(--white);font-weight:600;">Total for South Korea</span><span style="color:var(--white);font-family:'DM Mono',monospace;font-weight:600;">30 pts</span></div>
     </div>
     <div class="alert alert-info" style="margin-top:12px;font-size:12px;">Sonny got the position wrong but still got full credit for everything South Korea accomplished. That is what makes this pool different from a standard bracket.</div>
   </div>
@@ -1096,7 +1096,7 @@ const GROUPS = {
   L:['🏴󠁧󠁢󠁥󠁮󠁧󠁿 England','🇭🇷 Croatia','🇬🇭 Ghana','🇵🇦 Panama']
 };
 const ALL_TEAMS = Object.values(GROUPS).flat();
-const SCORING = {pos1:8,pos2:6,pos3:4,pos4:2,adv:3,perf:5,r32:4,r16:8,qf:14,sf:24,champ:45};
+const SCORING = {pos1:8,pos2:6,pos3:4,pos4:2,adv:2,perf:5,r32:4,r16:8,qf:16,sf:28,champ:55};
 
 let currentUser = null;
 let allEntries = [];

@@ -1084,7 +1084,7 @@ const ADMIN_PW_DEFAULT = 'wc2026admin';
 const GROUPS = {
   A:['🇲🇽 Mexico','🇿🇦 South Africa','🇰🇷 South Korea','🇨🇿 Czechia'],
   B:['🇨🇦 Canada','🇨🇭 Switzerland','🇶🇦 Qatar','🇧🇦 Bosnia & Herzegovina'],
-  C:['🇧🇷 Brazil','🇲🇦 Morocco','🇭🇹 Haiti','🇬🇧 Scotland'],
+  C:['🇧🇷 Brazil','🇲🇦 Morocco','🇭🇹 Haiti','🏴󠁧󠁢󠁳󠁣󠁴󠁿 Scotland'],
   D:['🇺🇸 USA','🇵🇾 Paraguay','🇦🇺 Australia','🇹🇷 Türkiye'],
   E:['🇩🇪 Germany','🇨🇼 Curaçao','🇨🇮 Ivory Coast','🇪🇨 Ecuador'],
   F:['🇳🇱 Netherlands','🇯🇵 Japan','🇸🇪 Sweden','🇹🇳 Tunisia'],
@@ -1117,11 +1117,40 @@ window.adminResetPin = adminResetPin;
 window.changeAdminPw = changeAdminPw;
 window.viewProfile = viewProfile;
 
+async function migrateScotlandFlag() {
+  // Migrate all saved entries from old UK flag to correct Scottish flag
+  const OLD = '🇬🇧 Scotland';
+  const NEW = '🏴󠁧󠁢󠁳󠁣󠁴󠁿 Scotland';
+  function deepReplace(obj) {
+    if (typeof obj === 'string') return obj === OLD ? NEW : obj;
+    if (Array.isArray(obj)) return obj.map(deepReplace);
+    if (obj && typeof obj === 'object') {
+      const out = {};
+      for (const k of Object.keys(obj)) out[k] = deepReplace(obj[k]);
+      return out;
+    }
+    return obj;
+  }
+  try {
+    const snap = await getDocs(collection(db,'entries'));
+    for (const d of snap.docs) {
+      const data = d.data();
+      const json = JSON.stringify(data);
+      if (json.includes(OLD)) {
+        const fixed = deepReplace(data);
+        await setDoc(doc(db,'entries',d.id), fixed);
+        console.log(`Migrated Scotland flag for: ${d.id}`);
+      }
+    }
+  } catch(e) { console.error('Migration error:', e); }
+}
+
 async function init() {
   buildForm();
   updateDaysLeft();
   const saved = sessionStorage.getItem('wc_user');
   if (saved) { currentUser = JSON.parse(saved); updateNavUser(); }
+  await migrateScotlandFlag();
   await loadResults();
   await loadEntries();
   updateHomePage();

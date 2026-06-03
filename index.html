@@ -1710,7 +1710,7 @@ function maxPossibleScore(entry) {
 async function renderLeaderboard() {
   await loadEntries(); await loadResults();
   const c=document.getElementById('leaderboard-content');
-  const submitted=allEntries.filter(e=>e.submitted);
+  const submitted=allEntries;
   if(!submitted.length){c.innerHTML='<div class="alert alert-warn">No entries yet.</div>';return;}
   const hasResults=Object.keys(results.groups).length>0||results.knockout?.r32?.length>0;
   const scored=submitted.map(e=>({...e,...scoreEntry(e)})).sort((a,b)=>b.total-a.total);

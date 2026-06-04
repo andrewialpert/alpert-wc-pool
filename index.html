@@ -1725,10 +1725,7 @@ async function renderLeaderboard() {
     const allQF = ['QF1','QF2','QF3','QF4'];
     const allSF = ['SF1','SF2'];
     const bp = e.bracket?.picks || {};
-    const tpCount = (e.thirdPlaceGroups?.length || e.thirdPlacePicks?.length || 0);
-    const entryComplete = e.groupPicks && Object.keys(GROUPS).every(l=>[0,1,2,3].every(i=>e.groupPicks[l]?.[i])) &&
-      tpCount===8 &&
-      [...allR32,...allR16,...allQF,...allSF,'FINAL'].every(id=>bp[id]);
+    const entryComplete = e.submitted === true;
     const statusBadge = entryComplete
       ? `<span style="font-size:10px;color:#7ee8a2;background:rgba(45,158,72,0.12);border:1px solid rgba(45,158,72,0.25);border-radius:4px;padding:1px 6px;margin-left:6px;font-family:'DM Mono',monospace;">✓ Complete</span>`
       : `<span style="font-size:10px;color:#ff6b6b;background:rgba(178,34,52,0.12);border:1px solid rgba(178,34,52,0.3);border-radius:4px;padding:1px 6px;margin-left:6px;font-family:'DM Mono',monospace;">⚠ Incomplete</span>`;

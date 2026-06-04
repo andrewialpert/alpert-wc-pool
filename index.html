@@ -381,6 +381,7 @@ select option{background:var(--card);}
           <div class="round-label">🏆 Champion <span class="round-pts">55 pts</span></div>
           <div id="bracket-final"></div>
         </div>
+        <div id="bracket-complete-status-bottom" style="margin-bottom:10px;"></div>
         <div style="display:flex;gap:8px;margin-bottom:80px;">
           <button class="btn-secondary" onclick="goToStep(1)" style="flex:1;">Back</button>
           <button class="btn-primary" onclick="submitPicks()" style="flex:1;">🔒 Lock In My Picks</button>
@@ -1267,17 +1268,15 @@ function updateEntryStatus() {
   const complete = isEntryComplete();
   statusEl.className = 'entry-status ' + (complete ? 'complete' : 'incomplete');
   statusEl.textContent = complete ? '✓ Entry Complete' : '⚠ Incomplete Entry';
-  // Also update bracket step status indicator
-  const bracketStatus = document.getElementById('bracket-complete-status');
-  if (bracketStatus) {
-    if (complete) {
-      bracketStatus.style.display = 'block';
-      bracketStatus.innerHTML = '<div class="alert alert-success" style="font-size:13px;font-weight:600;">✓ Your entry is complete! Hit Save or Submit when ready.</div>';
-    } else {
-      bracketStatus.style.display = 'block';
-      bracketStatus.innerHTML = '<div class="alert alert-error" style="font-size:13px;font-weight:600;">⚠ Your entry is incomplete. Pick a winner for every matchup including the Champion.</div>';
-    }
-  }
+
+  const completeHTML = '<div class="alert alert-success" style="font-size:13px;font-weight:600;">✓ All picks are in. You are good to go!</div>';
+  const incompleteHTML = '<div class="alert alert-error" style="font-size:13px;font-weight:600;">⚠ Picks incomplete. Pick a winner for every matchup including the Champion.</div>';
+
+  const top = document.getElementById('bracket-complete-status');
+  if (top) top.innerHTML = complete ? completeHTML : incompleteHTML;
+
+  const bottom = document.getElementById('bracket-complete-status-bottom');
+  if (bottom) bottom.innerHTML = complete ? completeHTML : incompleteHTML;
 }
 
 async function renderSubmitPage() {

@@ -1725,8 +1725,9 @@ async function renderLeaderboard() {
     const allQF = ['QF1','QF2','QF3','QF4'];
     const allSF = ['SF1','SF2'];
     const bp = e.bracket?.picks || {};
+    const tpCount = (e.thirdPlaceGroups?.length || e.thirdPlacePicks?.length || 0);
     const entryComplete = e.groupPicks && Object.keys(GROUPS).every(l=>[0,1,2,3].every(i=>e.groupPicks[l]?.[i])) &&
-      e.thirdPlaceGroups?.length===8 &&
+      tpCount===8 &&
       [...allR32,...allR16,...allQF,...allSF,'FINAL'].every(id=>bp[id]);
     const statusBadge = entryComplete
       ? `<span style="font-size:10px;color:#7ee8a2;background:rgba(45,158,72,0.12);border:1px solid rgba(45,158,72,0.25);border-radius:4px;padding:1px 6px;margin-left:6px;font-family:'DM Mono',monospace;">✓ Complete</span>`
@@ -1762,10 +1763,9 @@ async function viewProfile(username) {
 }
 
 function updateHomePage() {
-  const submitted=allEntries.filter(e=>e.submitted);
-  const el=document.getElementById('home-entry-count'); if(el) el.textContent=submitted.length;
+  const el=document.getElementById('home-entry-count'); if(el) el.textContent=allEntries.length;
   const list=document.getElementById('home-entry-list');
-  if(list){if(!submitted.length){list.innerHTML='<span style="color:var(--muted);font-size:13px;">No entries yet.</span>';return;}list.innerHTML=submitted.map(e=>`<span class="entry-pill" onclick="viewProfile('${e.username}')">${e.name}</span>`).join('');}
+  if(list){if(!allEntries.length){list.innerHTML='<span style="color:var(--muted);font-size:13px;">No entries yet.</span>';return;}list.innerHTML=allEntries.map(e=>`<span class="entry-pill" onclick="viewProfile('${e.username}')">${e.name}</span>`).join('');}
 }
 
 async function checkAdminPw() {

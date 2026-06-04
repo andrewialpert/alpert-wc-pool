@@ -184,6 +184,9 @@ select option{background:var(--card);}
 .entry-status.complete{color:#7ee8a2;background:rgba(45,158,72,0.12);border:1px solid rgba(45,158,72,0.25);}
 .nav-user-wrap{display:none;flex-direction:column;align-items:flex-end;cursor:pointer;}
 .bracket-warning{background:rgba(178,34,52,0.1);border:1px solid rgba(178,34,52,0.3);border-radius:8px;padding:10px 13px;font-size:12px;color:#ff8a8a;margin-bottom:12px;line-height:1.6;}
+.status-complete{color:#7ee8a2 !important;}
+.status-incomplete{color:#ff6b6b !important;}
+.status-saving{color:var(--muted) !important;}
 </style>
 </head>
 <body>
@@ -294,7 +297,7 @@ select option{background:var(--card);}
           <div><div class="section-title" id="picks-greeting">My Picks</div><div class="section-sub">Rank all 12 groups. Picks lock June 11.</div></div>
           <button class="btn-danger" onclick="wipepicks()">🗑 Start Over</button>
         </div>
-        <div id="save-reminder" class="alert alert-warn" style="display:none;">You have unsaved changes.</div>
+        <div id="save-reminder" style="display:none;"></div>
         <div class="card">
           <div class="card-title">🏁 Group Stage <span class="badge">12 GROUPS</span></div>
           <div class="scoring-toggle" onclick="toggleScoring('group-scoring')">How does group scoring work? <span>▼</span></div>
@@ -380,7 +383,7 @@ select option{background:var(--card);}
         </div>
         <div style="display:flex;gap:8px;margin-bottom:80px;">
           <button class="btn-secondary" onclick="goToStep(1)" style="flex:1;">Back</button>
-          <button class="btn-primary" onclick="submitPicks()" style="flex:1;">Submit My Picks</button>
+          <button class="btn-primary" onclick="submitPicks()" style="flex:1;">🔒 Lock In My Picks</button>
         </div>
       </div>
     </div>
@@ -409,7 +412,10 @@ select option{background:var(--card);}
     </div>
 
     <div class="save-bar" id="save-bar">
-      <button class="btn-save" onclick="saveDraft()" style="flex:1;">💾 Save Progress</button>
+      <div id="save-status-bar" style="flex:1;display:flex;align-items:center;justify-content:space-between;gap:8px;">
+        <div id="save-status-text" style="font-size:13px;color:var(--muted);font-family:'DM Mono',monospace;">Loading...</div>
+        <div id="save-spinner" style="display:none;font-size:12px;color:var(--muted);">Saving...</div>
+      </div>
     </div>
   </div>
 </div>
@@ -1252,22 +1258,7 @@ function updateNavUser() {
 }
 
 function isEntryComplete() {
-  // All 12 groups fully ranked
-  const groupsDone = Object.keys(GROUPS).every(l =>
-    [1,2,3,4].every(r => document.getElementById(`g${l}-${r}`)?.value)
-  );
-  if (!groupsDone) return false;
-  // Exactly 8 third place selected
-  const tpCount = [...document.querySelectorAll('#tp-chips .team-chip.selected')].length;
-  if (tpCount !== 8) return false;
-  // Every bracket matchup picked: all R32, R16, QF, SF, Final
-  const r32Ids = ['M73','M74','M75','M76','M77','M78','M79','M80','M81','M82','M83','M84','M85','M86','M87','M88'];
-  const r16Ids = R16.map(r => r.id);
-  const qfIds = QF.map(r => r.id);
-  const sfIds = SF.map(r => r.id);
-  const allIds = [...r32Ids, ...r16Ids, ...qfIds, ...sfIds, 'FINAL'];
-  if (!allIds.every(id => bracketPicks[id])) return false;
-  return true;
+  return isEntryCompleteFromData();
 }
 
 function updateEntryStatus() {
@@ -1581,6 +1572,7 @@ function loadPicksIntoForm(entry) {
     bracketPicks = {};
   }
   updateEntryStatus();
+  setTimeout(() => updateSaveStatusBar('saved'), 100);
 }
 
 // Step tabs / wizard state
@@ -1667,7 +1659,58 @@ function updateThirdPlaceChips() {
   document.getElementById('tp-count').textContent=c.querySelectorAll('.team-chip.selected').length;
 }
 
-function markUnsaved() { document.getElementById('save-reminder').style.display='block'; }
+let autosaveTimer = null;
+function markUnsaved() {
+  updateSaveStatusBar('saving');
+  clearTimeout(autosaveTimer);
+  autosaveTimer = setTimeout(() => { autoSave(); }, 800);
+}
+
+function updateSaveStatusBar(state) {
+  const el = document.getElementById('save-status-text');
+  if (!el) return;
+  if (state === 'saving') {
+    el.className = 'status-saving';
+    el.textContent = '💾 Saving...';
+  } else if (state === 'complete') {
+    el.className = 'status-complete';
+    el.textContent = '✓ All picks saved';
+  } else if (state === 'incomplete') {
+    const missing = countMissingPicks();
+    el.className = 'status-incomplete';
+    el.textContent = `⚠ Picks incomplete — ${missing} pick${missing===1?'':'s'} missing`;
+  } else if (state === 'saved') {
+    // saved but check completeness
+    const complete = isEntryCompleteFromData();
+    updateSaveStatusBar(complete ? 'complete' : 'incomplete');
+  }
+}
+
+function countMissingPicks() {
+  let missing = 0;
+  // Groups
+  Object.keys(GROUPS).forEach(l => {
+    [1,2,3,4].forEach(r => { if (!document.getElementById(`g${l}-${r}`)?.value) missing++; });
+  });
+  // Third place
+  const tpCount = [...document.querySelectorAll('#tp-chips .team-chip.selected')].length;
+  if (tpCount < 8) missing += (8 - tpCount);
+  // Bracket
+  const allIds = ['M73','M74','M75','M76','M77','M78','M79','M80','M81','M82','M83','M84','M85','M86','M87','M88',
+    'R16-1','R16-2','R16-3','R16-4','R16-5','R16-6','R16-7','R16-8',
+    'QF1','QF2','QF3','QF4','SF1','SF2','FINAL'];
+  allIds.forEach(id => { if (!bracketPicks[id]) missing++; });
+  return missing;
+}
+
+function isEntryCompleteFromData() {
+  const groupsDone = Object.keys(GROUPS).every(l => [1,2,3,4].every(r => document.getElementById(`g${l}-${r}`)?.value));
+  const tpCount = [...document.querySelectorAll('#tp-chips .team-chip.selected')].length;
+  const allIds = ['M73','M74','M75','M76','M77','M78','M79','M80','M81','M82','M83','M84','M85','M86','M87','M88',
+    'R16-1','R16-2','R16-3','R16-4','R16-5','R16-6','R16-7','R16-8',
+    'QF1','QF2','QF3','QF4','SF1','SF2','FINAL'];
+  return groupsDone && tpCount === 8 && allIds.every(id => bracketPicks[id]);
+}
 function toggleScoring(id) { document.getElementById(id)?.classList.toggle('open'); }
 
 function scoreEntry(entry) {
@@ -1725,7 +1768,14 @@ async function renderLeaderboard() {
     const allQF = ['QF1','QF2','QF3','QF4'];
     const allSF = ['SF1','SF2'];
     const bp = e.bracket?.picks || {};
-    const entryComplete = e.submitted === true;
+    const tpCount = (e.thirdPlaceGroups?.length || e.thirdPlacePicks?.length || 0);
+    const allBracketIds = ['M73','M74','M75','M76','M77','M78','M79','M80','M81','M82','M83','M84','M85','M86','M87','M88',
+      'R16-1','R16-2','R16-3','R16-4','R16-5','R16-6','R16-7','R16-8',
+      'QF1','QF2','QF3','QF4','SF1','SF2','FINAL'];
+    const entryComplete = e.groupPicks &&
+      Object.keys(GROUPS).every(l=>[0,1,2,3].every(i=>e.groupPicks[l]?.[i])) &&
+      tpCount===8 &&
+      allBracketIds.every(id=>bp[id]);
     const statusBadge = entryComplete
       ? `<span style="font-size:10px;color:#7ee8a2;background:rgba(45,158,72,0.12);border:1px solid rgba(45,158,72,0.25);border-radius:4px;padding:1px 6px;margin-left:6px;font-family:'DM Mono',monospace;">✓ Complete</span>`
       : `<span style="font-size:10px;color:#ff6b6b;background:rgba(178,34,52,0.12);border:1px solid rgba(178,34,52,0.3);border-radius:4px;padding:1px 6px;margin-left:6px;font-family:'DM Mono',monospace;">⚠ Incomplete</span>`;
@@ -1904,23 +1954,30 @@ async function wipepicks() {
   } catch(e) { showAlert('picks-alert','error','Error clearing picks.'); }
 }
 
-async function saveDraft() {
+async function autoSave() {
   if (!currentUser) return;
   const picks = collectPicks();
   const entry = {username:currentUser.username,name:currentUser.name,draft:true,submitted:false,savedAt:new Date().toISOString(),...picks};
   try {
     await setDoc(doc(db,'entries',currentUser.username.toLowerCase()), entry);
-    document.getElementById('save-reminder').style.display='none';
-    showAlert('picks-alert','success','Progress saved!');
-    setTimeout(()=>document.getElementById('picks-alert').innerHTML='', 2000);
+    updateSaveStatusBar('saved');
+    updateEntryStatus();
     await loadEntries(); updateHomePage();
-  } catch(e) { showAlert('picks-alert','error','Error saving: '+e.message); }
+  } catch(e) { 
+    const el = document.getElementById('save-status-text');
+    if (el) { el.className='status-incomplete'; el.textContent='⚠ Save failed. Check your connection.'; }
+  }
+}
+
+async function saveDraft() {
+  if (!currentUser) return;
+  await autoSave();
 }
 
 async function submitPicks() {
   if (!currentUser) return;
   if (picksLocked) { showAlert('picks-alert','error','Picks are locked. The tournament has started.'); return; }
-  if (!isEntryComplete()) { showAlert('picks-alert','error','Your entry is incomplete. You must pick a winner for every matchup including the Champion before submitting.'); return; }
+  if (!isEntryCompleteFromData()) { showAlert('picks-alert','error','Your entry is incomplete. You must pick a winner for every matchup including the Champion before locking in.'); return; }
   const picks = collectPicks();
   const entry = {username:currentUser.username,name:currentUser.name,submitted:true,draft:false,submittedAt:new Date().toISOString(),...picks};
   try {
@@ -1929,7 +1986,7 @@ async function submitPicks() {
     document.getElementById('picks-wizard').style.display='none';
     document.getElementById('submitted-area').style.display='block';
     document.getElementById('save-bar').style.display='none';
-  } catch(e) { showAlert('picks-alert','error','Error submitting.'); }
+  } catch(e) { showAlert('picks-alert','error','Error locking in picks.'); }
 }
 
 // Expose all functions to window (must be after all definitions)

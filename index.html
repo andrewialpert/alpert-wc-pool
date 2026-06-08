@@ -1204,9 +1204,20 @@ async function loadResults() {
 
 async function loadEntries() {
   try {
-    const snap = await getDocs(collection(db,'entries'));
-    allEntries = [];
-    snap.forEach(d => allEntries.push({id:d.id,...d.data()}));
+    const [entriesSnap, usersSnap] = await Promise.all([
+      getDocs(collection(db,'entries')),
+      getDocs(collection(db,'users'))
+    ]);
+    const entries = {};
+    entriesSnap.forEach(d => { entries[d.id] = {id:d.id,...d.data()}; });
+    // Add any users who have no entry yet
+    usersSnap.forEach(d => {
+      if (!entries[d.id]) {
+        const u = d.data();
+        entries[d.id] = {id:d.id, username:u.username, name:u.name, submitted:false, draft:false, noEntry:true};
+      }
+    });
+    allEntries = Object.values(entries);
   } catch(e) {}
 }
 

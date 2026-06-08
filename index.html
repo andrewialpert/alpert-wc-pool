@@ -1409,13 +1409,18 @@ async function loadEntries() {
       getDocs(collection(db,'entries')),
       getDocs(collection(db,'users'))
     ]);
+    const users = {};
+    usersSnap.forEach(d => { users[d.id] = d.data(); });
     const entries = {};
-    entriesSnap.forEach(d => { entries[d.id] = {id:d.id,...d.data()}; });
+    entriesSnap.forEach(d => {
+      const u = users[d.id] || {};
+      entries[d.id] = {id:d.id, paid: u.paid || false, ...d.data()};
+    });
     // Add any users who have no entry yet
     usersSnap.forEach(d => {
       if (!entries[d.id]) {
         const u = d.data();
-        entries[d.id] = {id:d.id, username:u.username, name:u.name, submitted:false, draft:false, noEntry:true};
+        entries[d.id] = {id:d.id, username:u.username, name:u.name, paid: u.paid || false, submitted:false, draft:false, noEntry:true};
       }
     });
     allEntries = Object.values(entries);
@@ -1842,8 +1847,9 @@ function updateGroupDropdowns(letter) {
     teams.forEach(t => {
       const opt = document.createElement('option');
       opt.value = t;
-      opt.textContent = (selected.includes(t) && t !== current) ? `· ${t}` : t;
+      opt.textContent = t;
       if (t === current) opt.selected = true;
+      if (selected.includes(t) && t !== current) opt.disabled = true;
       sel.appendChild(opt);
     });
   });
@@ -2002,7 +2008,10 @@ async function renderLeaderboard() {
     const statusBadge = entryComplete
       ? `<span style="font-size:10px;color:#7ee8a2;background:rgba(45,158,72,0.12);border:1px solid rgba(45,158,72,0.25);border-radius:4px;padding:1px 6px;margin-left:6px;font-family:'DM Mono',monospace;">✓ Complete</span>`
       : `<span style="font-size:10px;color:#ff6b6b;background:rgba(178,34,52,0.12);border:1px solid rgba(178,34,52,0.3);border-radius:4px;padding:1px 6px;margin-left:6px;font-family:'DM Mono',monospace;">⚠ Incomplete</span>`;
-    html+=`<tr onclick="viewProfile('${e.username}')"><td><span class="rank-cell">${rank}</span></td><td><strong>${e.name}</strong>${statusBadge}</td><td><span class="pts-badge">${e.total}</span></td><td><span class="pts-possible">+${maxPossibleScore(e)}</span></td><td style="color:var(--muted);font-size:12px;">${e.breakdown?.groups||0}</td><td style="color:var(--muted);font-size:12px;">${e.koScore||0}</td></tr>`;
+    const paidBadge = e.paid
+      ? ''
+      : `<span style="font-size:10px;color:#ff6b6b;background:rgba(178,34,52,0.12);border:1px solid rgba(178,34,52,0.3);border-radius:4px;padding:1px 6px;margin-left:6px;font-family:'DM Mono',monospace;">⚠ Unpaid</span>`;
+    html+=`<tr onclick="viewProfile('${e.username}')"><td><span class="rank-cell">${rank}</span></td><td><strong>${e.name}</strong>${statusBadge}${paidBadge}</td><td><span class="pts-badge">${e.total}</span></td><td><span class="pts-possible">+${maxPossibleScore(e)}</span></td><td style="color:var(--muted);font-size:12px;">${e.breakdown?.groups||0}</td><td style="color:var(--muted);font-size:12px;">${e.koScore||0}</td></tr>`;
   });
   html+=`</tbody></table></div><p style="color:var(--muted);font-size:12px;margin-top:7px;">${submitted.length} ${submitted.length===1?'entry':'entries'} total${!picksLocked?' · Picks hidden until June 11':''}</p>`;
   c.innerHTML=html;
@@ -2053,8 +2062,11 @@ async function renderAdminPanel() {
   document.getElementById('admin-entry-summary').textContent=`${submitted.length} entries submitted, ${allEntries.length} total accounts.`;
   document.getElementById('admin-entries-list').innerHTML=allEntries.map(e=>`
     <div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px;">
-      <span>${e.name} <span style="color:var(--muted);">(@${e.username})</span> ${e.submitted?'<span style="color:#7ee8a2;font-size:11px;">✓ Submitted</span>':e.noEntry?'<span style="color:#ff6b6b;font-size:11px;">No picks</span>':'<span style="color:#f0b429;font-size:11px;">Draft</span>'}</span>
-      <button onclick="adminDeleteAccount('${e.username}')" style="background:rgba(178,34,52,0.12);color:#ff8a8a;border:1px solid rgba(178,34,52,0.25);border-radius:6px;padding:3px 10px;font-size:11px;cursor:pointer;">Delete</button>
+      <span>${e.name} <span style="color:var(--muted);">(@${e.username})</span> ${e.submitted?'<span style="color:#7ee8a2;font-size:11px;">✓ Submitted</span>':e.noEntry?'<span style="color:#ff6b6b;font-size:11px;">No picks</span>':'<span style="color:#f0b429;font-size:11px;">Draft</span>'} ${e.paid?'<span style="color:#7ee8a2;font-size:11px;">💰 Paid</span>':'<span style="color:#ff6b6b;font-size:11px;">⚠ Unpaid</span>'}</span>
+      <div style="display:flex;gap:6px;">
+        <button onclick="adminTogglePaid('${e.username}',${!e.paid})" style="background:${e.paid?'rgba(178,34,52,0.12)':'rgba(45,158,72,0.12)'};color:${e.paid?'#ff8a8a':'#7ee8a2'};border:1px solid ${e.paid?'rgba(178,34,52,0.25)':'rgba(45,158,72,0.25)'};border-radius:6px;padding:3px 10px;font-size:11px;cursor:pointer;">${e.paid?'Mark Unpaid':'Mark Paid'}</button>
+        <button onclick="adminDeleteAccount('${e.username}')" style="background:rgba(178,34,52,0.12);color:#ff8a8a;border:1px solid rgba(178,34,52,0.25);border-radius:6px;padding:3px 10px;font-size:11px;cursor:pointer;">Delete</button>
+      </div>
     </div>`).join('');
   const rpSel=document.getElementById('reset-pin-user');
   rpSel.innerHTML='<option value="">Select user...</option>'+allEntries.map(e=>`<option value="${e.username}">${e.name} (@${e.username})</option>`).join('');
@@ -2146,6 +2158,16 @@ async function loadNotice() {
     const ta = document.getElementById('admin-notice-text');
     if (ta) ta.value = text;
   } catch(e) {}
+}
+
+async function adminTogglePaid(username, paid) {
+  try {
+    await updateDoc(doc(db,'users',username), {paid});
+    // Update local allEntries
+    const e = allEntries.find(e=>e.username===username);
+    if (e) e.paid = paid;
+    renderAdminPanel();
+  } catch(e) { alert('Error updating payment status.'); }
 }
 
 async function adminDeleteAccount(username) {
@@ -2277,6 +2299,7 @@ window.showPicksForm = showPicksWizard;
 window.adminSaveNotice = adminSaveNotice;
 window.adminClearNotice = adminClearNotice;
 window.adminDeleteAccount = adminDeleteAccount;
+window.adminTogglePaid = adminTogglePaid;
 window.setBracketPick = setBracketPick;
 window.updateEntryStatus = updateEntryStatus;
 

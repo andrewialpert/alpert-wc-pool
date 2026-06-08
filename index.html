@@ -229,6 +229,9 @@ select option{background:var(--card);}
     </div>
   </div>
   <div style="padding-top:24px;">
+    <div id="home-notice-wrap" style="display:none;">
+      <div class="alert alert-warn" id="home-notice" style="font-size:14px;line-height:1.7;margin-bottom:12px;"></div>
+    </div>
     <div class="card">
       <div class="card-title">📅 Key Dates</div>
       <div class="detail-row"><span class="detail-label">Picks Lock</span><span style="color:var(--red);font-weight:600;">June 11, 2026 at Kickoff</span></div>
@@ -554,6 +557,13 @@ select option{background:var(--card);}
         <input type="text" id="reset-pin-val" placeholder="New PIN" maxlength="4" style="width:90px;" />
         <button class="btn-secondary" onclick="adminResetPin()">Reset</button>
       </div>
+    </div>
+    <div class="card">
+      <div class="card-title">📢 Homepage Notice</div>
+      <p style="color:var(--muted);font-size:12px;margin-bottom:11px;">This message appears at the top of the homepage for everyone. Use it to list who still needs to pay, share updates, or leave it blank to hide it.</p>
+      <textarea id="admin-notice-text" placeholder="e.g. Still need to pay: John, Sarah, Mike" style="width:100%;background:var(--card-light);border:1px solid var(--border);border-radius:8px;color:var(--white);font-family:'DM Sans',sans-serif;font-size:14px;padding:10px 12px;outline:none;min-height:80px;resize:vertical;"></textarea>
+      <button class="btn-secondary" onclick="adminSaveNotice()" style="margin-top:8px;">Save Notice</button>
+      <button class="btn-danger" onclick="adminClearNotice()" style="margin-top:8px;margin-left:8px;">Clear Notice</button>
     </div>
     <div class="card">
       <div class="card-title">🔑 Admin Password</div>
@@ -1160,6 +1170,7 @@ async function init() {
   await migrateScotlandFlag();
   await loadResults();
   await loadEntries();
+  await loadNotice();
   updateHomePage();
   picksLocked = new Date() >= LOCK_DATE;
 }
@@ -1825,6 +1836,7 @@ async function checkAdminPw() {
 
 async function renderAdminPanel() {
   await loadEntries();
+  await loadNotice();
   const submitted=allEntries.filter(e=>e.submitted);
   document.getElementById('admin-entry-summary').textContent=`${submitted.length} entries submitted, ${allEntries.length} total accounts.`;
   document.getElementById('admin-entries-list').innerHTML=submitted.map(e=>`<span class="entry-pill">${e.name} (@${e.username})</span>`).join(' ');
@@ -1882,6 +1894,42 @@ async function adminResetPin() {
   if(!username||!pin){alert('Select a user and enter a PIN.');return;}
   if(pin.length!==4||!/^\d+$/.test(pin)){alert('PIN must be 4 digits.');return;}
   try { await updateDoc(doc(db,'users',username),{pin}); alert(`PIN reset for ${username}.`); } catch(e) { alert('Error.'); }
+}
+
+async function adminSaveNotice() {
+  const text = document.getElementById('admin-notice-text').value.trim();
+  try {
+    await setDoc(doc(db,'settings','notice'), {text, updatedAt: new Date().toISOString()});
+    alert('Notice saved!');
+    loadNotice();
+  } catch(e) { alert('Error saving notice.'); }
+}
+
+async function adminClearNotice() {
+  try {
+    await setDoc(doc(db,'settings','notice'), {text:'', updatedAt: new Date().toISOString()});
+    document.getElementById('admin-notice-text').value = '';
+    alert('Notice cleared.');
+    loadNotice();
+  } catch(e) { alert('Error clearing notice.'); }
+}
+
+async function loadNotice() {
+  try {
+    const snap = await getDoc(doc(db,'settings','notice'));
+    const text = snap.exists() ? snap.data().text : '';
+    const wrap = document.getElementById('home-notice-wrap');
+    const el = document.getElementById('home-notice');
+    if (text && wrap && el) {
+      el.textContent = text;
+      wrap.style.display = 'block';
+    } else if (wrap) {
+      wrap.style.display = 'none';
+    }
+    // Also populate admin textarea if open
+    const ta = document.getElementById('admin-notice-text');
+    if (ta) ta.value = text;
+  } catch(e) {}
 }
 
 async function changeAdminPw() {
@@ -1998,6 +2046,8 @@ window.tryGoToStep = tryGoToStep;
 window.advanceFromGroups = advanceFromGroups;
 window.advanceFromThirdPlace = advanceFromThirdPlace;
 window.showPicksForm = showPicksWizard;
+window.adminSaveNotice = adminSaveNotice;
+window.adminClearNotice = adminClearNotice;
 window.setBracketPick = setBracketPick;
 window.updateEntryStatus = updateEntryStatus;
 

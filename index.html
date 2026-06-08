@@ -239,7 +239,9 @@ select option{background:var(--card);}
       <div class="hero-stat"><div class="hero-stat-n">48</div><div class="hero-stat-l">Teams</div></div>
       <div class="hero-stat"><div class="hero-stat-n">12</div><div class="hero-stat-l">Groups</div></div>
       <div class="hero-stat"><div class="hero-stat-n" id="home-entry-count">0</div><div class="hero-stat-l">Entries</div></div>
-      <div class="hero-stat"><div class="hero-stat-n" id="home-days-left">23</div><div class="hero-stat-l">Days Left</div></div>
+      <div class="hero-stat"><div class="hero-stat-n" id="home-days-left">0</div><div class="hero-stat-l">Days Left</div></div>
+      <div class="hero-stat"><div class="hero-stat-n" id="home-hours-left">0</div><div class="hero-stat-l">Hours Left</div></div>
+      <div class="hero-stat"><div class="hero-stat-n" id="home-mins-left">0</div><div class="hero-stat-l">Minutes Left</div></div>
     </div>
   </div>
   <div style="padding-top:24px;">
@@ -1377,9 +1379,27 @@ async function init() {
 }
 
 function updateDaysLeft() {
-  const days = Math.max(0, Math.ceil((LOCK_DATE - new Date()) / 86400000));
-  const el = document.getElementById('home-days-left');
-  if (el) el.textContent = days;
+  const diff = LOCK_DATE - new Date();
+  if (diff <= 0) {
+    const d = document.getElementById('home-days-left');
+    const h = document.getElementById('home-hours-left');
+    const m = document.getElementById('home-mins-left');
+    if (d) d.textContent = '0';
+    if (h) h.textContent = '0';
+    if (m) m.textContent = '0';
+    return;
+  }
+  const totalMins = Math.floor(diff / 60000);
+  const days = Math.floor(totalMins / 1440);
+  const hours = Math.floor((totalMins % 1440) / 60);
+  const mins = totalMins % 60;
+  const d = document.getElementById('home-days-left');
+  const h = document.getElementById('home-hours-left');
+  const m = document.getElementById('home-mins-left');
+  if (d) d.textContent = days;
+  if (h) h.textContent = hours;
+  if (m) m.textContent = mins;
+  setTimeout(updateDaysLeft, 60000);
 }
 
 function showPage(id) {

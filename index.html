@@ -1850,7 +1850,11 @@ async function renderAdminPanel() {
   await loadNotice();
   const submitted=allEntries.filter(e=>e.submitted);
   document.getElementById('admin-entry-summary').textContent=`${submitted.length} entries submitted, ${allEntries.length} total accounts.`;
-  document.getElementById('admin-entries-list').innerHTML=submitted.map(e=>`<span class="entry-pill">${e.name} (@${e.username})</span>`).join(' ');
+  document.getElementById('admin-entries-list').innerHTML=allEntries.map(e=>`
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px;">
+      <span>${e.name} <span style="color:var(--muted);">(@${e.username})</span> ${e.submitted?'<span style="color:#7ee8a2;font-size:11px;">✓ Submitted</span>':e.noEntry?'<span style="color:#ff6b6b;font-size:11px;">No picks</span>':'<span style="color:#f0b429;font-size:11px;">Draft</span>'}</span>
+      <button onclick="adminDeleteAccount('${e.username}')" style="background:rgba(178,34,52,0.12);color:#ff8a8a;border:1px solid rgba(178,34,52,0.25);border-radius:6px;padding:3px 10px;font-size:11px;cursor:pointer;">Delete</button>
+    </div>`).join('');
   const rpSel=document.getElementById('reset-pin-user');
   rpSel.innerHTML='<option value="">Select user...</option>'+allEntries.map(e=>`<option value="${e.username}">${e.name} (@${e.username})</option>`).join('');
   const gg=document.getElementById('admin-groups-grid'); gg.innerHTML='';
@@ -1941,6 +1945,18 @@ async function loadNotice() {
     const ta = document.getElementById('admin-notice-text');
     if (ta) ta.value = text;
   } catch(e) {}
+}
+
+async function adminDeleteAccount(username) {
+  if (!confirm(`Delete account "${username}" and all their picks? This cannot be undone.`)) return;
+  try {
+    await deleteDoc(doc(db,'users',username));
+    await deleteDoc(doc(db,'entries',username));
+    alert(`Account ${username} deleted.`);
+    renderAdminPanel();
+    await loadEntries();
+    updateHomePage();
+  } catch(e) { alert('Error deleting account.'); }
 }
 
 async function changeAdminPw() {
@@ -2059,6 +2075,7 @@ window.advanceFromThirdPlace = advanceFromThirdPlace;
 window.showPicksForm = showPicksWizard;
 window.adminSaveNotice = adminSaveNotice;
 window.adminClearNotice = adminClearNotice;
+window.adminDeleteAccount = adminDeleteAccount;
 window.setBracketPick = setBracketPick;
 window.updateEntryStatus = updateEntryStatus;
 

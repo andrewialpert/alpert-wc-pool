@@ -187,6 +187,20 @@ select option{background:var(--card);}
 .status-complete{color:#7ee8a2 !important;}
 .status-incomplete{color:#ff6b6b !important;}
 .status-saving{color:var(--muted) !important;}
+.match-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);gap:8px;}
+.match-row:last-child{border-bottom:none;}
+.match-teams{display:flex;align-items:center;gap:8px;flex:1;}
+.match-team{display:flex;align-items:center;gap:5px;font-size:13px;min-width:0;}
+.match-team-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:90px;}
+.match-score{font-family:'DM Mono',monospace;font-size:16px;font-weight:700;color:var(--white);min-width:40px;text-align:center;}
+.match-score.live{color:var(--red);}
+.match-time{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);min-width:50px;text-align:right;}
+.match-group{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:0.5px;min-width:55px;}
+.live-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--red);margin-right:4px;animation:pulse 1.2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.3;}}
+.match-status-live{color:var(--red);font-size:10px;font-family:'DM Mono',monospace;font-weight:700;}
+.match-status-fin{color:var(--muted);font-size:10px;font-family:'DM Mono',monospace;}
+.match-status-up{color:var(--muted);font-size:10px;font-family:'DM Mono',monospace;}
 </style>
 </head>
 <body>
@@ -231,6 +245,13 @@ select option{background:var(--card);}
   <div style="padding-top:24px;">
     <div id="home-notice-wrap" style="display:none;">
       <div class="alert alert-warn" id="home-notice" style="font-size:14px;line-height:1.7;margin-bottom:12px;"></div>
+    </div>
+    <div class="card" id="matches-card">
+      <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;">
+        <span>⚽ Matches</span>
+        <span id="matches-updated" style="font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;font-weight:400;"></span>
+      </div>
+      <div id="matches-list"><div class="loading">Loading matches...</div></div>
     </div>
     <div class="card">
       <div class="card-title">📅 Key Dates</div>
@@ -1162,6 +1183,185 @@ async function migrateScotlandFlag() {
   } catch(e) { console.error('Migration error:', e); }
 }
 
+// =====================================================================
+// LIVE MATCHES - football-data.org API with caching
+// =====================================================================
+const FD_API_KEY = 'ef94bd51236942cc9eb3bc486218f794';
+const FD_BASE = 'https://api.football-data.org/v4';
+const CACHE_TTL = 3 * 60 * 1000; // 3 minute cache
+let matchesCache = null;
+let matchesCacheTime = 0;
+
+// Team name normalizer -- API uses different names than our GROUPS
+const TEAM_NAME_MAP = {
+  'Mexico': '🇲🇽 Mexico',
+  'South Africa': '🇿🇦 South Africa',
+  'Korea Republic': '🇰🇷 South Korea',
+  'South Korea': '🇰🇷 South Korea',
+  'Czechia': '🇨🇿 Czechia',
+  'Czech Republic': '🇨🇿 Czechia',
+  'Canada': '🇨🇦 Canada',
+  'Switzerland': '🇨🇭 Switzerland',
+  'Qatar': '🇶🇦 Qatar',
+  'Bosnia and Herzegovina': '🇧🇦 Bosnia & Herzegovina',
+  'Bosnia & Herzegovina': '🇧🇦 Bosnia & Herzegovina',
+  'Brazil': '🇧🇷 Brazil',
+  'Morocco': '🇲🇦 Morocco',
+  'Haiti': '🇭🇹 Haiti',
+  'Scotland': '🏴󠁧󠁢󠁳󠁣󠁴󠁿 Scotland',
+  'USA': '🇺🇸 USA',
+  'United States': '🇺🇸 USA',
+  'Paraguay': '🇵🇾 Paraguay',
+  'Australia': '🇦🇺 Australia',
+  'Türkiye': '🇹🇷 Türkiye',
+  'Turkey': '🇹🇷 Türkiye',
+  'Germany': '🇩🇪 Germany',
+  'Curaçao': '🇨🇼 Curaçao',
+  'Curacao': '🇨🇼 Curaçao',
+  "Côte d'Ivoire": '🇨🇮 Ivory Coast',
+  'Ivory Coast': '🇨🇮 Ivory Coast',
+  'Ecuador': '🇪🇨 Ecuador',
+  'Netherlands': '🇳🇱 Netherlands',
+  'Japan': '🇯🇵 Japan',
+  'Sweden': '🇸🇪 Sweden',
+  'Tunisia': '🇹🇳 Tunisia',
+  'Belgium': '🇧🇪 Belgium',
+  'Egypt': '🇪🇬 Egypt',
+  'Iran': '🇮🇷 Iran',
+  'New Zealand': '🇳🇿 New Zealand',
+  'Spain': '🇪🇸 Spain',
+  'Cape Verde': '🇨🇻 Cape Verde',
+  'Saudi Arabia': '🇸🇦 Saudi Arabia',
+  'Uruguay': '🇺🇾 Uruguay',
+  'France': '🇫🇷 France',
+  'Senegal': '🇸🇳 Senegal',
+  'Norway': '🇳🇴 Norway',
+  'Iraq': '🇮🇶 Iraq',
+  'Argentina': '🇦🇷 Argentina',
+  'Algeria': '🇩🇿 Algeria',
+  'Austria': '🇦🇹 Austria',
+  'Jordan': '🇯🇴 Jordan',
+  'Portugal': '🇵🇹 Portugal',
+  'DR Congo': '🇨🇩 DR Congo',
+  'Congo DR': '🇨🇩 DR Congo',
+  'Uzbekistan': '🇺🇿 Uzbekistan',
+  'Colombia': '🇨🇴 Colombia',
+  'England': '🏴󠁧󠁢󠁥󠁮󠁧󠁿 England',
+  'Croatia': '🇭🇷 Croatia',
+  'Ghana': '🇬🇭 Ghana',
+  'Panama': '🇵🇦 Panama',
+};
+
+function normTeam(name) {
+  return TEAM_NAME_MAP[name] || name;
+}
+
+async function fetchMatches() {
+  const now = Date.now();
+  if (matchesCache && now - matchesCacheTime < CACHE_TTL) return matchesCache;
+  try {
+    const res = await fetch(`${FD_BASE}/competitions/WC/matches?season=2026`, {
+      headers: { 'X-Auth-Token': FD_API_KEY }
+    });
+    if (!res.ok) throw new Error('API error');
+    const data = await res.json();
+    matchesCache = data.matches || [];
+    matchesCacheTime = now;
+    return matchesCache;
+  } catch(e) {
+    return matchesCache || [];
+  }
+}
+
+function formatMatchTime(dateStr) {
+  const d = new Date(dateStr);
+  return d.toLocaleDateString('en-US',{month:'short',day:'numeric'}) + ' ' +
+    d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true});
+}
+
+function getMatchStatus(m) {
+  const s = m.status;
+  if (s === 'FINISHED') return 'final';
+  if (s === 'IN_PLAY' || s === 'PAUSED' || s === 'HALFTIME') return 'live';
+  return 'upcoming';
+}
+
+function renderMatchCard(m) {
+  const status = getMatchStatus(m);
+  const home = normTeam(m.homeTeam?.name || '');
+  const away = normTeam(m.awayTeam?.name || '');
+  const homeScore = m.score?.fullTime?.home ?? m.score?.halfTime?.home ?? '';
+  const awayScore = m.score?.fullTime?.away ?? m.score?.halfTime?.away ?? '';
+  const hasScore = homeScore !== '' && awayScore !== '';
+  const group = m.group ? m.group.replace('GROUP_','Group ') : (m.stage?.replace(/_/g,' ') || '');
+
+  let scoreHtml, statusHtml;
+  if (status === 'live') {
+    const min = m.minute ? `${m.minute}'` : 'LIVE';
+    scoreHtml = `<div class="match-score live">${hasScore ? homeScore+'-'+awayScore : '0-0'}</div>`;
+    statusHtml = `<span class="match-status-live"><span class="live-dot"></span>${min}</span>`;
+  } else if (status === 'final') {
+    scoreHtml = `<div class="match-score">${homeScore}-${awayScore}</div>`;
+    statusHtml = `<span class="match-status-fin">FT</span>`;
+  } else {
+    scoreHtml = `<div class="match-score" style="font-size:12px;color:var(--muted);">${formatMatchTime(m.utcDate)}</div>`;
+    statusHtml = `<span class="match-status-up">${group}</span>`;
+  }
+
+  return `<div class="match-row">
+    <span class="match-group">${status !== 'upcoming' ? group : ''}</span>
+    <div class="match-teams">
+      <div class="match-team"><span class="match-team-name">${home}</span></div>
+      ${scoreHtml}
+      <div class="match-team" style="flex-direction:row-reverse;"><span class="match-team-name" style="text-align:right;">${away}</span></div>
+    </div>
+    ${statusHtml}
+  </div>`;
+}
+
+async function renderMatches() {
+  const matches = await fetchMatches();
+  const el = document.getElementById('matches-list');
+  if (!el) return;
+
+  if (!matches.length) {
+    el.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:8px 0;">No match data available yet.</div>';
+    return;
+  }
+
+  const now = new Date();
+
+  // Sort: live first, then most recent finished, then upcoming
+  const live = matches.filter(m => getMatchStatus(m) === 'live');
+  const finished = matches.filter(m => getMatchStatus(m) === 'final')
+    .sort((a,b) => new Date(b.utcDate) - new Date(a.utcDate));
+  const upcoming = matches.filter(m => getMatchStatus(m) === 'upcoming')
+    .sort((a,b) => new Date(a.utcDate) - new Date(b.utcDate));
+
+  // Show: all live, last 5 finished, next 5 upcoming
+  const toShow = [
+    ...live,
+    ...finished.slice(0, 5),
+    ...upcoming.slice(0, 5)
+  ];
+
+  if (!toShow.length) {
+    el.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:8px 0;">Tournament has not started yet.</div>';
+    return;
+  }
+
+  el.innerHTML = toShow.map(renderMatchCard).join('');
+
+  const upd = document.getElementById('matches-updated');
+  if (upd) upd.textContent = 'Updated ' + new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true});
+}
+
+async function loadMatchData() {
+  await renderMatches();
+  // Auto-refresh every 3 minutes
+  setInterval(renderMatches, CACHE_TTL);
+}
+
 async function init() {
   buildForm();
   updateDaysLeft();
@@ -1173,6 +1373,7 @@ async function init() {
   await loadNotice();
   updateHomePage();
   picksLocked = new Date() >= LOCK_DATE;
+  loadMatchData();
 }
 
 function updateDaysLeft() {

@@ -1263,26 +1263,59 @@ function normTeam(name) {
 async function fetchMatches() {
   const now = Date.now();
   if (matchesCache && now - matchesCacheTime < CACHE_TTL) return matchesCache;
-  // Try multiple possible competition codes for 2026 World Cup
+
+  // Try worldcup26.ir first - free, no API key, built for 2026 WC
   const attempts = [
-    `${FD_BASE}/competitions/WC/matches?season=2026`,
-    `${FD_BASE}/competitions/WC2026/matches`,
-    `${FD_BASE}/competitions/2000/matches?season=2026`,
-    `${FD_BASE}/competitions/WC/matches`,
+    {
+      url: 'https://worldcup26.ir/api/matches',
+      parse: (data) => {
+        const matches = Array.isArray(data) ? data : data.matches || data.data || [];
+        return matches.map(m => ({
+          homeTeam: { name: m.home_team || m.homeTeam?.name || m.home || '' },
+          awayTeam: { name: m.away_team || m.awayTeam?.name || m.away || '' },
+          score: {
+            fullTime: {
+              home: m.home_score ?? m.score?.home ?? m.homeScore ?? null,
+              away: m.away_score ?? m.score?.away ?? m.awayScore ?? null,
+            }
+          },
+          status: m.status || (m.finished ? 'FINISHED' : m.live ? 'IN_PLAY' : 'TIMED'),
+          utcDate: m.datetime || m.date || m.utcDate || '',
+          group: m.group || m.stage || '',
+          minute: m.minute || null,
+        }));
+      }
+    },
+    {
+      url: `${FD_BASE}/competitions/WC/matches?season=2026`,
+      headers: { 'X-Auth-Token': FD_API_KEY },
+      parse: (data) => data.matches || []
+    },
+    {
+      url: `${FD_BASE}/competitions/WC/matches`,
+      headers: { 'X-Auth-Token': FD_API_KEY },
+      parse: (data) => data.matches || []
+    },
   ];
-  for (const url of attempts) {
+
+  for (const attempt of attempts) {
     try {
-      const res = await fetch(url, { headers: { 'X-Auth-Token': FD_API_KEY } });
+      const res = await fetch(attempt.url, {
+        headers: attempt.headers || {}
+      });
       if (!res.ok) continue;
       const data = await res.json();
-      const matches = data.matches || [];
+      const matches = attempt.parse(data);
       if (matches.length > 0) {
         matchesCache = matches;
         matchesCacheTime = now;
-        console.log('Matches loaded from:', url, '- count:', matches.length);
+        console.log('Matches loaded from:', attempt.url, '- count:', matches.length);
         return matchesCache;
       }
-    } catch(e) { continue; }
+    } catch(e) {
+      console.log('Failed:', attempt.url, e.message);
+      continue;
+    }
   }
   return matchesCache || [];
 }
@@ -1294,9 +1327,9 @@ function formatMatchTime(dateStr) {
 }
 
 function getMatchStatus(m) {
-  const s = m.status;
-  if (s === 'FINISHED') return 'final';
-  if (s === 'IN_PLAY' || s === 'PAUSED' || s === 'HALFTIME') return 'live';
+  const s = (m.status || '').toUpperCase();
+  if (s === 'FINISHED' || s === 'FULL_TIME' || s === 'FT' || s === 'COMPLETED') return 'final';
+  if (s === 'IN_PLAY' || s === 'PAUSED' || s === 'HALFTIME' || s === 'LIVE' || s === 'HT' || s === 'PLAYING') return 'live';
   return 'upcoming';
 }
 

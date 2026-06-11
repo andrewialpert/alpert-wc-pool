@@ -1263,18 +1263,28 @@ function normTeam(name) {
 async function fetchMatches() {
   const now = Date.now();
   if (matchesCache && now - matchesCacheTime < CACHE_TTL) return matchesCache;
-  try {
-    const res = await fetch(`${FD_BASE}/competitions/WC/matches?season=2026`, {
-      headers: { 'X-Auth-Token': FD_API_KEY }
-    });
-    if (!res.ok) throw new Error('API error');
-    const data = await res.json();
-    matchesCache = data.matches || [];
-    matchesCacheTime = now;
-    return matchesCache;
-  } catch(e) {
-    return matchesCache || [];
+  // Try multiple possible competition codes for 2026 World Cup
+  const attempts = [
+    `${FD_BASE}/competitions/WC/matches?season=2026`,
+    `${FD_BASE}/competitions/WC2026/matches`,
+    `${FD_BASE}/competitions/2000/matches?season=2026`,
+    `${FD_BASE}/competitions/WC/matches`,
+  ];
+  for (const url of attempts) {
+    try {
+      const res = await fetch(url, { headers: { 'X-Auth-Token': FD_API_KEY } });
+      if (!res.ok) continue;
+      const data = await res.json();
+      const matches = data.matches || [];
+      if (matches.length > 0) {
+        matchesCache = matches;
+        matchesCacheTime = now;
+        console.log('Matches loaded from:', url, '- count:', matches.length);
+        return matchesCache;
+      }
+    } catch(e) { continue; }
   }
+  return matchesCache || [];
 }
 
 function formatMatchTime(dateStr) {
@@ -2010,7 +2020,7 @@ async function renderLeaderboard() {
   const scored=submitted.map(e=>({...e,...scoreEntry(e)})).sort((a,b)=>b.total-a.total);
   let html='';
   if(!hasResults)html+='<div class="alert alert-info" style="margin-bottom:12px;">Tournament has not started. Scores will appear once results are entered.</div>';
-  html+=`<div class="card" style="padding:0;overflow:hidden;"><table class="lb-table"><thead><tr><th style="width:40px;">#</th><th>Name</th><th>Score</th><th>Max Left</th><th>Group</th><th>KO</th></tr></thead><tbody>`;
+  html+=`<div class="card" style="padding:0;overflow:hidden;"><table class="lb-table"><thead><tr><th style="width:40px;">#</th><th>Name</th><th>Champion</th><th>Score</th><th>Max Left</th><th>Group</th><th>KO</th></tr></thead><tbody>`;
   scored.forEach((e,i)=>{
     const medals=['🥇','🥈','🥉'];
     const rank=medals[i]||`<span style="color:var(--muted);font-size:12px;">${i+1}</span>`;
@@ -2033,7 +2043,12 @@ async function renderLeaderboard() {
     const paidBadge = e.paid
       ? ''
       : `<span style="font-size:10px;color:#ff6b6b;background:rgba(178,34,52,0.12);border:1px solid rgba(178,34,52,0.3);border-radius:4px;padding:1px 6px;margin-left:6px;font-family:'DM Mono',monospace;">⚠ Unpaid</span>`;
-    html+=`<tr onclick="viewProfile('${e.username}')"><td><span class="rank-cell">${rank}</span></td><td><strong>${e.name}</strong>${statusBadge}${paidBadge}</td><td><span class="pts-badge">${e.total}</span></td><td><span class="pts-possible">+${maxPossibleScore(e)}</span></td><td style="color:var(--muted);font-size:12px;">${e.breakdown?.groups||0}</td><td style="color:var(--muted);font-size:12px;">${e.koScore||0}</td></tr>`;
+    const champPick = e.bracket?.picks?.['FINAL'] || e.knockout?.champion?.[0] || '';
+    const champDisplay = picksLocked && champPick
+      ? champPick.replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu,'').trim()
+      : picksLocked ? '<span style="color:var(--muted);">?</span>'
+      : '<span style="color:var(--muted);">🔒</span>';
+    html+=`<tr onclick="viewProfile('${e.username}')"><td><span class="rank-cell">${rank}</span></td><td><strong>${e.name}</strong>${statusBadge}${paidBadge}</td><td style="font-size:12px;color:var(--gold);">${champDisplay}</td><td><span class="pts-badge">${e.total}</span></td><td><span class="pts-possible">+${maxPossibleScore(e)}</span></td><td style="color:var(--muted);font-size:12px;">${e.breakdown?.groups||0}</td><td style="color:var(--muted);font-size:12px;">${e.koScore||0}</td></tr>`;
   });
   html+=`</tbody></table></div><p style="color:var(--muted);font-size:12px;margin-top:7px;">${submitted.length} ${submitted.length===1?'entry':'entries'} total${!picksLocked?' · Picks hidden until June 11':''}</p>`;
   c.innerHTML=html;

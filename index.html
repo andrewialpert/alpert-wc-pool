@@ -1202,8 +1202,11 @@ const TEAM_NAME_MAP = {
   'South Africa': '🇿🇦 South Africa',
   'Korea Republic': '🇰🇷 South Korea',
   'South Korea': '🇰🇷 South Korea',
-  'Czechia': '🇨🇿 Czechia',
   'Czech Republic': '🇨🇿 Czechia',
+  'Czechia': '🇨🇿 Czechia',
+  'Democratic Republic of the Congo': '🇨🇩 DR Congo',
+  'Congo DR': '🇨🇩 DR Congo',
+  'DR Congo': '🇨🇩 DR Congo',
   'Canada': '🇨🇦 Canada',
   'Switzerland': '🇨🇭 Switzerland',
   'Qatar': '🇶🇦 Qatar',
@@ -1260,68 +1263,64 @@ function normTeam(name) {
   return TEAM_NAME_MAP[name] || name;
 }
 
+// Cloudflare Worker proxy URL - replace with your worker URL after deploying
+const WC_PROXY = 'https://wc2026-proxy.skialpert.workers.dev';
+
 async function fetchMatches() {
   const now = Date.now();
   if (matchesCache && now - matchesCacheTime < CACHE_TTL) return matchesCache;
 
-  // Try worldcup26.ir first - free, no API key, built for 2026 WC
-  const attempts = [
-    {
-      url: 'https://worldcup26.ir/api/matches',
-      parse: (data) => {
-        const matches = Array.isArray(data) ? data : data.matches || data.data || [];
-        return matches.map(m => ({
-          homeTeam: { name: m.home_team || m.homeTeam?.name || m.home || '' },
-          awayTeam: { name: m.away_team || m.awayTeam?.name || m.away || '' },
-          score: {
-            fullTime: {
-              home: m.home_score ?? m.score?.home ?? m.homeScore ?? null,
-              away: m.away_score ?? m.score?.away ?? m.awayScore ?? null,
-            }
-          },
-          status: m.status || (m.finished ? 'FINISHED' : m.live ? 'IN_PLAY' : 'TIMED'),
-          utcDate: m.datetime || m.date || m.utcDate || '',
-          group: m.group || m.stage || '',
-          minute: m.minute || null,
-        }));
-      }
-    },
-    {
-      url: `${FD_BASE}/competitions/WC/matches?season=2026`,
-      headers: { 'X-Auth-Token': FD_API_KEY },
-      parse: (data) => data.matches || []
-    },
-    {
-      url: `${FD_BASE}/competitions/WC/matches`,
-      headers: { 'X-Auth-Token': FD_API_KEY },
-      parse: (data) => data.matches || []
-    },
-  ];
+  try {
+    const res = await fetch(`${WC_PROXY}/matches`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
 
-  for (const attempt of attempts) {
-    try {
-      const res = await fetch(attempt.url, {
-        headers: attempt.headers || {}
-      });
-      if (!res.ok) continue;
-      const data = await res.json();
-      const matches = attempt.parse(data);
-      if (matches.length > 0) {
-        matchesCache = matches;
-        matchesCacheTime = now;
-        console.log('Matches loaded from:', attempt.url, '- count:', matches.length);
-        return matchesCache;
-      }
-    } catch(e) {
-      console.log('Failed:', attempt.url, e.message);
-      continue;
+    const raw = data.games || data.matches || (Array.isArray(data) ? data : []);
+
+    const matches = raw.map(m => ({
+      homeTeam: { name: m.home_team_id !== '0' && m.home_team_id !== 0 ? (m.home_team_name_en || '') : '' },
+      awayTeam: { name: m.away_team_id !== '0' && m.away_team_id !== 0 ? (m.away_team_name_en || '') : '' },
+      homeLabel: m.home_team_label || '',
+      awayLabel: m.away_team_label || '',
+      score: {
+        fullTime: {
+          home: (m.finished === 'TRUE' || m.finished === true || m.time_elapsed === 'finished') ? parseInt(m.home_score) : null,
+          away: (m.finished === 'TRUE' || m.finished === true || m.time_elapsed === 'finished') ? parseInt(m.away_score) : null,
+        }
+      },
+      status: (m.finished === 'TRUE' || m.finished === true || m.time_elapsed === 'finished') ? 'FINISHED'
+            : (m.time_elapsed && m.time_elapsed !== 'notstarted' && m.time_elapsed !== 'finished') ? 'IN_PLAY'
+            : 'TIMED',
+      utcDate: m.local_date || '',
+      group: m.type === 'group' ? `Group ${m.group}` : m.type === 'r32' ? 'Round of 32' : m.type === 'r16' ? 'Round of 16' : m.type === 'qf' ? 'Quarterfinal' : m.type === 'sf' ? 'Semifinal' : m.type === 'final' ? 'Final' : m.type === 'third' ? '3rd Place' : m.group || '',
+      minute: (m.time_elapsed && m.time_elapsed !== 'notstarted' && m.time_elapsed !== 'finished') ? m.time_elapsed : null,
+      matchType: m.type || 'group',
+    }));
+
+    if (matches.length > 0) {
+      matchesCache = matches;
+      matchesCacheTime = now;
+      console.log('Matches loaded via proxy, count:', matches.length);
     }
+    return matchesCache || [];
+  } catch(e) {
+    console.log('Proxy fetch failed:', e.message);
+    return matchesCache || [];
   }
-  return matchesCache || [];
 }
 
 function formatMatchTime(dateStr) {
-  const d = new Date(dateStr);
+  if (!dateStr) return '';
+  // Handle "MM/DD/YYYY HH:MM" format from worldcup26.ir
+  let d;
+  if (dateStr.match(/^\d{2}\/\d{2}\/\d{4}/)) {
+    const [datePart, timePart] = dateStr.split(' ');
+    const [mm, dd, yyyy] = datePart.split('/');
+    d = new Date(`${yyyy}-${mm}-${dd}T${timePart || '00:00'}:00`);
+  } else {
+    d = new Date(dateStr);
+  }
+  if (isNaN(d.getTime())) return dateStr;
   return d.toLocaleDateString('en-US',{month:'short',day:'numeric'}) + ' ' +
     d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true});
 }
@@ -1335,12 +1334,15 @@ function getMatchStatus(m) {
 
 function renderMatchCard(m) {
   const status = getMatchStatus(m);
-  const home = normTeam(m.homeTeam?.name || '');
-  const away = normTeam(m.awayTeam?.name || '');
-  const homeScore = m.score?.fullTime?.home ?? m.score?.halfTime?.home ?? '';
-  const awayScore = m.score?.fullTime?.away ?? m.score?.halfTime?.away ?? '';
-  const hasScore = homeScore !== '' && awayScore !== '';
-  const group = m.group ? m.group.replace('GROUP_','Group ') : (m.stage?.replace(/_/g,' ') || '');
+  // For group stage use actual team names, for knockout use labels if no team yet
+  const homeRaw = m.homeTeam?.name || '';
+  const awayRaw = m.awayTeam?.name || '';
+  const home = homeRaw ? normTeam(homeRaw) : (m.homeLabel || 'TBD');
+  const away = awayRaw ? normTeam(awayRaw) : (m.awayLabel || 'TBD');
+  const homeScore = m.score?.fullTime?.home;
+  const awayScore = m.score?.fullTime?.away;
+  const hasScore = homeScore !== null && homeScore !== undefined && awayScore !== null && awayScore !== undefined;
+  const group = m.group || '';
 
   let scoreHtml, statusHtml;
   if (status === 'live') {
@@ -1352,11 +1354,11 @@ function renderMatchCard(m) {
     statusHtml = `<span class="match-status-fin">FT</span>`;
   } else {
     scoreHtml = `<div class="match-score" style="font-size:12px;color:var(--muted);">${formatMatchTime(m.utcDate)}</div>`;
-    statusHtml = `<span class="match-status-up">${group}</span>`;
+    statusHtml = `<span class="match-status-up"></span>`;
   }
 
   return `<div class="match-row">
-    <span class="match-group">${status !== 'upcoming' ? group : ''}</span>
+    <span class="match-group">${group}</span>
     <div class="match-teams">
       <div class="match-team"><span class="match-team-name">${home}</span></div>
       ${scoreHtml}

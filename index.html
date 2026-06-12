@@ -1202,11 +1202,8 @@ const TEAM_NAME_MAP = {
   'South Africa': '🇿🇦 South Africa',
   'Korea Republic': '🇰🇷 South Korea',
   'South Korea': '🇰🇷 South Korea',
-  'Czech Republic': '🇨🇿 Czechia',
   'Czechia': '🇨🇿 Czechia',
-  'Democratic Republic of the Congo': '🇨🇩 DR Congo',
-  'Congo DR': '🇨🇩 DR Congo',
-  'DR Congo': '🇨🇩 DR Congo',
+  'Czech Republic': '🇨🇿 Czechia',
   'Canada': '🇨🇦 Canada',
   'Switzerland': '🇨🇭 Switzerland',
   'Qatar': '🇶🇦 Qatar',
@@ -1251,6 +1248,7 @@ const TEAM_NAME_MAP = {
   'Portugal': '🇵🇹 Portugal',
   'DR Congo': '🇨🇩 DR Congo',
   'Congo DR': '🇨🇩 DR Congo',
+  'Democratic Republic of the Congo': '🇨🇩 DR Congo',
   'Uzbekistan': '🇺🇿 Uzbekistan',
   'Colombia': '🇨🇴 Colombia',
   'England': '🏴󠁧󠁢󠁥󠁮󠁧󠁿 England',
@@ -1263,20 +1261,16 @@ function normTeam(name) {
   return TEAM_NAME_MAP[name] || name;
 }
 
-// Cloudflare Worker proxy URL - replace with your worker URL after deploying
 const WC_PROXY = 'https://wc2026-proxy.skialpert.workers.dev';
 
 async function fetchMatches() {
   const now = Date.now();
   if (matchesCache && now - matchesCacheTime < CACHE_TTL) return matchesCache;
-
   try {
     const res = await fetch(`${WC_PROXY}/matches`);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
-
     const raw = data.games || data.matches || (Array.isArray(data) ? data : []);
-
     const matches = raw.map(m => ({
       homeTeam: { name: m.home_team_id !== '0' && m.home_team_id !== 0 ? (m.home_team_name_en || '') : '' },
       awayTeam: { name: m.away_team_id !== '0' && m.away_team_id !== 0 ? (m.away_team_name_en || '') : '' },
@@ -1296,11 +1290,10 @@ async function fetchMatches() {
       minute: (m.time_elapsed && m.time_elapsed !== 'notstarted' && m.time_elapsed !== 'finished') ? m.time_elapsed : null,
       matchType: m.type || 'group',
     }));
-
     if (matches.length > 0) {
       matchesCache = matches;
       matchesCacheTime = now;
-      console.log('Matches loaded via proxy, count:', matches.length);
+      console.log('Matches loaded, count:', matches.length);
     }
     return matchesCache || [];
   } catch(e) {
@@ -1308,10 +1301,8 @@ async function fetchMatches() {
     return matchesCache || [];
   }
 }
-
 function formatMatchTime(dateStr) {
   if (!dateStr) return '';
-  // Handle "MM/DD/YYYY HH:MM" format from worldcup26.ir
   let d;
   if (dateStr.match(/^\d{2}\/\d{2}\/\d{4}/)) {
     const [datePart, timePart] = dateStr.split(' ');
@@ -1334,7 +1325,6 @@ function getMatchStatus(m) {
 
 function renderMatchCard(m) {
   const status = getMatchStatus(m);
-  // For group stage use actual team names, for knockout use labels if no team yet
   const homeRaw = m.homeTeam?.name || '';
   const awayRaw = m.awayTeam?.name || '';
   const home = homeRaw ? normTeam(homeRaw) : (m.homeLabel || 'TBD');
@@ -1343,7 +1333,6 @@ function renderMatchCard(m) {
   const awayScore = m.score?.fullTime?.away;
   const hasScore = homeScore !== null && homeScore !== undefined && awayScore !== null && awayScore !== undefined;
   const group = m.group || '';
-
   let scoreHtml, statusHtml;
   if (status === 'live') {
     const min = m.minute ? `${m.minute}'` : 'LIVE';
@@ -1356,7 +1345,6 @@ function renderMatchCard(m) {
     scoreHtml = `<div class="match-score" style="font-size:12px;color:var(--muted);">${formatMatchTime(m.utcDate)}</div>`;
     statusHtml = `<span class="match-status-up"></span>`;
   }
-
   return `<div class="match-row">
     <span class="match-group">${group}</span>
     <div class="match-teams">
@@ -2151,11 +2139,14 @@ async function viewProfile(username) {
   const entry=allEntries.find(e=>e.username===username); if(!entry) return;
   const score=scoreEntry(entry);
   showPage('profile');
-  const locked=picksLocked;
+  const locked = new Date() >= LOCK_DATE; // always recalculate fresh
   let html=`<div class="profile-header"><div class="profile-avatar">${(entry.name||'?')[0].toUpperCase()}</div><div><div class="profile-name">${entry.name}</div><div class="profile-meta">@${entry.username} · Submitted ${new Date(entry.submittedAt||entry.savedAt||Date.now()).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}</div></div></div>`;
   html+=`<div class="score-breakdown"><div class="breakdown-item"><div class="breakdown-n">${score.total}</div><div class="breakdown-l">Total</div></div><div class="breakdown-item"><div class="breakdown-n">${score.groupScore}</div><div class="breakdown-l">Groups</div></div><div class="breakdown-item"><div class="breakdown-n">${score.koScore}</div><div class="breakdown-l">Knockout</div></div><div class="breakdown-item"><div class="breakdown-n">${score.breakdown?.r32||0}</div><div class="breakdown-l">R32</div></div><div class="breakdown-item"><div class="breakdown-n">${score.breakdown?.r16||0}</div><div class="breakdown-l">R16</div></div><div class="breakdown-item"><div class="breakdown-n">${score.breakdown?.qf||0}</div><div class="breakdown-l">QF</div></div><div class="breakdown-item"><div class="breakdown-n">${score.breakdown?.sf||0}</div><div class="breakdown-l">SF</div></div><div class="breakdown-item"><div class="breakdown-n">${score.breakdown?.final||0}</div><div class="breakdown-l">Final</div></div><div class="breakdown-item"><div class="breakdown-n">${score.breakdown?.champion||0}</div><div class="breakdown-l">Champ</div></div></div>`;
   if(locked){
-    html+=`<div class="card"><div class="card-title">🏆 Champion Pick</div><div style="font-size:18px;font-weight:600;">${entry.knockout?.champion?.[0]||'None'}</div></div>`;
+    // Champion
+    const champ = entry.bracket?.picks?.['FINAL'] || entry.knockout?.champion?.[0] || 'None';
+    html+=`<div class="card"><div class="card-title">🏆 Champion Pick</div><div style="font-size:18px;font-weight:600;">${champ}</div></div>`;
+    // Group picks
     html+=`<div class="card"><div class="card-title">🏁 Group Picks</div><div class="groups-grid">`;
     Object.entries(GROUPS).forEach(([l])=>{
       const picks=entry.groupPicks?.[l]||[];
@@ -2167,7 +2158,30 @@ async function viewProfile(username) {
       html+=`</div>`;
     });
     html+=`</div></div>`;
-  } else { html+=`<div class="alert alert-info">Picks will be visible to everyone after the tournament starts on June 11.</div>`; }
+    // Third place picks
+    const tp = entry.thirdPlacePicks || [];
+    html+=`<div class="card"><div class="card-title">🥉 Third Place Qualifiers</div><div class="team-chips">`;
+    tp.forEach(t=>{ html+=`<div class="team-chip selected">${t}</div>`; });
+    if(!tp.length) html+='<span style="color:var(--muted);font-size:13px;">None saved</span>';
+    html+=`</div></div>`;
+    // Bracket picks
+    const bp = entry.bracket?.picks || {};
+    const rounds = [
+      {label:'Round of 32', ids:['M73','M74','M75','M76','M77','M78','M79','M80','M81','M82','M83','M84','M85','M86','M87','M88']},
+      {label:'Round of 16', ids:['R16-1','R16-2','R16-3','R16-4','R16-5','R16-6','R16-7','R16-8']},
+      {label:'Quarterfinals', ids:['QF1','QF2','QF3','QF4']},
+      {label:'Semifinals', ids:['SF1','SF2']},
+    ];
+    rounds.forEach(({label,ids})=>{
+      const roundPicks = ids.map(id=>bp[id]).filter(Boolean);
+      if(!roundPicks.length) return;
+      html+=`<div class="card"><div class="card-title">${label}</div><div class="team-chips">`;
+      roundPicks.forEach(t=>{ html+=`<div class="team-chip selected">${t}</div>`; });
+      html+=`</div></div>`;
+    });
+  } else {
+    html+=`<div class="alert alert-info">Picks will be visible to everyone after the tournament starts on June 11.</div>`;
+  }
   document.getElementById('profile-content').innerHTML=html;
 }
 

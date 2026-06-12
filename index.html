@@ -2143,7 +2143,7 @@ async function viewProfile(username) {
   let html=`<div class="profile-header"><div class="profile-avatar">${(entry.name||'?')[0].toUpperCase()}</div><div><div class="profile-name">${entry.name}</div><div class="profile-meta">@${entry.username} · Submitted ${new Date(entry.submittedAt||entry.savedAt||Date.now()).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}</div></div></div>`;
   html+=`<div class="score-breakdown"><div class="breakdown-item"><div class="breakdown-n">${score.total}</div><div class="breakdown-l">Total</div></div><div class="breakdown-item"><div class="breakdown-n">${score.groupScore}</div><div class="breakdown-l">Groups</div></div><div class="breakdown-item"><div class="breakdown-n">${score.koScore}</div><div class="breakdown-l">Knockout</div></div><div class="breakdown-item"><div class="breakdown-n">${score.breakdown?.r32||0}</div><div class="breakdown-l">R32</div></div><div class="breakdown-item"><div class="breakdown-n">${score.breakdown?.r16||0}</div><div class="breakdown-l">R16</div></div><div class="breakdown-item"><div class="breakdown-n">${score.breakdown?.qf||0}</div><div class="breakdown-l">QF</div></div><div class="breakdown-item"><div class="breakdown-n">${score.breakdown?.sf||0}</div><div class="breakdown-l">SF</div></div><div class="breakdown-item"><div class="breakdown-n">${score.breakdown?.final||0}</div><div class="breakdown-l">Final</div></div><div class="breakdown-item"><div class="breakdown-n">${score.breakdown?.champion||0}</div><div class="breakdown-l">Champ</div></div></div>`;
   if(locked){
-    // Champion
+    // Champion at top
     const champ = entry.bracket?.picks?.['FINAL'] || entry.knockout?.champion?.[0] || 'None';
     html+=`<div class="card"><div class="card-title">🏆 Champion Pick</div><div style="font-size:18px;font-weight:600;">${champ}</div></div>`;
     // Group picks
@@ -2179,6 +2179,8 @@ async function viewProfile(username) {
       roundPicks.forEach(t=>{ html+=`<div class="team-chip selected">${t}</div>`; });
       html+=`</div></div>`;
     });
+    // Champion again at bottom
+    html+=`<div class="card" style="border-color:var(--gold);"><div class="card-title" style="color:var(--gold);">🏆 Champion Pick</div><div style="font-size:22px;font-weight:700;color:var(--gold);">${champ}</div></div>`;
   } else {
     html+=`<div class="alert alert-info">Picks will be visible to everyone after the tournament starts on June 11.</div>`;
   }

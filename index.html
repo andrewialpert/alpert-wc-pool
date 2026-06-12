@@ -1278,8 +1278,8 @@ async function fetchMatches() {
       awayLabel: m.away_team_label || '',
       score: {
         fullTime: {
-          home: (m.finished === 'TRUE' || m.finished === true || m.time_elapsed === 'finished') ? parseInt(m.home_score) : null,
-          away: (m.finished === 'TRUE' || m.finished === true || m.time_elapsed === 'finished') ? parseInt(m.away_score) : null,
+          home: (m.finished === 'TRUE' || m.finished === true || m.time_elapsed === 'finished' || m.time_elapsed === 'live') ? parseInt(m.home_score) : null,
+          away: (m.finished === 'TRUE' || m.finished === true || m.time_elapsed === 'finished' || m.time_elapsed === 'live') ? parseInt(m.away_score) : null,
         }
       },
       status: (m.finished === 'TRUE' || m.finished === true || m.time_elapsed === 'finished') ? 'FINISHED'

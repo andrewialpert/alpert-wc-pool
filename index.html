@@ -1288,6 +1288,17 @@ const WC_PROXY = 'https://wc2026-proxy.skialpert.workers.dev';
 async function fetchMatches() {
   const now = Date.now();
   if (matchesCache && now - matchesCacheTime < CACHE_TTL) return matchesCache;
+
+  // Option B: show cached data from localStorage instantly while fetching fresh
+  const stored = localStorage.getItem('wc_matches_cache');
+  const storedTime = parseInt(localStorage.getItem('wc_matches_time') || '0');
+  if (stored && now - storedTime < 10 * 60 * 1000) {
+    try {
+      matchesCache = JSON.parse(stored);
+      matchesCacheTime = storedTime;
+    } catch(e) {}
+  }
+
   try {
     const res = await fetch(`${WC_PROXY}/matches`);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -1315,6 +1326,11 @@ async function fetchMatches() {
     if (matches.length > 0) {
       matchesCache = matches;
       matchesCacheTime = now;
+      // Save to localStorage for next load
+      try {
+        localStorage.setItem('wc_matches_cache', JSON.stringify(matches));
+        localStorage.setItem('wc_matches_time', now.toString());
+      } catch(e) {}
       console.log('Matches loaded, count:', matches.length);
     }
     return matchesCache || [];
@@ -1518,12 +1534,15 @@ async function init() {
   const saved = sessionStorage.getItem('wc_user');
   if (saved) { currentUser = JSON.parse(saved); updateNavUser(); }
   await migrateScotlandFlag();
-  await loadResults();
-  await loadEntries();
-  await loadNotice();
+  // Load Firebase data and match data in parallel for faster startup
+  await Promise.all([
+    loadResults(),
+    loadEntries(),
+    loadNotice(),
+    loadMatchData(),
+  ]);
   updateHomePage();
   picksLocked = new Date() >= LOCK_DATE;
-  loadMatchData();
 }
 
 function updateDaysLeft() {
@@ -1571,6 +1590,10 @@ async function loadResults() {
   } catch(e) {}
 }
 
+let entriesCache = null;
+let entriesCacheTime = 0;
+const ENTRIES_CACHE_TTL = 60 * 1000;
+
 async function loadEntries() {
   const now = Date.now();
   if (entriesCache && now - entriesCacheTime < ENTRIES_CACHE_TTL) {
@@ -1589,7 +1612,6 @@ async function loadEntries() {
       const u = users[d.id] || {};
       entries[d.id] = {id:d.id, paid: u.paid || false, ...d.data()};
     });
-    // Add any users who have no entry yet
     usersSnap.forEach(d => {
       if (!entries[d.id]) {
         const u = d.data();
@@ -1668,17 +1690,30 @@ function isEntryComplete() {
 function updateEntryStatus() {
   const statusEl = document.getElementById('nav-status');
   if (!currentUser || !statusEl) return;
-  const complete = isEntryComplete();
+  // Use saved entry data if available, otherwise check form
+  const savedEntry = allEntries.find(e => e.username === currentUser.username);
+  let complete = false;
+  if (savedEntry && picksLocked) {
+    // After lockout use saved data
+    const bp = savedEntry.bracket?.picks || {};
+    const tpCount = savedEntry.thirdPlacePicks?.length || savedEntry.thirdPlaceGroups?.length || 0;
+    const allBracketIds = ['M73','M74','M75','M76','M77','M78','M79','M80','M81','M82','M83','M84','M85','M86','M87','M88',
+      'R16-1','R16-2','R16-3','R16-4','R16-5','R16-6','R16-7','R16-8',
+      'QF1','QF2','QF3','QF4','SF1','SF2','FINAL'];
+    complete = savedEntry.groupPicks &&
+      Object.keys(GROUPS).every(l=>[0,1,2,3].every(i=>savedEntry.groupPicks[l]?.[i])) &&
+      tpCount===8 &&
+      allBracketIds.every(id=>bp[id]);
+  } else {
+    complete = isEntryComplete();
+  }
   statusEl.className = 'entry-status ' + (complete ? 'complete' : 'incomplete');
   statusEl.textContent = complete ? '✓ Entry Complete' : '⚠ Incomplete Entry';
-
+  const top = document.getElementById('bracket-complete-status');
+  const bottom = document.getElementById('bracket-complete-status-bottom');
   const completeHTML = '<div class="alert alert-success" style="font-size:13px;font-weight:600;">✓ All picks are in. You are good to go!</div>';
   const incompleteHTML = '<div class="alert alert-error" style="font-size:13px;font-weight:600;">⚠ Picks incomplete. Pick a winner for every matchup including the Champion.</div>';
-
-  const top = document.getElementById('bracket-complete-status');
   if (top) top.innerHTML = complete ? completeHTML : incompleteHTML;
-
-  const bottom = document.getElementById('bracket-complete-status-bottom');
   if (bottom) bottom.innerHTML = complete ? completeHTML : incompleteHTML;
 }
 

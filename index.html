@@ -1473,7 +1473,8 @@ function renderStandings(matches) {
     rows.forEach((r, i) => {
       const name = r.team.replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA9F}]/gu,'').replace(/[\uD800-\uDFFF]/g,'').trim();
       const leader = i < 2 ? ' leader' : '';
-      html += `<tr class="${leader}">
+      const rowStyle = i === 2 ? ' style="color:var(--gold);"' : '';
+      html += `<tr class="${leader}"${rowStyle}>
         <td>${name}</td>
         <td>${r.p}</td><td>${r.w}</td><td>${r.d}</td><td>${r.l}</td>
         <td>${r.gd > 0 ? '+'+r.gd : r.gd}</td>

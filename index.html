@@ -1571,10 +1571,6 @@ async function loadResults() {
   } catch(e) {}
 }
 
-let entriesCache = null;
-let entriesCacheTime = 0;
-const ENTRIES_CACHE_TTL = 60 * 1000; // 1 minute cache
-
 async function loadEntries() {
   const now = Date.now();
   if (entriesCache && now - entriesCacheTime < ENTRIES_CACHE_TTL) {
@@ -1688,10 +1684,16 @@ function updateEntryStatus() {
 
 async function renderSubmitPage() {
   if (!currentUser) { document.getElementById('auth-area').style.display='block'; document.getElementById('picks-area').style.display='none'; return; }
+  picksLocked = new Date() >= LOCK_DATE;
+  // After lockout, redirect My Picks to the user's profile view
+  if (picksLocked) {
+    await loadEntries();
+    viewProfile(currentUser.username);
+    return;
+  }
   document.getElementById('auth-area').style.display='none';
   document.getElementById('picks-area').style.display='block';
   document.getElementById('picks-greeting').textContent = (currentUser.name||currentUser.username)+"'s Picks";
-  picksLocked = new Date() >= LOCK_DATE;
   if (picksLocked) { document.getElementById('locked-banner').style.display='block'; document.getElementById('save-bar').style.display='none'; }
   buildForm();
   try {
@@ -2542,7 +2544,6 @@ async function adminTogglePaid(username, paid) {
     await updateDoc(doc(db,'users',username), {paid});
     const e = allEntries.find(e=>e.username===username);
     if (e) e.paid = paid;
-    entriesCache = null;
     renderAdminPanel();
   } catch(e) { alert('Error updating payment status.'); }
 }
@@ -2553,7 +2554,6 @@ async function adminDeleteAccount(username) {
     await deleteDoc(doc(db,'users',username));
     await deleteDoc(doc(db,'entries',username));
     alert(`Account ${username} deleted.`);
-    entriesCache = null;
     renderAdminPanel();
     await loadEntries();
     updateHomePage();

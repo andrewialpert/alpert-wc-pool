@@ -2072,7 +2072,7 @@ function updateSaveStatusBar(state) {
   } else if (state === 'incomplete') {
     const missing = countMissingPicks();
     el.className = 'status-incomplete';
-    el.textContent = `⚠ Picks incomplete — ${missing} pick${missing===1?'':'s'} missing`;
+    el.textContent = `⚠ Picks incomplete: ${missing} pick${missing===1?'':'s'} missing`;
   } else if (state === 'saved') {
     // saved but check completeness
     const complete = isEntryCompleteFromData();
@@ -2154,34 +2154,34 @@ function scoreLiveEntry(entry, liveStandings) {
   let total = 0;
 
   Object.keys(GROUPS).forEach(letter => {
-    const liveOrder = liveStandings[letter]; // sorted array of team objects
+    const liveOrder = liveStandings[letter];
     if (!liveOrder) return;
 
-    // Only score if all 3 matchdays are complete for this group
-    // A group is complete when all 4 teams have played at least 3 games
-    // OR all teams have pts that account for 3 games each (6 games total = 18 team-games)
-    const totalGames = liveOrder.reduce((s, t) => s + t.p, 0) / 2; // each game counted twice
-    if (totalGames < 3) return; // group not fully played yet
+    // Score based on current live standings regardless of how many games played
+    // If a group hasn't started, all teams are at 0 pts so order is arbitrary -- skip it
+    const anyPlayed = liveOrder.some(t => t.p > 0);
+    if (!anyPlayed) return;
 
     const picks = entry.groupPicks[letter] || [];
-    const liveNames = liveOrder.map(t => t.team); // [1st, 2nd, 3rd, 4th]
-
-    // Check for perfect group
+    const liveNames = liveOrder.map(t => t.team);
     const perfect = picks.length === 4 && picks.every((p, i) => p === liveNames[i]);
 
     picks.forEach((pick, i) => {
       if (!pick) return;
-      const actualPos = liveNames.indexOf(pick); // 0-based index in sorted standings
-      if (actualPos === -1) return; // team not found
+      const actualPos = liveNames.indexOf(pick);
+      if (actualPos === -1) return;
       if (actualPos === i) {
-        // Exact position match
         total += [pos1, pos2, pos3, pos4][i];
       } else if (actualPos <= 1 && i <= 1) {
-        // Picked to advance (top 2), in wrong position between 1st and 2nd
         total += adv;
       }
-      // No points for wrong position outside top 2
     });
+
+    if (perfect) total += perf;
+  });
+
+  return total;
+}
 
     if (perfect) total += perf;
   });
@@ -2227,7 +2227,7 @@ async function renderLeaderboard() {
 
   // Explanatory note
   html += `<div class="alert alert-info" style="margin-bottom:12px;font-size:12px;line-height:1.7;">
-    <strong>Live</strong> score is calculated automatically from current match data and updates every 3 minutes. It shows where you would stand if the group stage ended right now — only groups that have completed all 3 matchdays are scored.<br>
+    <strong>Live</strong> score is calculated automatically from current match data and updates every 3 minutes. It shows where you would stand if the tournament standings froze right now, based on all games played so far.<br>
     <strong>Official</strong> score is locked in manually after each group is finalized and is what determines the actual winner.
   </div>`;
 
@@ -2298,7 +2298,7 @@ async function adminViewProfile(username) {
   const score = scoreEntry(entry);
   showPage('profile');
   let html = `<div style="margin-bottom:10px;"><button class="btn-secondary" onclick="showPage('admin')">Back to Admin</button></div>`;
-  html += `<div class="alert alert-warn" style="margin-bottom:14px;font-size:12px;">Admin view — picks visible regardless of lock date.</div>`;
+  html += `<div class="alert alert-warn" style="margin-bottom:14px;font-size:12px;">Admin view: picks visible regardless of lock date.</div>`;
   html += `<div class="profile-header"><div class="profile-avatar">${(entry.name||'?')[0].toUpperCase()}</div><div><div class="profile-name">${entry.name}</div><div class="profile-meta">@${entry.username} · ${entry.submitted?'Submitted':'Draft/Autosaved'} ${new Date(entry.submittedAt||entry.savedAt||Date.now()).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}</div></div></div>`;
   html += `<div class="card"><div class="card-title">🏆 Champion Pick</div><div style="font-size:18px;font-weight:600;">${entry.bracket?.picks?.['FINAL'] || entry.knockout?.champion?.[0] || 'Not picked'}</div></div>`;
   html += `<div class="card"><div class="card-title">🏁 Group Picks</div><div class="groups-grid">`;

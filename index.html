@@ -1571,7 +1571,16 @@ async function loadResults() {
   } catch(e) {}
 }
 
+let entriesCache = null;
+let entriesCacheTime = 0;
+const ENTRIES_CACHE_TTL = 60 * 1000; // 1 minute cache
+
 async function loadEntries() {
+  const now = Date.now();
+  if (entriesCache && now - entriesCacheTime < ENTRIES_CACHE_TTL) {
+    allEntries = entriesCache;
+    return;
+  }
   try {
     const [entriesSnap, usersSnap] = await Promise.all([
       getDocs(collection(db,'entries')),
@@ -1592,6 +1601,8 @@ async function loadEntries() {
       }
     });
     allEntries = Object.values(entries);
+    entriesCache = allEntries;
+    entriesCacheTime = now;
   } catch(e) {}
 }
 
@@ -2189,8 +2200,15 @@ function scoreLiveEntry(entry, liveStandings) {
 let lbSortMode = 'live'; // 'live' or 'name'
 
 async function renderLeaderboard() {
-  await loadEntries(); await loadResults();
   const c=document.getElementById('leaderboard-content');
+  c.innerHTML='<div class="loading" style="padding:40px;text-align:center;color:var(--muted);">Loading leaderboard...</div>';
+  
+  await loadEntries(); 
+  await loadResults();
+  
+  // Make sure match data is loaded before calculating live scores
+  if (!matchesCache) await fetchMatches();
+
   const submitted=allEntries;
   if(!submitted.length){c.innerHTML='<div class="alert alert-warn">No entries yet.</div>';return;}
   const hasResults=Object.keys(results.groups).length>0||results.knockout?.r32?.length>0;
@@ -2522,9 +2540,9 @@ async function loadNotice() {
 async function adminTogglePaid(username, paid) {
   try {
     await updateDoc(doc(db,'users',username), {paid});
-    // Update local allEntries
     const e = allEntries.find(e=>e.username===username);
     if (e) e.paid = paid;
+    entriesCache = null;
     renderAdminPanel();
   } catch(e) { alert('Error updating payment status.'); }
 }
@@ -2535,6 +2553,7 @@ async function adminDeleteAccount(username) {
     await deleteDoc(doc(db,'users',username));
     await deleteDoc(doc(db,'entries',username));
     alert(`Account ${username} deleted.`);
+    entriesCache = null;
     renderAdminPanel();
     await loadEntries();
     updateHomePage();

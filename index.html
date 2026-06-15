@@ -1543,6 +1543,7 @@ async function init() {
   ]);
   updateHomePage();
   picksLocked = new Date() >= LOCK_DATE;
+  updateEntryStatus(); // update after entries are loaded
 }
 
 function updateDaysLeft() {

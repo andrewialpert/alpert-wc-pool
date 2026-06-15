@@ -187,7 +187,18 @@ select option{background:var(--card);}
 .status-complete{color:#7ee8a2 !important;}
 .status-incomplete{color:#ff6b6b !important;}
 .status-saving{color:var(--muted) !important;}
-.match-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);gap:8px;}
+.standings-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;}
+@media(max-width:600px){.standings-grid{grid-template-columns:1fr;}}
+.standings-group{background:var(--card-light);border-radius:8px;padding:10px;}
+.standings-group-title{font-family:'Bebas Neue',sans-serif;font-size:16px;color:var(--gold);margin-bottom:6px;letter-spacing:1px;}
+.standings-table{width:100%;border-collapse:collapse;font-size:11px;}
+.standings-table th{color:var(--muted);font-weight:400;text-align:right;padding:2px 4px;font-family:'DM Mono',monospace;}
+.standings-table th:first-child{text-align:left;}
+.standings-table td{padding:3px 4px;text-align:right;border-top:1px solid rgba(255,255,255,0.04);}
+.standings-table td:first-child{text-align:left;font-size:12px;}
+.standings-table tr.leader td{color:#7ee8a2;}
+.standings-pts{font-family:'DM Mono',monospace;font-weight:700;color:var(--white);}
+.live-badge{display:inline-block;background:rgba(178,34,52,0.15);color:var(--red);border:1px solid rgba(178,34,52,0.3);border-radius:4px;font-size:10px;font-family:'DM Mono',monospace;padding:1px 6px;margin-left:6px;vertical-align:middle;}align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);gap:8px;}
 .match-row:last-child{border-bottom:none;}
 .match-teams{display:flex;align-items:center;gap:8px;flex:1;}
 .match-team{display:flex;align-items:center;gap:5px;font-size:13px;min-width:0;}
@@ -254,6 +265,14 @@ select option{background:var(--card);}
         <span id="matches-updated" style="font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;font-weight:400;"></span>
       </div>
       <div id="matches-list"><div class="loading">Loading matches...</div></div>
+    </div>
+    <div class="card" id="standings-card">
+      <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;">
+        <span>📊 Live Group Standings <span class="live-badge">LIVE</span></span>
+        <span id="standings-updated" style="font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;font-weight:400;"></span>
+      </div>
+      <div class="alert alert-info" style="font-size:11px;margin-bottom:10px;">This table updates automatically every 3 minutes based on live match data. It may be slightly delayed. Official leaderboard scores are calculated after each group stage is finalized.</div>
+      <div id="standings-list"><div class="loading">Loading standings...</div></div>
     </div>
     <div class="card">
       <div class="card-title">📅 Key Dates</div>
@@ -1393,10 +1412,93 @@ async function renderMatches() {
   if (upd) upd.textContent = 'Updated ' + new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true});
 }
 
+function calcStandings(matches) {
+  const groups = {};
+  // Initialize all teams from GROUPS constant
+  Object.entries(GROUPS).forEach(([letter, teams]) => {
+    groups[letter] = {};
+    teams.forEach(t => {
+      groups[letter][t] = {team:t, p:0, w:0, d:0, l:0, gf:0, ga:0, gd:0, pts:0};
+    });
+  });
+
+  // Process finished and live group stage matches
+  matches.filter(m => m.matchType === 'group' && m.status !== 'TIMED').forEach(m => {
+    const hName = normTeam(m.homeTeam?.name || '');
+    const aName = normTeam(m.awayTeam?.name || '');
+    const hg = m.score?.fullTime?.home;
+    const ag = m.score?.fullTime?.away;
+    if (hg === null || hg === undefined || ag === null || ag === undefined) return;
+    const grp = m.group?.replace('Group ','');
+    if (!grp || !groups[grp]) return;
+    if (!groups[grp][hName] || !groups[grp][aName]) return;
+
+    const h = groups[grp][hName];
+    const a = groups[grp][aName];
+    h.p++; a.p++;
+    h.gf += hg; h.ga += ag; h.gd = h.gf - h.ga;
+    a.gf += ag; a.ga += hg; a.gd = a.gf - a.ga;
+
+    if (hg > ag) { h.w++; h.pts+=3; a.l++; }
+    else if (hg < ag) { a.w++; a.pts+=3; h.l++; }
+    else { h.d++; h.pts+=1; a.d++; a.pts+=1; }
+  });
+
+  // Sort each group: pts desc, gd desc, gf desc
+  Object.keys(groups).forEach(g => {
+    groups[g] = Object.values(groups[g]).sort((a,b) =>
+      b.pts - a.pts || b.gd - a.gd || b.gf - a.gf
+    );
+  });
+
+  return groups;
+}
+
+function renderStandings(matches) {
+  const el = document.getElementById('standings-list');
+  if (!el) return;
+
+  const standings = calcStandings(matches);
+  const groupLetters = Object.keys(GROUPS);
+
+  let html = '<div class="standings-grid">';
+  groupLetters.forEach(letter => {
+    const rows = standings[letter] || [];
+    html += `<div class="standings-group">
+      <div class="standings-group-title">Group ${letter}</div>
+      <table class="standings-table">
+        <thead><tr>
+          <th>Team</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GD</th><th>Pts</th>
+        </tr></thead><tbody>`;
+    rows.forEach((r, i) => {
+      const name = r.team.replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA9F}]/gu,'').replace(/[\uD800-\uDFFF]/g,'').trim();
+      const leader = i < 2 ? ' leader' : '';
+      html += `<tr class="${leader}">
+        <td>${name}</td>
+        <td>${r.p}</td><td>${r.w}</td><td>${r.d}</td><td>${r.l}</td>
+        <td>${r.gd > 0 ? '+'+r.gd : r.gd}</td>
+        <td class="standings-pts">${r.pts}</td>
+      </tr>`;
+    });
+    html += '</tbody></table></div>';
+  });
+  html += '</div>';
+
+  el.innerHTML = html;
+  const upd = document.getElementById('standings-updated');
+  if (upd) upd.textContent = 'Updated ' + new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true});
+}
+
 async function loadMatchData() {
+  const matches = await fetchMatches();
   await renderMatches();
-  // Auto-refresh every 3 minutes
-  setInterval(renderMatches, CACHE_TTL);
+  renderStandings(matches);
+  setInterval(async () => {
+    matchesCacheTime = 0; // force refresh
+    const fresh = await fetchMatches();
+    renderMatches();
+    renderStandings(fresh);
+  }, CACHE_TTL);
 }
 
 async function init() {

@@ -247,7 +247,7 @@ select option{background:var(--card);}
     </div>
     <div style="margin-top:14px;font-size:13px;color:var(--white);line-height:1.7;">
       <strong>New: Live Leaderboard ⚡</strong><br>
-      The leaderboard now shows a live projected score updating every 3 minutes based on current match results. See where you stand right now, not just after results are officially entered.
+      The leaderboard now shows a live projected score updating every 3 minutes. It gives you a real-time sense of where you stand based on current group standings, but only reflects group position points for now. Additional points for advancement, perfect group bonuses, third place qualifiers, and bracket picks will be added once groups are officially finalized.
     </div>
     <div class="hero-stats">
       <div class="hero-stat"><div class="hero-stat-n">48</div><div class="hero-stat-l">Teams</div></div>
@@ -2280,8 +2280,8 @@ async function renderLeaderboard() {
 
   // Explanatory note
   html += `<div class="alert alert-info" style="margin-bottom:12px;font-size:12px;line-height:1.7;">
-    <strong>Live</strong> score is calculated automatically from current match data and updates every 3 minutes. It shows where you would stand if the tournament standings froze right now, based on all games played so far.<br>
-    <strong>Official</strong> score is locked in manually after each group is finalized and is what determines the actual winner.
+    <strong>Live</strong> score is calculated automatically from current match data and updates every 3 minutes. It gives you a real-time sense of where you stand, but only reflects group position points based on current standings. Points for correct advancement in the wrong position, perfect group bonuses, third place qualifiers, and all bracket picks are not included until groups are officially finalized.<br><br>
+    <strong>Official</strong> score is locked in after each group is finalized and is what determines the actual winner.
   </div>`;
 
   // Sort buttons

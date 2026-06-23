@@ -2544,13 +2544,14 @@ async function viewProfile(username) {
     html+=`<div class="card"><div class="card-title">🏆 Champion Pick</div><div style="font-size:18px;font-weight:600;">${champ}</div></div>`;
     // Color code legend
     html+=`<div class="card" style="padding:11px 13px;">
-      <div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;margin-bottom:8px;">GROUP PICK COLOR KEY</div>
-      <div style="display:flex;flex-wrap:wrap;gap:10px;font-size:11px;">
-        <span style="color:#7ee8a2;font-weight:700;">●</span><span style="color:var(--muted);">Exact, advances</span>
-        <span style="color:#4d9e6a;font-weight:700;">●</span><span style="color:var(--muted);">Exact, eliminated</span>
-        <span style="color:#f0b429;font-weight:700;">●</span><span style="color:var(--muted);">Wrong spot, advances</span>
-        <span style="color:#ff6b6b;font-weight:700;">●</span><span style="color:var(--muted);">Wrong, eliminated</span>
-        <span style="color:var(--white);font-weight:700;">●</span><span style="color:var(--muted);">Not yet decided</span>
+      <div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;margin-bottom:8px;">GROUP PICK COLOR KEY (based on YOUR pick earning points)</div>
+      <div style="display:flex;flex-direction:column;gap:5px;font-size:11px;">
+        <div><span style="color:#7ee8a2;font-weight:700;">●</span> <span style="color:var(--muted);">Exact position correct, advances. Full points.</span></div>
+        <div><span style="color:#4d9e6a;font-weight:700;">●</span> <span style="color:var(--muted);">Exact position correct, eliminated spot. Full points.</span></div>
+        <div><span style="color:#f0b429;font-weight:700;">●</span> <span style="color:var(--muted);">Wrong position, but your pick still advanced. Advancement points.</span></div>
+        <div><span style="color:#ff4040;font-weight:700;">●</span> <span style="color:var(--muted);">Wrong on an advancing spot, your pick did not advance. Zero points.</span></div>
+        <div><span style="color:#a83a3a;font-weight:700;">●</span> <span style="color:var(--muted);">Wrong on an eliminated spot, your pick did not advance. Zero points.</span></div>
+        <div><span style="color:var(--white);font-weight:700;">●</span> <span style="color:var(--muted);">Not yet decided.</span></div>
       </div>
     </div>`;
     // Group picks with color coding
@@ -2566,12 +2567,13 @@ async function viewProfile(username) {
         let color='var(--white)', icon='', label='';
         if(actAtThisPos && t===actAtThisPos){
           // Exact match at this confirmed position
-          if(i<=1){ color='#7ee8a2'; icon=' ✓'; } // advances
-          else { color='#4d9e6a'; icon=' ✓'; } // eliminated spot but correct
+          if(i<=1){ color='#7ee8a2'; icon=' ✓'; } // advances, bold
+          else { color='#4d9e6a'; icon=' ✓'; } // eliminated spot but correct, muted
         } else if(pickedPos!==-1){
           // Team confirmed somewhere else in the group
-          if(pickedPos<=1 && i<=1){ color='#f0b429'; icon=' ~'; } // wrong spot but still advances (swap within top2)
-          else { color='#ff6b6b'; icon=' ✗'; } // wrong, doesn't advance from where picked
+          if(pickedPos<=1){ color='#f0b429'; icon=' ~'; } // your pick still advanced, yellow
+          else if(i<=1){ color='#ff4040'; icon=' ✗'; } // this was an advancing slot you guessed wrong on entirely, bold red
+          else { color='#a83a3a'; icon=' ✗'; } // this was an eliminated slot you guessed wrong on, muted red
         } else if(confirmed.some(c=>c)){
           // Some positions confirmed but this team not found among them yet, partial group
           color='var(--white)';

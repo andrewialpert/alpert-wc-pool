@@ -2168,9 +2168,14 @@ function scoreEntry(entry) {
     let gScore=0,perfect=true;
     [0,1,2,3].forEach(i=>{
       const pred=predicted[i],act=actual[i];
-      if(!pred||!act){perfect=false;return;}
-      if(pred===act){gScore+=[SCORING.pos1,SCORING.pos2,SCORING.pos3,SCORING.pos4][i];}
-      else{const pp=actual.indexOf(pred);if(pp===0||pp===1)gScore+=SCORING.adv;perfect=false;}
+      if(!pred){perfect=false;return;}
+      if(act&&pred===act){gScore+=[SCORING.pos1,SCORING.pos2,SCORING.pos3,SCORING.pos4][i];}
+      else{
+        // Check if this pick landed in a confirmed position anywhere in the group, even if act itself is unconfirmed
+        const pp=actual.indexOf(pred);
+        if(pp===0||pp===1)gScore+=SCORING.adv;
+        perfect=false;
+      }
     });
     if(perfect)gScore+=SCORING.perf;
     groupScore+=gScore;
@@ -2193,12 +2198,14 @@ function maxPossibleScore(entry) {
   const liveStandings = matchesCache ? calcStandings(matchesCache) : null;
 
   Object.keys(GROUPS).forEach(letter => {
-    if (results.groups[letter]) return; // already officially decided, no more possible points here
+    const confirmedPositions = results.groups[letter]; // may be partial, e.g. ['USA','','','']
     const picks = entry.groupPicks?.[letter] || [];
     const liveOrder = liveStandings?.[letter];
 
     picks.forEach((pick, i) => {
       if (!pick) return;
+      // If this specific position is already officially confirmed, no possible points remain for it
+      if (confirmedPositions && confirmedPositions[i]) return;
       if (!liveOrder) {
         // No live data yet, assume full credit available (group hasn't started)
         max += [pos1,pos2,pos3,pos4][i];
@@ -2217,8 +2224,9 @@ function maxPossibleScore(entry) {
         max += [pos1,pos2,pos3,pos4][i];
       }
     });
-    // Perfect group bonus, only if not yet ruled out
-    if (picks.length === 4) max += perf;
+    // Perfect group bonus only possible if no position has been confirmed yet at all
+    const anyConfirmed = confirmedPositions && confirmedPositions.some(p => p);
+    if (picks.length === 4 && !anyConfirmed) max += perf;
   });
 
   // KNOCKOUT: for each bracket pick, check if the team is still alive

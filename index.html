@@ -2386,12 +2386,10 @@ async function renderLeaderboard() {
   const scored = submitted.map(e => {
     const official = scoreEntry(e);
     const liveTotal = liveStandings ? scoreLiveEntry(e, liveStandings, matchesCache) : 0;
-    const possiblePoints = maxPossibleScore(e);
     return {
       ...e,
       ...official,
       liveTotal,
-      possiblePoints,
     };
   });
 
@@ -2400,8 +2398,6 @@ async function renderLeaderboard() {
     scored.sort((a,b) => (a.name||'').localeCompare(b.name||''));
   } else if (lbSortMode === 'live') {
     scored.sort((a,b) => b.liveTotal - a.liveTotal || (a.name||'').localeCompare(b.name||''));
-  } else if (lbSortMode === 'possible') {
-    scored.sort((a,b) => b.possiblePoints - a.possiblePoints || (a.name||'').localeCompare(b.name||''));
   } else {
     // official (default)
     scored.sort((a,b) => b.total - a.total || b.liveTotal - a.liveTotal || (a.name||'').localeCompare(b.name||''));
@@ -2412,15 +2408,13 @@ async function renderLeaderboard() {
   // Explanatory note
   html += `<div class="alert alert-info" style="margin-bottom:12px;font-size:12px;line-height:1.7;">
     <strong>Live</strong> score is calculated automatically from current match data and updates every 3 minutes. It includes group position points based on current standings, plus knockout points for any team that has actually won a match. It does not yet include advancement points, perfect group bonuses, or third place qualifiers, those are only awarded once groups are officially finalized.<br><br>
-    <strong>Official</strong> score is locked in after each group is finalized and is what determines the actual winner.<br><br>
-    <strong>Max Left</strong> shows how many more points you could still earn going forward, based on which of your picks are mathematically still alive in the tournament.
+    <strong>Official</strong> score is locked in after each group is finalized and is what determines the actual winner.
   </div>`;
 
   // Sort buttons
   html += `<div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
     <button onclick="setLbSort('official')" style="flex:1;min-width:80px;padding:8px;border-radius:8px;font-size:12px;font-family:'DM Mono',monospace;cursor:pointer;border:1px solid ${lbSortMode==='official'?'var(--gold)':'var(--border)'};background:${lbSortMode==='official'?'rgba(240,180,41,0.12)':'var(--card-light)'};color:${lbSortMode==='official'?'var(--gold)':'var(--muted)'};">Official</button>
     <button onclick="setLbSort('live')" style="flex:1;min-width:80px;padding:8px;border-radius:8px;font-size:12px;font-family:'DM Mono',monospace;cursor:pointer;border:1px solid ${lbSortMode==='live'?'var(--gold)':'var(--border)'};background:${lbSortMode==='live'?'rgba(240,180,41,0.12)':'var(--card-light)'};color:${lbSortMode==='live'?'var(--gold)':'var(--muted)'};">Live</button>
-    <button onclick="setLbSort('possible')" style="flex:1;min-width:80px;padding:8px;border-radius:8px;font-size:12px;font-family:'DM Mono',monospace;cursor:pointer;border:1px solid ${lbSortMode==='possible'?'var(--gold)':'var(--border)'};background:${lbSortMode==='possible'?'rgba(240,180,41,0.12)':'var(--card-light)'};color:${lbSortMode==='possible'?'var(--gold)':'var(--muted)'};">Max Possible</button>
     <button onclick="setLbSort('name')" style="flex:1;min-width:80px;padding:8px;border-radius:8px;font-size:12px;font-family:'DM Mono',monospace;cursor:pointer;border:1px solid ${lbSortMode==='name'?'var(--gold)':'var(--border)'};background:${lbSortMode==='name'?'rgba(240,180,41,0.12)':'var(--card-light)'};color:${lbSortMode==='name'?'var(--gold)':'var(--muted)'};">Name</button>
   </div>`;
 
@@ -2430,7 +2424,6 @@ async function renderLeaderboard() {
     <th>Champion</th>
     <th style="color:var(--red);">Live ⚡</th>
     <th>Official</th>
-    <th>Max Left</th>
     <th>Group</th>
     <th>KO</th>
   </tr></thead><tbody>`;
@@ -2465,7 +2458,6 @@ async function renderLeaderboard() {
       <td style="font-size:12px;color:var(--gold);">${champDisplay}</td>
       <td>${liveDisplay}</td>
       <td><span class="pts-badge">${e.total}</span></td>
-      <td><span class="pts-possible">+${e.possiblePoints}</span></td>
       <td style="color:var(--muted);font-size:12px;">${e.breakdown?.groups||0}</td>
       <td style="color:var(--muted);font-size:12px;">${e.koScore||0}</td>
     </tr>`;
@@ -2550,14 +2542,41 @@ async function viewProfile(username) {
     // Champion at top
     const champ = entry.bracket?.picks?.['FINAL'] || entry.knockout?.champion?.[0] || 'None';
     html+=`<div class="card"><div class="card-title">🏆 Champion Pick</div><div style="font-size:18px;font-weight:600;">${champ}</div></div>`;
-    // Group picks
+    // Color code legend
+    html+=`<div class="card" style="padding:11px 13px;">
+      <div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;margin-bottom:8px;">GROUP PICK COLOR KEY</div>
+      <div style="display:flex;flex-wrap:wrap;gap:10px;font-size:11px;">
+        <span style="color:#7ee8a2;font-weight:700;">●</span><span style="color:var(--muted);">Exact, advances</span>
+        <span style="color:#4d9e6a;font-weight:700;">●</span><span style="color:var(--muted);">Exact, eliminated</span>
+        <span style="color:#f0b429;font-weight:700;">●</span><span style="color:var(--muted);">Wrong spot, advances</span>
+        <span style="color:#ff6b6b;font-weight:700;">●</span><span style="color:var(--muted);">Wrong, eliminated</span>
+        <span style="color:var(--white);font-weight:700;">●</span><span style="color:var(--muted);">Not yet decided</span>
+      </div>
+    </div>`;
+    // Group picks with color coding
     html+=`<div class="card"><div class="card-title">🏁 Group Picks</div><div class="groups-grid">`;
     Object.entries(GROUPS).forEach(([l])=>{
       const picks=entry.groupPicks?.[l]||[];
+      const confirmed=results.groups[l]||[];
       html+=`<div class="group-card"><div class="group-letter">GROUP ${l}</div>`;
       [0,1,2,3].forEach(i=>{
-        const t=picks[i]||'?',act=results.groups[l]?.[i],correct=act&&t===act;
-        html+=`<div style="font-size:12px;padding:3px 0;display:flex;gap:5px;align-items:center;"><span style="color:var(--muted);font-family:'DM Mono',monospace;font-size:10px;width:12px;">${i+1}</span><span style="color:${correct?'#7ee8a2':'var(--white)'}">${t}</span>${correct?'<span style="font-size:10px;">✓</span>':''}</div>`;
+        const t=picks[i]||'?';
+        const actAtThisPos=confirmed[i];
+        const pickedPos=confirmed.indexOf(t); // -1 if not found/not confirmed
+        let color='var(--white)', icon='', label='';
+        if(actAtThisPos && t===actAtThisPos){
+          // Exact match at this confirmed position
+          if(i<=1){ color='#7ee8a2'; icon=' ✓'; } // advances
+          else { color='#4d9e6a'; icon=' ✓'; } // eliminated spot but correct
+        } else if(pickedPos!==-1){
+          // Team confirmed somewhere else in the group
+          if(pickedPos<=1 && i<=1){ color='#f0b429'; icon=' ~'; } // wrong spot but still advances (swap within top2)
+          else { color='#ff6b6b'; icon=' ✗'; } // wrong, doesn't advance from where picked
+        } else if(confirmed.some(c=>c)){
+          // Some positions confirmed but this team not found among them yet, partial group
+          color='var(--white)';
+        }
+        html+=`<div style="font-size:12px;padding:3px 0;display:flex;gap:5px;align-items:center;"><span style="color:var(--muted);font-family:'DM Mono',monospace;font-size:10px;width:12px;">${i+1}</span><span style="color:${color};font-weight:${color==='#7ee8a2'?'700':'400'};">${t}${icon}</span></div>`;
       });
       html+=`</div>`;
     });

@@ -2185,14 +2185,92 @@ function scoreEntry(entry) {
 }
 
 function maxPossibleScore(entry) {
-  let max=0;
-  Object.keys(GROUPS).forEach(l=>{if(!results.groups[l])max+=(SCORING.pos1+SCORING.pos2+SCORING.pos3+SCORING.pos4+SCORING.perf);});
-  ['r32','r16','qf','sf','champion'].forEach((r,i)=>{
-    if(!results.knockout[r]?.length){
-      const pts=[SCORING.r32,SCORING.r16,SCORING.qf,SCORING.sf,SCORING.champ][i];
-      max+=(entry.knockout?.[r]?.length||0)*pts;
-    }
+  let max = 0;
+  const {pos1,pos2,pos3,pos4,adv,perf} = SCORING;
+
+  // GROUPS: for each group not yet officially decided, calculate true upside
+  // using live standings to check if a team is still alive in the group
+  const liveStandings = matchesCache ? calcStandings(matchesCache) : null;
+
+  Object.keys(GROUPS).forEach(letter => {
+    if (results.groups[letter]) return; // already officially decided, no more possible points here
+    const picks = entry.groupPicks?.[letter] || [];
+    const liveOrder = liveStandings?.[letter];
+
+    picks.forEach((pick, i) => {
+      if (!pick) return;
+      if (!liveOrder) {
+        // No live data yet, assume full credit available (group hasn't started)
+        max += [pos1,pos2,pos3,pos4][i];
+        return;
+      }
+      const liveNames = liveOrder.map(t => t.team);
+      const actualPos = liveNames.indexOf(pick);
+      const teamGames = liveOrder.find(t => t.team === pick)?.p || 0;
+      if (teamGames >= 3) {
+        // Team has finished all group games, position is fixed
+        if (actualPos === i) max += [pos1,pos2,pos3,pos4][i];
+        else if (actualPos <= 1 && i <= 1) max += adv;
+        // else 0, no possible points left for this pick
+      } else {
+        // Still mid-group, give credit for full potential (can't rule out yet)
+        max += [pos1,pos2,pos3,pos4][i];
+      }
+    });
+    // Perfect group bonus, only if not yet ruled out
+    if (picks.length === 4) max += perf;
   });
+
+  // KNOCKOUT: for each bracket pick, check if the team is still alive
+  const bp = entry.bracket?.picks || {};
+  const rounds = [
+    {key:'r32', label:'R32', ids:['M73','M74','M75','M76','M77','M78','M79','M80','M81','M82','M83','M84','M85','M86','M87','M88'], pts:SCORING.r32},
+    {key:'r16', label:'R16', ids:['R16-1','R16-2','R16-3','R16-4','R16-5','R16-6','R16-7','R16-8'], pts:SCORING.r16},
+    {key:'qf', label:'QF', ids:['QF1','QF2','QF3','QF4'], pts:SCORING.qf},
+    {key:'sf', label:'SF', ids:['SF1','SF2'], pts:SCORING.sf},
+  ];
+
+  // Build a set of teams that have been eliminated (lost a finished knockout match)
+  const eliminated = new Set();
+  if (matchesCache) {
+    matchesCache.forEach(m => {
+      if (m.matchType === 'group') return;
+      if (m.status !== 'FINISHED') return;
+      const homeScore = m.score?.fullTime?.home;
+      const awayScore = m.score?.fullTime?.away;
+      if (homeScore === null || awayScore === null) return;
+      const homeName = normTeam(m.homeTeam?.name || '');
+      const awayName = normTeam(m.awayTeam?.name || '');
+      if (homeScore < awayScore) eliminated.add(homeName);
+      if (awayScore < homeScore) eliminated.add(awayName);
+    });
+  }
+
+  // For official rounds already entered, no possible points remain for that round
+  const officialDone = {
+    r32: !!(results.knockout?.r32?.length),
+    r16: !!(results.knockout?.r16?.length),
+    qf: !!(results.knockout?.qf?.length),
+    sf: !!(results.knockout?.sf?.length),
+    champion: !!(results.knockout?.champion?.length),
+  };
+
+  rounds.forEach(({key, ids, pts}) => {
+    if (officialDone[key]) return; // already scored officially, no remaining upside here
+    ids.forEach(id => {
+      const pick = bp[id];
+      if (!pick) return;
+      if (eliminated.has(pick)) return; // team is out, no points possible
+      max += pts;
+    });
+  });
+
+  // Champion
+  if (!officialDone.champion) {
+    const champPick = bp['FINAL'];
+    if (champPick && !eliminated.has(champPick)) max += SCORING.champ;
+  }
+
   return max;
 }
 
@@ -2200,7 +2278,7 @@ function maxPossibleScore(entry) {
 // LIVE SCORING - calculates projected scores from API match data
 // Only scores groups where ALL 3 matchdays are complete
 // ================================================================
-function scoreLiveEntry(entry, liveStandings) {
+function scoreLiveEntry(entry, liveStandings, matches) {
   if (!entry.groupPicks || !liveStandings) return 0;
   const {pos1,pos2,pos3,pos4,adv,perf} = SCORING;
   let total = 0;
@@ -2232,6 +2310,49 @@ function scoreLiveEntry(entry, liveStandings) {
     if (perfect) total += perf;
   });
 
+  // KNOCKOUT - award points for any team that has won at least one knockout match
+  // We track cumulative rounds reached for each team based on finished knockout matches
+  const bp = entry.bracket?.picks || {};
+  const teamRoundsReached = {}; // team name -> highest round index reached (0=R32 won, 1=R16 won, etc)
+  const roundOrder = ['r32','r16','qf','sf','final'];
+
+  if (matches) {
+    // Sort knockout matches by matchday/date so we process rounds in order
+    const koMatches = matches.filter(m => m.matchType && m.matchType !== 'group' && m.status === 'FINISHED');
+    koMatches.forEach(m => {
+      const homeScore = m.score?.fullTime?.home;
+      const awayScore = m.score?.fullTime?.away;
+      if (homeScore === null || awayScore === null || homeScore === awayScore) return; // skip draws (shouldn't happen in KO) or incomplete
+      const homeName = m.homeTeam?.name ? normTeam(m.homeTeam.name) : '';
+      const awayName = m.awayTeam?.name ? normTeam(m.awayTeam.name) : '';
+      const winner = homeScore > awayScore ? homeName : awayName;
+      if (!winner) return;
+      const roundIdx = roundOrder.indexOf(m.matchType);
+      if (roundIdx === -1) return;
+      if (!(winner in teamRoundsReached) || teamRoundsReached[winner] < roundIdx) {
+        teamRoundsReached[winner] = roundIdx;
+      }
+    });
+  }
+
+  // Award points for each bracket pick based on rounds that team has actually won
+  const koPointsByRound = [SCORING.r32, SCORING.r16, SCORING.qf, SCORING.sf, SCORING.champ];
+  Object.entries(teamRoundsReached).forEach(([team, maxRoundIdx]) => {
+    // Check if this team appears in any of the entry's bracket picks for the rounds up to maxRoundIdx
+    // Award points for every round up to and including maxRoundIdx, if the team was picked for that round
+    for (let r = 0; r <= maxRoundIdx; r++) {
+      const roundIds = {
+        0: ['M73','M74','M75','M76','M77','M78','M79','M80','M81','M82','M83','M84','M85','M86','M87','M88'],
+        1: ['R16-1','R16-2','R16-3','R16-4','R16-5','R16-6','R16-7','R16-8'],
+        2: ['QF1','QF2','QF3','QF4'],
+        3: ['SF1','SF2'],
+        4: ['FINAL'],
+      }[r];
+      const pickedForThisRound = roundIds.some(id => bp[id] === team);
+      if (pickedForThisRound) total += koPointsByRound[r];
+    }
+  });
+
   return total;
 }
 
@@ -2256,12 +2377,13 @@ async function renderLeaderboard() {
 
   const scored = submitted.map(e => {
     const official = scoreEntry(e);
-    const liveGroupScore = liveStandings ? scoreLiveEntry(e, liveStandings) : 0;
+    const liveTotal = liveStandings ? scoreLiveEntry(e, liveStandings, matchesCache) : 0;
+    const possiblePoints = maxPossibleScore(e);
     return {
       ...e,
       ...official,
-      liveGroupScore,
-      liveTotal: liveGroupScore + (official.koScore || 0),
+      liveTotal,
+      possiblePoints,
     };
   });
 
@@ -2270,6 +2392,8 @@ async function renderLeaderboard() {
     scored.sort((a,b) => (a.name||'').localeCompare(b.name||''));
   } else if (lbSortMode === 'live') {
     scored.sort((a,b) => b.liveTotal - a.liveTotal || (a.name||'').localeCompare(b.name||''));
+  } else if (lbSortMode === 'possible') {
+    scored.sort((a,b) => b.possiblePoints - a.possiblePoints || (a.name||'').localeCompare(b.name||''));
   } else {
     // official (default)
     scored.sort((a,b) => b.total - a.total || b.liveTotal - a.liveTotal || (a.name||'').localeCompare(b.name||''));
@@ -2279,15 +2403,17 @@ async function renderLeaderboard() {
 
   // Explanatory note
   html += `<div class="alert alert-info" style="margin-bottom:12px;font-size:12px;line-height:1.7;">
-    <strong>Live</strong> score is calculated automatically from current match data and updates every 3 minutes. It gives you a real-time sense of where you stand, but only reflects group position points based on current standings. Points for correct advancement in the wrong position, perfect group bonuses, third place qualifiers, and all bracket picks are not included until groups are officially finalized.<br><br>
-    <strong>Official</strong> score is locked in after each group is finalized and is what determines the actual winner.
+    <strong>Live</strong> score is calculated automatically from current match data and updates every 3 minutes. It includes group position points based on current standings, plus knockout points for any team that has actually won a match. It does not yet include advancement points, perfect group bonuses, or third place qualifiers, those are only awarded once groups are officially finalized.<br><br>
+    <strong>Official</strong> score is locked in after each group is finalized and is what determines the actual winner.<br><br>
+    <strong>Max Left</strong> shows how many more points you could still earn going forward, based on which of your picks are mathematically still alive in the tournament.
   </div>`;
 
   // Sort buttons
-  html += `<div style="display:flex;gap:8px;margin-bottom:12px;">
-    <button onclick="setLbSort('official')" style="flex:1;padding:8px;border-radius:8px;font-size:12px;font-family:'DM Mono',monospace;cursor:pointer;border:1px solid ${lbSortMode==='official'?'var(--gold)':'var(--border)'};background:${lbSortMode==='official'?'rgba(240,180,41,0.12)':'var(--card-light)'};color:${lbSortMode==='official'?'var(--gold)':'var(--muted)'};">Sort by Official</button>
-    <button onclick="setLbSort('live')" style="flex:1;padding:8px;border-radius:8px;font-size:12px;font-family:'DM Mono',monospace;cursor:pointer;border:1px solid ${lbSortMode==='live'?'var(--gold)':'var(--border)'};background:${lbSortMode==='live'?'rgba(240,180,41,0.12)':'var(--card-light)'};color:${lbSortMode==='live'?'var(--gold)':'var(--muted)'};">Sort by Live</button>
-    <button onclick="setLbSort('name')" style="flex:1;padding:8px;border-radius:8px;font-size:12px;font-family:'DM Mono',monospace;cursor:pointer;border:1px solid ${lbSortMode==='name'?'var(--gold)':'var(--border)'};background:${lbSortMode==='name'?'rgba(240,180,41,0.12)':'var(--card-light)'};color:${lbSortMode==='name'?'var(--gold)':'var(--muted)'};">Sort by Name</button>
+  html += `<div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+    <button onclick="setLbSort('official')" style="flex:1;min-width:80px;padding:8px;border-radius:8px;font-size:12px;font-family:'DM Mono',monospace;cursor:pointer;border:1px solid ${lbSortMode==='official'?'var(--gold)':'var(--border)'};background:${lbSortMode==='official'?'rgba(240,180,41,0.12)':'var(--card-light)'};color:${lbSortMode==='official'?'var(--gold)':'var(--muted)'};">Official</button>
+    <button onclick="setLbSort('live')" style="flex:1;min-width:80px;padding:8px;border-radius:8px;font-size:12px;font-family:'DM Mono',monospace;cursor:pointer;border:1px solid ${lbSortMode==='live'?'var(--gold)':'var(--border)'};background:${lbSortMode==='live'?'rgba(240,180,41,0.12)':'var(--card-light)'};color:${lbSortMode==='live'?'var(--gold)':'var(--muted)'};">Live</button>
+    <button onclick="setLbSort('possible')" style="flex:1;min-width:80px;padding:8px;border-radius:8px;font-size:12px;font-family:'DM Mono',monospace;cursor:pointer;border:1px solid ${lbSortMode==='possible'?'var(--gold)':'var(--border)'};background:${lbSortMode==='possible'?'rgba(240,180,41,0.12)':'var(--card-light)'};color:${lbSortMode==='possible'?'var(--gold)':'var(--muted)'};">Max Possible</button>
+    <button onclick="setLbSort('name')" style="flex:1;min-width:80px;padding:8px;border-radius:8px;font-size:12px;font-family:'DM Mono',monospace;cursor:pointer;border:1px solid ${lbSortMode==='name'?'var(--gold)':'var(--border)'};background:${lbSortMode==='name'?'rgba(240,180,41,0.12)':'var(--card-light)'};color:${lbSortMode==='name'?'var(--gold)':'var(--muted)'};">Name</button>
   </div>`;
 
   html+=`<div class="card" style="padding:0;overflow:hidden;"><table class="lb-table"><thead><tr>
@@ -2296,6 +2422,7 @@ async function renderLeaderboard() {
     <th>Champion</th>
     <th style="color:var(--red);">Live ⚡</th>
     <th>Official</th>
+    <th>Max Left</th>
     <th>Group</th>
     <th>KO</th>
   </tr></thead><tbody>`;
@@ -2330,6 +2457,7 @@ async function renderLeaderboard() {
       <td style="font-size:12px;color:var(--gold);">${champDisplay}</td>
       <td>${liveDisplay}</td>
       <td><span class="pts-badge">${e.total}</span></td>
+      <td><span class="pts-possible">+${e.possiblePoints}</span></td>
       <td style="color:var(--muted);font-size:12px;">${e.breakdown?.groups||0}</td>
       <td style="color:var(--muted);font-size:12px;">${e.koScore||0}</td>
     </tr>`;

@@ -606,6 +606,13 @@ select option{background:var(--card);}
       <div class="card-title">🥉 Confirmed Third Place Qualifiers</div>
       <p style="color:var(--muted);font-size:12px;margin-bottom:11px;">Check off any third-place team that has been mathematically confirmed to advance, even before all 12 groups are finished. Leave unchecked if not yet certain.</p>
       <div id="admin-third-place-area" class="team-chips"></div>
+      <div style="margin-top:11px;padding-top:11px;border-top:1px solid var(--border);">
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--white);cursor:pointer;">
+          <input type="checkbox" id="admin-third-place-finalized" style="width:16px;height:16px;" />
+          All 8 third place qualifiers are now fully and finally determined
+        </label>
+        <p style="color:var(--muted);font-size:11px;margin-top:6px;">Only check this once you are certain the complete top-8 third-place ranking is locked in. This determines whether unchecked third-place picks show as pending (grey) or eliminated (muted green/red).</p>
+      </div>
     </div>
     <button class="btn-primary" onclick="adminSaveResults()" style="margin-bottom:11px;">Save All Results</button>
     <div class="card">
@@ -1175,7 +1182,7 @@ const SCORING = {pos1:8,pos2:6,pos3:4,pos4:2,adv:2,perf:5,thirdPlaceCorrect:1,r3
 
 let currentUser = null;
 let allEntries = [];
-let results = {groups:{},knockout:{r32:[],r16:[],qf:[],sf:[],final:[],champion:[]},qualifiedThirdPlace:[]};
+let results = {groups:{},knockout:{r32:[],r16:[],qf:[],sf:[],final:[],champion:[]},qualifiedThirdPlace:[],thirdPlaceFinalized:false};
 let picksLocked = false;
 let adminLoggedIn = false;
 
@@ -1604,6 +1611,7 @@ async function loadResults() {
         groups: data.groups || {},
         knockout: data.knockout || {r32:[],r16:[],qf:[],sf:[],final:[],champion:[]},
         qualifiedThirdPlace: data.qualifiedThirdPlace || [],
+        thirdPlaceFinalized: data.thirdPlaceFinalized || false,
       };
     }
   } catch(e) {}
@@ -2598,11 +2606,18 @@ async function viewProfile(username) {
         let color='var(--white)', icon='', label='';
         if(actAtThisPos && t===actAtThisPos){
           // Exact match at this confirmed position
-          if(i<=1){ color='#7ee8a2'; icon=' ✓'; } // advances, bold
-          else { color='#4d9e6a'; icon=' ✓'; } // eliminated spot but correct, muted
+          if(i<=1){ color='#7ee8a2'; icon=' ✓'; } // top 2, automatically advances, bold
+          else if(i===2){
+            // Exact 3rd place, advancing depends on third-place qualification
+            if(qualifiedThirdPlace.includes(t)){ color='#7ee8a2'; icon=' ✓'; } // confirmed qualifier, bold, advances
+            else if(results.thirdPlaceFinalized){ color='#4d9e6a'; icon=' ✓'; } // qualification fully decided, this team did not make it, muted green, still full points for exact position
+            else { color='var(--white)'; icon=' ?'; } // exact 3rd, qualification still pending
+          }
+          else { color='#4d9e6a'; icon=' ✓'; } // exact 4th, eliminated spot, correct but muted
         } else if(pickedPos===2){
           // This team is confirmed 3rd place, but third-place qualification is determined separately and may still be pending
           if(qualifiedThirdPlace.includes(t)){ color='#f0b429'; icon=' ~'; } // confirmed qualifier, your pick advances
+          else if(results.thirdPlaceFinalized){ color='#a83a3a'; icon=' ✗'; } // qualification fully decided, this team did not make it, wrong and eliminated
           else { color='var(--white)'; icon=' ?'; } // 3rd place locked in, qualification still pending
         } else if(pickedPos!==-1){
           // Team confirmed in 1st, 2nd, or 4th
@@ -2715,13 +2730,16 @@ async function renderAdminPanel() {
       tpArea.appendChild(chip);
     });
   }
+  const finalizedCheckbox = document.getElementById('admin-third-place-finalized');
+  if (finalizedCheckbox) finalizedCheckbox.checked = results.thirdPlaceFinalized || false;
 }
 
 async function adminSaveResults() {
-  const res={groups:{},knockout:{},qualifiedThirdPlace:[]};
+  const res={groups:{},knockout:{},qualifiedThirdPlace:[],thirdPlaceFinalized:false};
   Object.keys(GROUPS).forEach(l=>{ res.groups[l]=[1,2,3,4].map(r=>document.getElementById(`ar-g${l}-${r}`)?.value||''); });
   ['r32','r16','qf','sf','champion'].forEach(id=>{ res.knockout[id]=[...document.querySelectorAll(`#admin-ko-${id} .admin-chip.selected`)].map(c=>c.dataset.team); });
   res.qualifiedThirdPlace=[...document.querySelectorAll('#admin-third-place-area .admin-chip.selected')].map(c=>c.dataset.team);
+  res.thirdPlaceFinalized=document.getElementById('admin-third-place-finalized')?.checked||false;
   try { await setDoc(doc(db,'settings','results'),res); results=res; alert('Results saved!'); } catch(e) { alert('Error saving.'); }
 }
 

@@ -357,6 +357,7 @@ select option{background:var(--card);}
               <div class="scoring-mini-item"><span>Exact 4th place</span><span class="scoring-pts">2 pts</span></div>
               <div class="scoring-mini-item"><span>Advances, wrong position</span><span class="scoring-pts">2 pts</span></div>
               <div class="scoring-mini-item"><span>Perfect group bonus</span><span class="scoring-pts">+5 pts</span></div>
+              <div class="scoring-mini-item"><span>Correct third place qualifier</span><span class="scoring-pts">1 pt</span></div>
             </div>
             <div class="scoring-mini" style="margin-top:8px;">
               <div class="scoring-mini-item"><span>Round of 32</span><span class="scoring-pts">4 pts</span></div>
@@ -495,8 +496,9 @@ select option{background:var(--card);}
       <div class="scoring-item"><span>Correct 4th place</span><span class="scoring-pts">2 pts</span></div>
       <div class="scoring-item"><span>Team advances, wrong position</span><span class="scoring-pts">2 pts</span></div>
       <div class="scoring-item"><span>Perfect group bonus</span><span class="scoring-pts">+5 pts</span></div>
+      <div class="scoring-item"><span>Each correct third place qualifier</span><span class="scoring-pts">1 pt</span></div>
     </div>
-    <div class="alert alert-info" style="margin-top:11px;font-size:12px;">Position points and advancement points are mutually exclusive. You get whichever is higher, not both.</div>
+    <div class="alert alert-info" style="margin-top:11px;font-size:12px;">Position points and advancement points are mutually exclusive. You get whichever is higher, not both. Third place qualifier points are separate and stack on top of everything else.</div>
   </div>
   <div class="card">
     <div class="card-title">🏆 Knockout Rounds</div>
@@ -521,7 +523,11 @@ select option{background:var(--card);}
     </div>
     <p style="color:var(--muted);font-size:13px;line-height:1.8;margin-bottom:12px;">The 8 teams with the best records advance. Which group winner each third-place team faces in the Round of 32 is pre-determined by FIFA in a table called Annex C. FIFA published all 495 possible combinations before the tournament so the moment the group stage ends, the full bracket is known automatically with no additional draw needed.</p>
     <p style="color:var(--muted);font-size:13px;line-height:1.8;margin-bottom:12px;">That is what makes this pick interesting. You are predicting which 8 third-place teams advance, and your bracket generates automatically from your picks using the exact same FIFA rules.</p>
-    <div class="alert alert-info" style="font-size:12px;">For the full details see Article 13 of the official FIFA World Cup 26 regulations, which covers tiebreaking criteria for third-place teams.</div>
+    <div class="alert alert-info" style="font-size:12px;margin-bottom:12px;">For the full details see Article 13 of the official FIFA World Cup 26 regulations, which covers tiebreaking criteria for third-place teams.</div>
+    <div style="background:var(--card-light);border-radius:8px;padding:13px;font-size:13px;display:flex;justify-content:space-between;align-items:center;">
+      <span style="color:var(--muted);">Each correctly identified qualifying third-place team</span>
+      <span style="color:var(--gold);font-family:'DM Mono',monospace;font-weight:600;">+1 pt</span>
+    </div>
   </div>
 
   <div class="card">
@@ -593,7 +599,7 @@ select option{background:var(--card);}
     </div>
     <div class="card">
       <div class="card-title">🏆 Knockout Results</div>
-      <p style="color:var(--muted);font-size:12px;margin-bottom:11px;">Select teams that actually reached each round.</p>
+      <p style="color:var(--muted);font-size:12px;margin-bottom:11px;">Select teams that WON each round (advanced to the next one), not just teams that reached or qualified for it. For example, check a team under "Won Round of 32" only after they win their R32 match.</p>
       <div id="admin-knockout-area"></div>
     </div>
     <div class="card">
@@ -1165,7 +1171,7 @@ const GROUPS = {
   L:['🏴󠁧󠁢󠁥󠁮󠁧󠁿 England','🇭🇷 Croatia','🇬🇭 Ghana','🇵🇦 Panama']
 };
 const ALL_TEAMS = Object.values(GROUPS).flat();
-const SCORING = {pos1:8,pos2:6,pos3:4,pos4:2,adv:2,perf:5,r32:4,r16:8,qf:16,sf:28,champ:55};
+const SCORING = {pos1:8,pos2:6,pos3:4,pos4:2,adv:2,perf:5,thirdPlaceCorrect:1,r32:4,r16:8,qf:16,sf:28,champ:55};
 
 let currentUser = null;
 let allEntries = [];
@@ -2174,10 +2180,10 @@ function toggleScoring(id) { document.getElementById(id)?.classList.toggle('open
 function scoreEntry(entry) {
   let groupScore=0,koScore=0;
   const breakdown={r32:0,r16:0,qf:0,sf:0,final:0,champion:0,groups:0};
+  const qualifiedThirdPlace = results.qualifiedThirdPlace || [];
   Object.keys(GROUPS).forEach(l=>{
     if(!results.groups[l]) return;
     const actual=results.groups[l]; const predicted=entry.groupPicks?.[l]||[];
-    const qualifiedThirdPlace = results.qualifiedThirdPlace || [];
     let gScore=0,perfect=true;
     [0,1,2,3].forEach(i=>{
       const pred=predicted[i],act=actual[i];
@@ -2196,7 +2202,15 @@ function scoreEntry(entry) {
     if(perfect)gScore+=SCORING.perf;
     groupScore+=gScore;
   });
+  // Third place qualifier picks: 1 point per correctly identified team, only once qualifiers are confirmed
+  let thirdPlaceScore=0;
+  if (qualifiedThirdPlace.length > 0) {
+    const picks = entry.thirdPlacePicks || [];
+    picks.forEach(t => { if (qualifiedThirdPlace.includes(t)) thirdPlaceScore += SCORING.thirdPlaceCorrect; });
+  }
+  groupScore += thirdPlaceScore;
   breakdown.groups=groupScore;
+  breakdown.thirdPlace = thirdPlaceScore;
   ['r32','r16','qf','sf','champion'].forEach((r,i)=>{
     const actual=results.knockout[r]||[],predicted=entry.knockout?.[r]||[];
     const pts=[SCORING.r32,SCORING.r16,SCORING.qf,SCORING.sf,SCORING.champ][i];
@@ -2438,8 +2452,8 @@ async function renderLeaderboard() {
     <th style="width:40px;">#</th>
     <th>Name</th>
     <th>Champion</th>
-    <th style="color:var(--red);">Live ⚡</th>
     <th>Official</th>
+    <th style="color:var(--red);">Live ⚡</th>
     <th>Group</th>
     <th>KO</th>
   </tr></thead><tbody>`;
@@ -2472,8 +2486,8 @@ async function renderLeaderboard() {
       <td><span class="rank-cell">${rank}</span></td>
       <td><strong>${e.name}</strong>${statusBadge}${paidBadge}</td>
       <td style="font-size:12px;color:var(--gold);">${champDisplay}</td>
-      <td>${liveDisplay}</td>
       <td><span class="pts-badge">${e.total}</span></td>
+      <td>${liveDisplay}</td>
       <td style="color:var(--muted);font-size:12px;">${e.breakdown?.groups||0}</td>
       <td style="color:var(--muted);font-size:12px;">${e.koScore||0}</td>
     </tr>`;
@@ -2673,7 +2687,7 @@ async function renderAdminPanel() {
     gg.appendChild(div);
   });
   const ko=document.getElementById('admin-knockout-area'); ko.innerHTML='';
-  [{id:'r32',label:'Round of 32'},{id:'r16',label:'Round of 16'},{id:'qf',label:'Quarterfinals'},{id:'sf',label:'Semifinals'},{id:'champion',label:'Champion'}].forEach(({id,label})=>{
+  [{id:'r32',label:'Won Round of 32 (advanced to R16)'},{id:'r16',label:'Won Round of 16 (advanced to QF)'},{id:'qf',label:'Won Quarterfinal (advanced to SF)'},{id:'sf',label:'Won Semifinal (advanced to Final)'},{id:'champion',label:'Won the Final (Champion)'}].forEach(({id,label})=>{
     const div=document.createElement('div'); div.className='admin-round';
     div.innerHTML=`<div class="admin-round-title">${label}</div><div class="admin-chips" id="admin-ko-${id}"></div>`;
     ko.appendChild(div);

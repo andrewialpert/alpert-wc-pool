@@ -596,6 +596,11 @@ select option{background:var(--card);}
       <p style="color:var(--muted);font-size:12px;margin-bottom:11px;">Select teams that actually reached each round.</p>
       <div id="admin-knockout-area"></div>
     </div>
+    <div class="card">
+      <div class="card-title">🥉 Confirmed Third Place Qualifiers</div>
+      <p style="color:var(--muted);font-size:12px;margin-bottom:11px;">Check off any third-place team that has been mathematically confirmed to advance, even before all 12 groups are finished. Leave unchecked if not yet certain.</p>
+      <div id="admin-third-place-area" class="team-chips"></div>
+    </div>
     <button class="btn-primary" onclick="adminSaveResults()" style="margin-bottom:11px;">Save All Results</button>
     <div class="card">
       <div class="card-title">🔢 Reset a User PIN</div>
@@ -1164,7 +1169,7 @@ const SCORING = {pos1:8,pos2:6,pos3:4,pos4:2,adv:2,perf:5,r32:4,r16:8,qf:16,sf:2
 
 let currentUser = null;
 let allEntries = [];
-let results = {groups:{},knockout:{r32:[],r16:[],qf:[],sf:[],final:[],champion:[]}};
+let results = {groups:{},knockout:{r32:[],r16:[],qf:[],sf:[],final:[],champion:[]},qualifiedThirdPlace:[]};
 let picksLocked = false;
 let adminLoggedIn = false;
 
@@ -1587,7 +1592,14 @@ function showPage(id) {
 async function loadResults() {
   try {
     const snap = await getDoc(doc(db,'settings','results'));
-    if (snap.exists()) results = snap.data();
+    if (snap.exists()) {
+      const data = snap.data();
+      results = {
+        groups: data.groups || {},
+        knockout: data.knockout || {r32:[],r16:[],qf:[],sf:[],final:[],champion:[]},
+        qualifiedThirdPlace: data.qualifiedThirdPlace || [],
+      };
+    }
   } catch(e) {}
 }
 
@@ -2165,15 +2177,19 @@ function scoreEntry(entry) {
   Object.keys(GROUPS).forEach(l=>{
     if(!results.groups[l]) return;
     const actual=results.groups[l]; const predicted=entry.groupPicks?.[l]||[];
+    const qualifiedThirdPlace = results.qualifiedThirdPlace || [];
     let gScore=0,perfect=true;
     [0,1,2,3].forEach(i=>{
       const pred=predicted[i],act=actual[i];
       if(!pred){perfect=false;return;}
       if(act&&pred===act){gScore+=[SCORING.pos1,SCORING.pos2,SCORING.pos3,SCORING.pos4][i];}
       else{
-        // Check if this pick landed in a confirmed position anywhere in the group, even if act itself is unconfirmed
+        // Check if this pick landed in a confirmed advancing position anywhere in the group:
+        // top 2 automatic qualifiers, OR confirmed as one of the best 8 third-place teams
         const pp=actual.indexOf(pred);
-        if(pp===0||pp===1)gScore+=SCORING.adv;
+        const advancesViaTop2 = (pp===0||pp===1);
+        const advancesViaThirdPlace = (pp===2 && qualifiedThirdPlace.includes(pred));
+        if(advancesViaTop2 || advancesViaThirdPlace) gScore+=SCORING.adv;
         perfect=false;
       }
     });
@@ -2669,12 +2685,24 @@ async function renderAdminPanel() {
       c.appendChild(chip);
     });
   });
+  const tpArea=document.getElementById('admin-third-place-area'); 
+  if (tpArea) {
+    tpArea.innerHTML='';
+    ALL_TEAMS.forEach(t=>{
+      const chip=document.createElement('div'); 
+      chip.className='team-chip admin-chip'+((results.qualifiedThirdPlace||[]).includes(t)?' selected':'');
+      chip.dataset.team=t; chip.textContent=t;
+      chip.addEventListener('click',()=>chip.classList.toggle('selected'));
+      tpArea.appendChild(chip);
+    });
+  }
 }
 
 async function adminSaveResults() {
-  const res={groups:{},knockout:{}};
+  const res={groups:{},knockout:{},qualifiedThirdPlace:[]};
   Object.keys(GROUPS).forEach(l=>{ res.groups[l]=[1,2,3,4].map(r=>document.getElementById(`ar-g${l}-${r}`)?.value||''); });
   ['r32','r16','qf','sf','champion'].forEach(id=>{ res.knockout[id]=[...document.querySelectorAll(`#admin-ko-${id} .admin-chip.selected`)].map(c=>c.dataset.team); });
+  res.qualifiedThirdPlace=[...document.querySelectorAll('#admin-third-place-area .admin-chip.selected')].map(c=>c.dataset.team);
   try { await setDoc(doc(db,'settings','results'),res); results=res; alert('Results saved!'); } catch(e) { alert('Error saving.'); }
 }
 

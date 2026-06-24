@@ -2578,14 +2578,15 @@ async function viewProfile(username) {
       <div style="display:flex;flex-direction:column;gap:5px;font-size:11px;">
         <div><span style="color:#7ee8a2;font-weight:700;">●</span> <span style="color:var(--muted);">Exact position correct, advances. Full points.</span></div>
         <div><span style="color:#4d9e6a;font-weight:700;">●</span> <span style="color:var(--muted);">Exact position correct, eliminated spot. Full points.</span></div>
-        <div><span style="color:#f0b429;font-weight:700;">●</span> <span style="color:var(--muted);">Wrong position, but your pick still advanced. Advancement points.</span></div>
+        <div><span style="color:#f0b429;font-weight:700;">●</span> <span style="color:var(--muted);">Wrong position, but your pick still advanced (top 2, or a confirmed third place qualifier). Advancement points.</span></div>
         <div><span style="color:#ff4040;font-weight:700;">●</span> <span style="color:var(--muted);">Wrong on an advancing spot, your pick did not advance. Zero points.</span></div>
         <div><span style="color:#a83a3a;font-weight:700;">●</span> <span style="color:var(--muted);">Wrong on an eliminated spot, your pick did not advance. Zero points.</span></div>
-        <div><span style="color:var(--white);font-weight:700;">●</span> <span style="color:var(--muted);">Not yet decided.</span></div>
+        <div><span style="color:var(--white);font-weight:700;">●</span> <span style="color:var(--muted);">Not yet decided, or finished 3rd and still waiting on third place qualification.</span></div>
       </div>
     </div>`;
     // Group picks with color coding
     html+=`<div class="card"><div class="card-title">🏁 Group Picks</div><div class="groups-grid">`;
+    const qualifiedThirdPlace = results.qualifiedThirdPlace || [];
     Object.entries(GROUPS).forEach(([l])=>{
       const picks=entry.groupPicks?.[l]||[];
       const confirmed=results.groups[l]||[];
@@ -2599,9 +2600,13 @@ async function viewProfile(username) {
           // Exact match at this confirmed position
           if(i<=1){ color='#7ee8a2'; icon=' ✓'; } // advances, bold
           else { color='#4d9e6a'; icon=' ✓'; } // eliminated spot but correct, muted
+        } else if(pickedPos===2){
+          // This team is confirmed 3rd place, but third-place qualification is determined separately and may still be pending
+          if(qualifiedThirdPlace.includes(t)){ color='#f0b429'; icon=' ~'; } // confirmed qualifier, your pick advances
+          else { color='var(--white)'; icon=' ?'; } // 3rd place locked in, qualification still pending
         } else if(pickedPos!==-1){
-          // Team confirmed somewhere else in the group
-          if(pickedPos<=1){ color='#f0b429'; icon=' ~'; } // your pick still advanced, yellow
+          // Team confirmed in 1st, 2nd, or 4th
+          if(pickedPos<=1){ color='#f0b429'; icon=' ~'; } // your pick still advanced via top 2, yellow
           else if(i<=1){ color='#ff4040'; icon=' ✗'; } // this was an advancing slot you guessed wrong on entirely, bold red
           else { color='#a83a3a'; icon=' ✗'; } // this was an eliminated slot you guessed wrong on, muted red
         } else if(confirmed.some(c=>c)){

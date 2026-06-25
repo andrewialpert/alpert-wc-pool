@@ -2413,7 +2413,7 @@ function scoreLiveEntry(entry, liveStandings, matches) {
 
 let lbSortMode = 'official'; // 'official', 'live', or 'name'
 
-const LEADERBOARD_MAINTENANCE_MODE = true; // set to false to bring leaderboard back online
+const LEADERBOARD_MAINTENANCE_MODE = false; // set to true to take leaderboard offline for maintenance
 
 async function renderLeaderboard() {
   const c=document.getElementById('leaderboard-content');
@@ -2582,6 +2582,8 @@ async function adminViewProfile(username) {
       <div><span style="color:#f0b429;font-weight:700;">●</span> <span style="color:var(--muted);">Wrong position, but your pick still advanced (top 2, or a confirmed third place qualifier). Advancement points.</span></div>
       <div><span style="color:#ff4040;font-weight:700;">●</span> <span style="color:var(--muted);">Wrong on an advancing spot, your pick did not advance. Zero points.</span></div>
       <div><span style="color:#a83a3a;font-weight:700;">●</span> <span style="color:var(--muted);">Wrong on an eliminated spot, your pick did not advance. Zero points.</span></div>
+      <div><span style="color:#7aa2f7;font-weight:700;">●</span> <span style="color:var(--muted);">Got third place exactly right, but you did not pick them as one of your 8 qualifiers, and they actually advanced.</span></div>
+      <div><span style="color:#bb86fc;font-weight:700;">●</span> <span style="color:var(--muted);">Got third place exactly right, you picked them as a qualifier, but they did not actually advance.</span></div>
       <div><span style="color:var(--white);font-weight:700;">●</span> <span style="color:var(--muted);">Not yet decided, or finished 3rd and still waiting on third place qualification.</span></div>
     </div>
   </div>`;
@@ -2602,8 +2604,13 @@ async function adminViewProfile(username) {
       } else if(actAtThisPos && t===actAtThisPos){
         if(i<=1){ color='#7ee8a2'; icon=' ✓'; }
         else if(i===2){
-          if(qualifiedThirdPlaceAdmin.includes(t)){ color='#7ee8a2'; icon=' ✓'; }
-          else if(results.thirdPlaceFinalized){ color='#4d9e6a'; icon=' ✓'; }
+          const pickedAsQualifierAdmin = (entry.thirdPlacePicks||[]).includes(t);
+          const actuallyQualifiedAdmin = qualifiedThirdPlaceAdmin.includes(t);
+          if(actuallyQualifiedAdmin && pickedAsQualifierAdmin){ color='#7ee8a2'; icon=' ✓'; }
+          else if(actuallyQualifiedAdmin && !pickedAsQualifierAdmin){ color='#7aa2f7'; icon=' ?'; }
+          else if(!actuallyQualifiedAdmin && pickedAsQualifierAdmin && results.thirdPlaceFinalized){ color='#bb86fc'; icon=' ✗'; }
+          else if(!actuallyQualifiedAdmin && pickedAsQualifierAdmin && !results.thirdPlaceFinalized){ color='var(--white)'; icon=' ?'; }
+          else if(!actuallyQualifiedAdmin && !pickedAsQualifierAdmin && results.thirdPlaceFinalized){ color='#4d9e6a'; icon=' ✓'; }
           else { color='var(--white)'; icon=' ?'; }
         }
         else { color='#4d9e6a'; icon=' ✓'; }
@@ -2676,6 +2683,8 @@ async function viewProfile(username) {
         <div><span style="color:#f0b429;font-weight:700;">●</span> <span style="color:var(--muted);">Wrong position, but your pick still advanced (top 2, or a confirmed third place qualifier). Advancement points.</span></div>
         <div><span style="color:#ff4040;font-weight:700;">●</span> <span style="color:var(--muted);">Wrong on an advancing spot, your pick did not advance. Zero points.</span></div>
         <div><span style="color:#a83a3a;font-weight:700;">●</span> <span style="color:var(--muted);">Wrong on an eliminated spot, your pick did not advance. Zero points.</span></div>
+        <div><span style="color:#7aa2f7;font-weight:700;">●</span> <span style="color:var(--muted);">Got third place exactly right, but you did not pick them as one of your 8 qualifiers, and they actually advanced.</span></div>
+        <div><span style="color:#bb86fc;font-weight:700;">●</span> <span style="color:var(--muted);">Got third place exactly right, you picked them as a qualifier, but they did not actually advance.</span></div>
         <div><span style="color:var(--white);font-weight:700;">●</span> <span style="color:var(--muted);">Not yet decided, or finished 3rd and still waiting on third place qualification.</span></div>
       </div>
     </div>`;
@@ -2695,9 +2704,14 @@ async function viewProfile(username) {
           // Exact match at this confirmed position
           if(i<=1){ color='#7ee8a2'; icon=' ✓'; } // top 2, automatically advances, bold
           else if(i===2){
-            // Exact 3rd place, advancing depends on third-place qualification
-            if(qualifiedThirdPlace.includes(t)){ color='#7ee8a2'; icon=' ✓'; } // confirmed qualifier, bold, advances
-            else if(results.thirdPlaceFinalized){ color='#4d9e6a'; icon=' ✓'; } // qualification fully decided, this team did not make it, muted green, still full points for exact position
+            // Exact 3rd place. Now check the SEPARATE prediction: did they pick this team as one of their 8 qualifiers?
+            const pickedAsQualifier = (entry.thirdPlacePicks||[]).includes(t);
+            const actuallyQualified = qualifiedThirdPlace.includes(t);
+            if(actuallyQualified && pickedAsQualifier){ color='#7ee8a2'; icon=' ✓'; } // exact 3rd, correctly predicted to advance, bold green
+            else if(actuallyQualified && !pickedAsQualifier){ color='#7aa2f7'; icon=' ?'; } // exact 3rd, but missed predicting they would advance, blue
+            else if(!actuallyQualified && pickedAsQualifier && results.thirdPlaceFinalized){ color='#bb86fc'; icon=' ✗'; } // exact 3rd, wrongly predicted they would advance, purple
+            else if(!actuallyQualified && pickedAsQualifier && !results.thirdPlaceFinalized){ color='var(--white)'; icon=' ?'; } // exact 3rd, picked as qualifier, still pending
+            else if(!actuallyQualified && !pickedAsQualifier && results.thirdPlaceFinalized){ color='#4d9e6a'; icon=' ✓'; } // exact 3rd, correctly predicted elimination, muted green
             else { color='var(--white)'; icon=' ?'; } // exact 3rd, qualification still pending
           }
           else { color='#4d9e6a'; icon=' ✓'; } // exact 4th, eliminated spot, correct but muted

@@ -2574,21 +2574,54 @@ async function adminViewProfile(username) {
   html += `<div class="alert alert-warn" style="margin-bottom:14px;font-size:12px;">Admin view: picks visible regardless of lock date.</div>`;
   html += `<div class="profile-header"><div class="profile-avatar">${(entry.name||'?')[0].toUpperCase()}</div><div><div class="profile-name">${entry.name}</div><div class="profile-meta">@${entry.username} · ${entry.submitted?'Submitted':'Draft/Autosaved'} ${new Date(entry.submittedAt||entry.savedAt||Date.now()).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}</div></div></div>`;
   html += `<div class="card"><div class="card-title">🏆 Champion Pick</div><div style="font-size:18px;font-weight:600;">${entry.bracket?.picks?.['FINAL'] || entry.knockout?.champion?.[0] || 'Not picked'}</div></div>`;
+  html += `<div class="card" style="padding:11px 13px;">
+    <div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;margin-bottom:8px;">GROUP PICK COLOR KEY (based on YOUR pick earning points)</div>
+    <div style="display:flex;flex-direction:column;gap:5px;font-size:11px;">
+      <div><span style="color:#7ee8a2;font-weight:700;">●</span> <span style="color:var(--muted);">Exact position correct, advances. Full points.</span></div>
+      <div><span style="color:#4d9e6a;font-weight:700;">●</span> <span style="color:var(--muted);">Exact position correct, eliminated spot. Full points.</span></div>
+      <div><span style="color:#f0b429;font-weight:700;">●</span> <span style="color:var(--muted);">Wrong position, but your pick still advanced (top 2, or a confirmed third place qualifier). Advancement points.</span></div>
+      <div><span style="color:#ff4040;font-weight:700;">●</span> <span style="color:var(--muted);">Wrong on an advancing spot, your pick did not advance. Zero points.</span></div>
+      <div><span style="color:#a83a3a;font-weight:700;">●</span> <span style="color:var(--muted);">Wrong on an eliminated spot, your pick did not advance. Zero points.</span></div>
+      <div><span style="color:var(--white);font-weight:700;">●</span> <span style="color:var(--muted);">Not yet decided, or finished 3rd and still waiting on third place qualification.</span></div>
+    </div>
+  </div>`;
   html += `<div class="card"><div class="card-title">🏁 Group Picks</div><div class="groups-grid">`;
+  const qualifiedThirdPlaceAdmin = results.qualifiedThirdPlace || [];
   Object.entries(GROUPS).forEach(([l]) => {
     const picks = entry.groupPicks?.[l] || [];
+    const confirmed = results.groups[l] || [];
     html += `<div class="group-card"><div class="group-letter">GROUP ${l}</div>`;
     [0,1,2,3].forEach(i => {
-      const t = picks[i] || '<span style="color:var(--red);">Not picked</span>';
-      const act = results.groups[l]?.[i];
-      const correct = act && picks[i] && picks[i] === act;
-      // Check for duplicates
+      const t = picks[i] || '?';
       const dupeCheck = picks[i] && picks.filter(p => p === picks[i]).length > 1;
+      const actAtThisPos = confirmed[i];
+      const pickedPos = confirmed.indexOf(t);
+      let color='var(--white)', icon='';
+      if (dupeCheck) {
+        color='#ff6b6b'; icon=' ⚠ DUPE';
+      } else if(actAtThisPos && t===actAtThisPos){
+        if(i<=1){ color='#7ee8a2'; icon=' ✓'; }
+        else if(i===2){
+          if(qualifiedThirdPlaceAdmin.includes(t)){ color='#7ee8a2'; icon=' ✓'; }
+          else if(results.thirdPlaceFinalized){ color='#4d9e6a'; icon=' ✓'; }
+          else { color='var(--white)'; icon=' ?'; }
+        }
+        else { color='#4d9e6a'; icon=' ✓'; }
+      } else if(i<=2 && pickedPos===2){
+        if(qualifiedThirdPlaceAdmin.includes(t)){ color='#f0b429'; icon=' ~'; }
+        else if(results.thirdPlaceFinalized){ color='#a83a3a'; icon=' ✗'; }
+        else { color='var(--white)'; icon=' ?'; }
+      } else if(i<=2 && pickedPos!==-1 && pickedPos<=1){
+        color='#f0b429'; icon=' ~';
+      } else if(pickedPos!==-1){
+        if(i<=1){ color='#ff4040'; icon=' ✗'; }
+        else { color='#a83a3a'; icon=' ✗'; }
+      } else if(confirmed.some(c=>c)){
+        color='var(--white)';
+      }
       html += `<div style="font-size:12px;padding:3px 0;display:flex;gap:5px;align-items:center;">
         <span style="color:var(--muted);font-family:'DM Mono',monospace;font-size:10px;width:12px;">${i+1}</span>
-        <span style="color:${correct?'#7ee8a2':dupeCheck?'#ff6b6b':'var(--white)'}">${picks[i]||'Not picked'}</span>
-        ${correct?'<span style="font-size:10px;">✓</span>':''}
-        ${dupeCheck?'<span style="font-size:10px;color:#ff6b6b;">⚠ DUPE</span>':''}
+        <span style="color:${color};font-weight:${color==='#7ee8a2'?'700':'400'};">${t}${icon}</span>
       </div>`;
     });
     html += `</div>`;

@@ -584,6 +584,12 @@ select option{background:var(--card);}
     <div class="section-title">Admin Panel</div>
     <div class="section-sub">Enter results, manage entries, update settings.</div>
     <div class="card">
+      <div class="card-title">👀 Admin Leaderboard Preview</div>
+      <p style="color:var(--muted);font-size:12px;margin-bottom:11px;">View the real leaderboard with current scores, even while it's in maintenance mode for everyone else. Only visible here in admin.</p>
+      <button class="btn-secondary" onclick="renderAdminLeaderboardPreview()">Load Leaderboard Preview</button>
+      <div id="admin-leaderboard-preview" style="margin-top:14px;"></div>
+    </div>
+    <div class="card">
       <div class="card-title">📋 Entries</div>
       <p id="admin-entry-summary" style="color:var(--muted);font-size:13px;margin-bottom:11px;">Loading...</p>
       <div class="btn-row">
@@ -2522,6 +2528,42 @@ function setLbSort(mode) {
   renderLeaderboard();
 }
 
+async function renderAdminLeaderboardPreview() {
+  const c = document.getElementById('admin-leaderboard-preview');
+  c.innerHTML = '<div class="loading" style="padding:20px;text-align:center;color:var(--muted);">Loading...</div>';
+
+  await loadEntries();
+  await loadResults();
+  if (!matchesCache) await fetchMatches();
+
+  const submitted = allEntries;
+  if (!submitted.length) { c.innerHTML = '<div class="alert alert-warn">No entries yet.</div>'; return; }
+
+  const liveStandings = matchesCache ? calcStandings(matchesCache) : null;
+  const scored = submitted.map(e => {
+    const official = scoreEntry(e);
+    const liveTotal = liveStandings ? scoreLiveEntry(e, liveStandings, matchesCache) : 0;
+    return { ...e, ...official, liveTotal };
+  });
+  scored.sort((a,b) => b.total - a.total || b.liveTotal - a.liveTotal || (a.name||'').localeCompare(b.name||''));
+
+  let html = `<table class="lb-table"><thead><tr>
+    <th style="width:30px;">#</th><th>Name</th><th>Official</th><th>Live</th><th>Group</th><th>3rd</th><th>KO</th>
+  </tr></thead><tbody>`;
+  scored.forEach((e,i) => {
+    html += `<tr onclick="adminViewProfile('${e.username}')" style="cursor:pointer;">
+      <td>${i+1}</td>
+      <td>${e.name}</td>
+      <td><strong>${e.total}</strong></td>
+      <td style="color:var(--red);">${e.liveTotal}</td>
+      <td style="color:var(--muted);font-size:12px;">${e.breakdown?.groups||0}</td>
+      <td style="color:var(--muted);font-size:12px;">${e.breakdown?.thirdPlace||0}</td>
+      <td style="color:var(--muted);font-size:12px;">${e.koScore||0}</td>
+    </tr>`;
+  });
+  html += '</tbody></table>';
+  c.innerHTML = html;
+}
 
 async function adminViewProfile(username) {
   const entry = allEntries.find(e => e.username === username);
@@ -2956,6 +2998,7 @@ window.adminViewProfile = adminViewProfile;
 window.setBracketPick = setBracketPick;
 window.updateEntryStatus = updateEntryStatus;
 window.setLbSort = setLbSort;
+window.renderAdminLeaderboardPreview = renderAdminLeaderboardPreview;
 
 init();
 </script>

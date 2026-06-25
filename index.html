@@ -275,6 +275,13 @@ select option{background:var(--card);}
         <span id="standings-updated" style="font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;font-weight:400;"></span>
       </div>
       <div class="alert alert-info" style="font-size:11px;margin-bottom:10px;">This table updates automatically every 3 minutes based on live match data. It may be slightly delayed. Official leaderboard scores are calculated after each group stage is finalized.</div>
+      <div class="alert alert-info" style="font-size:11px;margin-bottom:10px;line-height:1.7;">
+        <strong>Color key:</strong><br>
+        <span style="color:#7ee8a2;font-weight:700;">Bold green</span> = group is fully finalized and this team is confirmed through to the knockout rounds.<br>
+        <span style="color:#7ee8a2;font-weight:400;">Green</span> = currently sitting in an advancing position based on live results so far, but the group is not finalized yet, so this can still change.<br>
+        <span style="color:var(--gold);font-weight:400;">Gold</span> = currently sitting in 3rd place based on live results, in the mix for one of the 8 third-place qualifying spots, not yet confirmed either way.<br>
+        <span style="color:#ff4040;font-weight:700;">Red</span> = mathematically eliminated, no longer able to reach the knockout rounds.
+      </div>
       <div id="standings-list"><div class="loading">Loading standings...</div></div>
     </div>
     <div class="card">
@@ -1524,11 +1531,17 @@ function renderStandings(matches) {
       const eliminatedTeams = results.eliminatedTeams || [];
       const isEliminated = eliminatedTeams.includes(r.team);
       const isConfirmedThirdPlaceQualifier = (i === 2 && qualifiedThirdPlace.includes(r.team));
-      const leader = (!isEliminated && (i < 2 || isConfirmedThirdPlaceQualifier)) ? ' leader' : '';
+      const groupFinalized = !!(results.groups[letter] && results.groups[letter].every(p => p));
+      const isAdvancing = (i < 2 || isConfirmedThirdPlaceQualifier);
       let rowStyle = '';
-      if (isEliminated) rowStyle = ' style="color:#ff4040;"';
-      else if (i === 2 && !isConfirmedThirdPlaceQualifier) rowStyle = ' style="color:var(--gold);"';
-      html += `<tr class="${leader}"${rowStyle}>
+      if (isEliminated) {
+        rowStyle = ' style="color:#ff4040;font-weight:700;"';
+      } else if (isAdvancing) {
+        rowStyle = ` style="color:#7ee8a2;font-weight:${groupFinalized ? '700' : '400'};"`;
+      } else if (i === 2) {
+        rowStyle = ' style="color:var(--gold);font-weight:400;"';
+      }
+      html += `<tr${rowStyle}>
         <td>${name}</td>
         <td>${r.p}</td><td>${r.w}</td><td>${r.d}</td><td>${r.l}</td>
         <td>${r.gd > 0 ? '+'+r.gd : r.gd}</td>

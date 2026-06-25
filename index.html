@@ -1515,8 +1515,10 @@ function renderStandings(matches) {
         </tr></thead><tbody>`;
     rows.forEach((r, i) => {
       const name = r.team.replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA9F}]/gu,'').replace(/[\uD800-\uDFFF]/g,'').trim();
-      const leader = i < 2 ? ' leader' : '';
-      const rowStyle = i === 2 ? ' style="color:var(--gold);"' : '';
+      const qualifiedThirdPlace = results.qualifiedThirdPlace || [];
+      const isConfirmedThirdPlaceQualifier = (i === 2 && qualifiedThirdPlace.includes(r.team));
+      const leader = (i < 2 || isConfirmedThirdPlaceQualifier) ? ' leader' : '';
+      const rowStyle = (i === 2 && !isConfirmedThirdPlaceQualifier) ? ' style="color:var(--gold);"' : '';
       html += `<tr class="${leader}"${rowStyle}>
         <td>${name}</td>
         <td>${r.p}</td><td>${r.w}</td><td>${r.d}</td><td>${r.l}</td>
@@ -2586,7 +2588,7 @@ async function adminViewProfile(username) {
       <div><span style="color:#bb86fc;font-weight:700;">●</span> <span style="color:var(--muted);">Got third place exactly right and predicted them to be one of the 8 to advance, but that prediction was wrong, they did not advance.</span></div>
       <div><span style="color:var(--white);font-weight:700;">●</span> <span style="color:var(--muted);">Group not yet decided.</span></div>
         <div><span style="color:#a0703a;font-weight:700;">●</span> <span style="color:var(--muted);">Exact 3rd place pick, still waiting to see if they qualify as one of the 8.</span></div>
-        <div><span style="color:#e08e3a;font-weight:700;">●</span> <span style="color:var(--muted);">Wrong position, but they finished 3rd, still waiting to see if they qualify as one of the 8.</span></div>
+        <div><span style="color:#ff7a1a;font-weight:700;">●</span> <span style="color:var(--muted);">Wrong position, but they finished 3rd, still waiting to see if they qualify as one of the 8.</span></div>
     </div>
   </div>`;
   html += `<div class="card"><div class="card-title">🏁 Group Picks</div><div class="groups-grid">`;
@@ -2619,7 +2621,7 @@ async function adminViewProfile(username) {
       } else if(i<=2 && pickedPos===2){
         if(qualifiedThirdPlaceAdmin.includes(t)){ color='#f0b429'; icon=' ~'; }
         else if(results.thirdPlaceFinalized){ color='#a83a3a'; icon=' ✗'; }
-        else { color='#e08e3a'; icon=' ?'; }
+        else { color='#ff7a1a'; icon=' ?'; }
       } else if(i<=2 && pickedPos!==-1 && pickedPos<=1){
         color='#f0b429'; icon=' ~';
       } else if(pickedPos!==-1){
@@ -2690,7 +2692,7 @@ async function viewProfile(username) {
         <div><span style="color:#bb86fc;font-weight:700;">●</span> <span style="color:var(--muted);">Got third place exactly right and predicted them to be one of the 8 to advance, but that prediction was wrong, they did not advance.</span></div>
         <div><span style="color:var(--white);font-weight:700;">●</span> <span style="color:var(--muted);">Group not yet decided.</span></div>
         <div><span style="color:#a0703a;font-weight:700;">●</span> <span style="color:var(--muted);">Exact 3rd place pick, still waiting to see if they qualify as one of the 8.</span></div>
-        <div><span style="color:#e08e3a;font-weight:700;">●</span> <span style="color:var(--muted);">Wrong position, but they finished 3rd, still waiting to see if they qualify as one of the 8.</span></div>
+        <div><span style="color:#ff7a1a;font-weight:700;">●</span> <span style="color:var(--muted);">Wrong position, but they finished 3rd, still waiting to see if they qualify as one of the 8.</span></div>
       </div>
     </div>`;
     // Group picks with color coding
@@ -2725,7 +2727,7 @@ async function viewProfile(username) {
           // Whether that counts depends on third-place qualification
           if(qualifiedThirdPlace.includes(t)){ color='#f0b429'; icon=' ~'; } // confirmed qualifier, your pick advances
           else if(results.thirdPlaceFinalized){ color='#a83a3a'; icon=' ✗'; } // qualification fully decided, this team did not make it, wrong and eliminated
-          else { color='#e08e3a'; icon=' ?'; } // wrong position, landed on 3rd, qualification still pending, orange
+          else { color='#ff7a1a'; icon=' ?'; } // wrong position, landed on 3rd, qualification still pending, orange
         } else if(i<=2 && pickedPos!==-1 && pickedPos<=1){
           // You picked this team 1st, 2nd, or 3rd, and they actually finished 1st or 2nd. Wrong position, but advances
           color='#f0b429'; icon=' ~';

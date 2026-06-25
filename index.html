@@ -1560,9 +1560,10 @@ async function init() {
   const saved = sessionStorage.getItem('wc_user');
   if (saved) { currentUser = JSON.parse(saved); updateNavUser(); }
   await migrateScotlandFlag();
-  // Load Firebase data and match data in parallel for faster startup
+  // Load results first since renderStandings depends on results.qualifiedThirdPlace being populated
+  await loadResults();
+  // Then load everything else in parallel
   await Promise.all([
-    loadResults(),
     loadEntries(),
     loadNotice(),
     loadMatchData(),

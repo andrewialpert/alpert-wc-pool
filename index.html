@@ -2198,12 +2198,15 @@ function scoreEntry(entry) {
       if(!pred){perfect=false;return;}
       if(act&&pred===act){gScore+=[SCORING.pos1,SCORING.pos2,SCORING.pos3,SCORING.pos4][i];}
       else{
-        // Check if this pick landed in a confirmed advancing position anywhere in the group:
-        // top 2 automatic qualifiers, OR confirmed as one of the best 8 third-place teams
-        const pp=actual.indexOf(pred);
-        const advancesViaTop2 = (pp===0||pp===1);
-        const advancesViaThirdPlace = (pp===2 && qualifiedThirdPlace.includes(pred));
-        if(advancesViaTop2 || advancesViaThirdPlace) gScore+=SCORING.adv;
+        // Advancement credit only applies if the slot YOU picked this team for implies advancement (1st, 2nd, or 3rd).
+        // A 4th place pick means you predicted elimination, so it can never earn advancement credit
+        // even if the team actually advances. The team's actual finishing position must also confirm advancement.
+        if(i<=2){
+          const pp=actual.indexOf(pred);
+          const advancesViaTop2 = (pp===0||pp===1);
+          const advancesViaThirdPlace = (pp===2 && qualifiedThirdPlace.includes(pred));
+          if(advancesViaTop2 || advancesViaThirdPlace) gScore+=SCORING.adv;
+        }
         perfect=false;
       }
     });
@@ -2404,8 +2407,17 @@ function scoreLiveEntry(entry, liveStandings, matches) {
 
 let lbSortMode = 'official'; // 'official', 'live', or 'name'
 
+const LEADERBOARD_MAINTENANCE_MODE = true; // set to false to bring leaderboard back online
+
 async function renderLeaderboard() {
   const c=document.getElementById('leaderboard-content');
+  if (LEADERBOARD_MAINTENANCE_MODE) {
+    c.innerHTML = `<div class="alert alert-warn" style="font-size:14px;line-height:1.7;padding:20px;text-align:center;">
+      🛠️ <strong>Leaderboard is temporarily down for maintenance.</strong><br><br>
+      We found a scoring bug and are fixing it now to make sure everyone's points are correct. Back shortly.
+    </div>`;
+    return;
+  }
   c.innerHTML='<div class="loading" style="padding:40px;text-align:center;color:var(--muted);">Loading leaderboard...</div>';
   
   await loadEntries(); 
@@ -2614,16 +2626,20 @@ async function viewProfile(username) {
             else { color='var(--white)'; icon=' ?'; } // exact 3rd, qualification still pending
           }
           else { color='#4d9e6a'; icon=' ✓'; } // exact 4th, eliminated spot, correct but muted
-        } else if(pickedPos===2){
-          // This team is confirmed 3rd place, but third-place qualification is determined separately and may still be pending
+        } else if(i<=2 && pickedPos===2){
+          // You picked this team 1st, 2nd, or 3rd (implying advancement), and they're confirmed exactly 3rd.
+          // Whether that counts depends on third-place qualification
           if(qualifiedThirdPlace.includes(t)){ color='#f0b429'; icon=' ~'; } // confirmed qualifier, your pick advances
           else if(results.thirdPlaceFinalized){ color='#a83a3a'; icon=' ✗'; } // qualification fully decided, this team did not make it, wrong and eliminated
           else { color='var(--white)'; icon=' ?'; } // 3rd place locked in, qualification still pending
+        } else if(i<=2 && pickedPos!==-1 && pickedPos<=1){
+          // You picked this team 1st, 2nd, or 3rd, and they actually finished 1st or 2nd. Wrong position, but advances
+          color='#f0b429'; icon=' ~';
         } else if(pickedPos!==-1){
-          // Team confirmed in 1st, 2nd, or 4th
-          if(pickedPos<=1){ color='#f0b429'; icon=' ~'; } // your pick still advanced via top 2, yellow
-          else if(i<=1){ color='#ff4040'; icon=' ✗'; } // this was an advancing slot you guessed wrong on entirely, bold red
-          else { color='#a83a3a'; icon=' ✗'; } // this was an eliminated slot you guessed wrong on, muted red
+          // Either you picked this team 4th (never earns advancement credit regardless of outcome),
+          // or you picked 1st/2nd/3rd but the team finished somewhere that does not qualify
+          if(i<=1){ color='#ff4040'; icon=' ✗'; } // this was an advancing slot you guessed wrong on entirely, bold red
+          else { color='#a83a3a'; icon=' ✗'; } // this was an eliminated slot (3rd unqualified or 4th) you guessed wrong on, muted red
         } else if(confirmed.some(c=>c)){
           // Some positions confirmed but this team not found among them yet, partial group
           color='var(--white)';

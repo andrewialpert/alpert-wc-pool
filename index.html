@@ -2580,8 +2580,8 @@ async function adminViewProfile(username) {
       <div><span style="color:#7ee8a2;font-weight:700;">●</span> <span style="color:var(--muted);">Exact position correct, advances. Full points.</span></div>
       <div><span style="color:#4d9e6a;font-weight:700;">●</span> <span style="color:var(--muted);">Exact position correct, eliminated spot. Full points.</span></div>
       <div><span style="color:#f0b429;font-weight:700;">●</span> <span style="color:var(--muted);">Wrong position, but your pick still advanced (top 2, or a confirmed third place qualifier). Advancement points.</span></div>
-      <div><span style="color:#ff4040;font-weight:700;">●</span> <span style="color:var(--muted);">Wrong on an advancing spot, your pick did not advance. Zero points.</span></div>
-      <div><span style="color:#a83a3a;font-weight:700;">●</span> <span style="color:var(--muted);">Wrong on an eliminated spot, your pick did not advance. Zero points.</span></div>
+      <div><span style="color:#ff4040;font-weight:700;">●</span> <span style="color:var(--muted);">You predicted this team would NOT advance, but they actually did. Zero points.</span></div>
+      <div><span style="color:#a83a3a;font-weight:700;">●</span> <span style="color:var(--muted);">You predicted this team would NOT advance, and they did not. Zero points.</span></div>
       <div><span style="color:#7aa2f7;font-weight:700;">●</span> <span style="color:var(--muted);">Got third place exactly right but predicted they would NOT advance, that prediction was wrong, they did advance.</span></div>
       <div><span style="color:#bb86fc;font-weight:700;">●</span> <span style="color:var(--muted);">Got third place exactly right and predicted them to be one of the 8 to advance, but that prediction was wrong, they did not advance.</span></div>
       <div><span style="color:var(--white);font-weight:700;">●</span> <span style="color:var(--muted);">Not yet decided, or finished 3rd and still waiting on third place qualification.</span></div>
@@ -2621,7 +2621,8 @@ async function adminViewProfile(username) {
       } else if(i<=2 && pickedPos!==-1 && pickedPos<=1){
         color='#f0b429'; icon=' ~';
       } else if(pickedPos!==-1){
-        if(i<=1){ color='#ff4040'; icon=' ✗'; }
+        const actuallyAdvancedAdmin = (pickedPos===0||pickedPos===1) || (pickedPos===2 && qualifiedThirdPlaceAdmin.includes(t));
+        if(actuallyAdvancedAdmin){ color='#ff4040'; icon=' ✗'; }
         else { color='#a83a3a'; icon=' ✗'; }
       } else if(confirmed.some(c=>c)){
         color='var(--white)';
@@ -2681,8 +2682,8 @@ async function viewProfile(username) {
         <div><span style="color:#7ee8a2;font-weight:700;">●</span> <span style="color:var(--muted);">Exact position correct, advances. Full points.</span></div>
         <div><span style="color:#4d9e6a;font-weight:700;">●</span> <span style="color:var(--muted);">Exact position correct, eliminated spot. Full points.</span></div>
         <div><span style="color:#f0b429;font-weight:700;">●</span> <span style="color:var(--muted);">Wrong position, but your pick still advanced (top 2, or a confirmed third place qualifier). Advancement points.</span></div>
-        <div><span style="color:#ff4040;font-weight:700;">●</span> <span style="color:var(--muted);">Wrong on an advancing spot, your pick did not advance. Zero points.</span></div>
-        <div><span style="color:#a83a3a;font-weight:700;">●</span> <span style="color:var(--muted);">Wrong on an eliminated spot, your pick did not advance. Zero points.</span></div>
+        <div><span style="color:#ff4040;font-weight:700;">●</span> <span style="color:var(--muted);">You predicted this team would NOT advance, but they actually did. Zero points.</span></div>
+        <div><span style="color:#a83a3a;font-weight:700;">●</span> <span style="color:var(--muted);">You predicted this team would NOT advance, and they did not. Zero points.</span></div>
         <div><span style="color:#7aa2f7;font-weight:700;">●</span> <span style="color:var(--muted);">Got third place exactly right but predicted they would NOT advance, that prediction was wrong, they did advance.</span></div>
         <div><span style="color:#bb86fc;font-weight:700;">●</span> <span style="color:var(--muted);">Got third place exactly right and predicted them to be one of the 8 to advance, but that prediction was wrong, they did not advance.</span></div>
         <div><span style="color:var(--white);font-weight:700;">●</span> <span style="color:var(--muted);">Not yet decided, or finished 3rd and still waiting on third place qualification.</span></div>
@@ -2725,10 +2726,12 @@ async function viewProfile(username) {
           // You picked this team 1st, 2nd, or 3rd, and they actually finished 1st or 2nd. Wrong position, but advances
           color='#f0b429'; icon=' ~';
         } else if(pickedPos!==-1){
-          // Either you picked this team 4th (never earns advancement credit regardless of outcome),
-          // or you picked 1st/2nd/3rd but the team finished somewhere that does not qualify
-          if(i<=1){ color='#ff4040'; icon=' ✗'; } // this was an advancing slot you guessed wrong on entirely, bold red
-          else { color='#a83a3a'; icon=' ✗'; } // this was an eliminated slot (3rd unqualified or 4th) you guessed wrong on, muted red
+          // You picked this team in some position, and they are confirmed somewhere else, not advancing from where you put them.
+          // Bold red = the team actually advanced (1st, 2nd, or qualifies from 3rd) but you picked them in a non-advancing slot, a real miss.
+          // Muted red = the team did not advance at all, you got the elimination right but the exact slot wrong.
+          const actuallyAdvanced = (pickedPos===0||pickedPos===1) || (pickedPos===2 && qualifiedThirdPlace.includes(t));
+          if(actuallyAdvanced){ color='#ff4040'; icon=' ✗'; } // team you wrote off actually advanced, bold red
+          else { color='#a83a3a'; icon=' ✗'; } // team did not advance either way, muted red
         } else if(confirmed.some(c=>c)){
           // Some positions confirmed but this team not found among them yet, partial group
           color='var(--white)';

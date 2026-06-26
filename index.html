@@ -2718,9 +2718,6 @@ function renderBracketVisual(entry) {
     return pick ? pick.replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA9F}]/gu,'').replace(/[\uD800-\uDFFF]/g,'').trim() : null;
   }
 
-  // Determine real-world status of a team, regardless of which bracket box it appears in.
-  // Returns 'eliminated', 'alive', or 'unknown'.
-  function teamStatus(displayName) {
   // Determine real-world status of a team for a SPECIFIC round, since group qualification
   // only proves a team is alive for R32, not for any round beyond that.
   // roundIndex: 0=R32, 1=R16, 2=QF, 3=SF, 4=Final/Champion

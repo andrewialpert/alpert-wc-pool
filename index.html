@@ -205,7 +205,9 @@ select option{background:var(--card);}
 .bracket-round-title{font-family:'Bebas Neue',sans-serif;font-size:13px;color:var(--gold);text-align:center;letter-spacing:1px;margin-bottom:4px;}
 .bracket-match{background:var(--card-light);border-radius:6px;padding:6px 8px;font-size:11px;flex:1;display:flex;flex-direction:column;justify-content:center;}
 .bracket-team{padding:2px 0;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.bracket-winner{color:#7ee8a2;font-weight:700;}align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);gap:8px;}
+.bracket-winner{color:#7ee8a2;font-weight:700;}
+.bracket-team-alive{color:#7ee8a2 !important;font-weight:700;}
+.bracket-team-eliminated{color:#ff4040 !important;text-decoration:line-through;}align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);gap:8px;}
 .match-row:last-child{border-bottom:none;}
 .match-teams{display:flex;align-items:center;gap:8px;flex:1;}
 .match-team{display:flex;align-items:center;gap:5px;font-size:13px;min-width:0;}
@@ -2703,6 +2705,8 @@ async function adminViewProfile(username) {
 function renderBracketVisual(entry) {
   const bp = entry.bracket?.picks || {};
   const bm = entry.bracket?.matchups || {};
+  const eliminatedTeams = results.eliminatedTeams || [];
+  const qualifiedThirdPlace = results.qualifiedThirdPlace || [];
 
   function teamLabel(matchupId, side) {
     const m = bm[matchupId];
@@ -2713,10 +2717,61 @@ function renderBracketVisual(entry) {
     const pick = bp[matchupId];
     return pick ? pick.replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA9F}]/gu,'').replace(/[\uD800-\uDFFF]/g,'').trim() : null;
   }
+
+  // Determine real-world status of a team, regardless of which bracket box it appears in.
+  // Returns 'eliminated', 'alive', or 'unknown'.
+  function teamStatus(displayName) {
+    if (!displayName || displayName === 'TBD') return 'unknown';
+
+    // Check against every group's full team list to find the matching original (with flag) string,
+    // since displayName here has been stripped of its flag emoji for display purposes.
+    let originalTeam = null;
+    Object.values(GROUPS).forEach(teams => {
+      teams.forEach(t => {
+        const stripped = t.replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA9F}]/gu,'').replace(/[\uD800-\uDFFF]/g,'').trim();
+        if (stripped === displayName) originalTeam = t;
+      });
+    });
+    if (!originalTeam) return 'unknown';
+
+    // Eliminated takes priority, confirmed by admin regardless of round
+    if (eliminatedTeams.includes(originalTeam)) return 'eliminated';
+
+    // Check group position: confirmed 1st or 2nd in a fully entered group = alive
+    for (const letter of Object.keys(GROUPS)) {
+      const confirmed = results.groups[letter];
+      if (!confirmed) continue;
+      const pos = confirmed.indexOf(originalTeam);
+      if (pos === -1) continue;
+      if (pos === 0 || pos === 1) return 'alive';
+      if (pos === 2) {
+        if (qualifiedThirdPlace.includes(originalTeam)) return 'alive';
+        if (results.thirdPlaceFinalized) return 'eliminated'; // qualification fully decided, this team did not make it
+        return 'unknown'; // confirmed 3rd, qualification still pending
+      }
+      if (pos === 3) return 'eliminated'; // confirmed 4th, always eliminated regardless of third place qualification
+    }
+
+    // Check knockout rounds: if this team is a confirmed winner of any round, they're alive
+    const koRounds = ['r32','r16','qf','sf','champion'];
+    for (const r of koRounds) {
+      if ((results.knockout?.[r] || []).includes(originalTeam)) return 'alive';
+    }
+
+    return 'unknown';
+  }
+
+  function statusClass(displayName) {
+    const status = teamStatus(displayName);
+    if (status === 'alive') return ' bracket-team-alive';
+    if (status === 'eliminated') return ' bracket-team-eliminated';
+    return '';
+  }
+
   function matchCell(homeLabel, awayLabel) {
     return `<div class="bracket-match">
-      <div class="bracket-team">${homeLabel}</div>
-      <div class="bracket-team">${awayLabel}</div>
+      <div class="bracket-team${statusClass(homeLabel)}">${homeLabel}</div>
+      <div class="bracket-team${statusClass(awayLabel)}">${awayLabel}</div>
     </div>`;
   }
 
@@ -2758,7 +2813,7 @@ function renderBracketVisual(entry) {
 
   // Champion
   html += '<div class="bracket-round"><div class="bracket-round-title">🏆 Champion</div>';
-  html += `<div class="bracket-match bracket-champion-cell"><div class="bracket-team">${pickedWinner('FINAL') || 'TBD'}</div></div>`;
+  html += `<div class="bracket-match bracket-champion-cell"><div class="bracket-team${statusClass(pickedWinner('FINAL') || 'TBD')}">${pickedWinner('FINAL') || 'TBD'}</div></div>`;
   html += '</div>';
 
   html += '</div>';

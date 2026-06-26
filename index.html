@@ -200,9 +200,10 @@ select option{background:var(--card);}
 .standings-pts{font-family:'DM Mono',monospace;font-weight:700;color:var(--white);}
 .live-badge{display:inline-block;background:rgba(178,34,52,0.15);color:var(--red);border:1px solid rgba(178,34,52,0.3);border-radius:4px;font-size:10px;font-family:'DM Mono',monospace;padding:1px 6px;margin-left:6px;vertical-align:middle;}
 .bracket-visual{display:flex;gap:10px;overflow-x:auto;padding:8px 0;}
-.bracket-round{display:flex;flex-direction:column;justify-content:space-around;min-width:130px;gap:8px;}
+.bracket-round{display:flex;flex-direction:column;justify-content:space-around;min-width:130px;gap:6px;}
+.bracket-round-r32{gap:4px;}
 .bracket-round-title{font-family:'Bebas Neue',sans-serif;font-size:13px;color:var(--gold);text-align:center;letter-spacing:1px;margin-bottom:4px;}
-.bracket-match{background:var(--card-light);border-radius:6px;padding:6px 8px;font-size:11px;}
+.bracket-match{background:var(--card-light);border-radius:6px;padding:6px 8px;font-size:11px;flex:1;display:flex;flex-direction:column;justify-content:center;}
 .bracket-team{padding:2px 0;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .bracket-winner{color:#7ee8a2;font-weight:700;}align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);gap:8px;}
 .match-row:last-child{border-bottom:none;}
@@ -2702,7 +2703,6 @@ async function adminViewProfile(username) {
 function renderBracketVisual(entry) {
   const bp = entry.bracket?.picks || {};
   const bm = entry.bracket?.matchups || {};
-  const R32_ORDER = ['M73','M74','M75','M76','M77','M78','M79','M80','M81','M82','M83','M84','M85','M86','M87','M88'];
 
   function teamLabel(matchupId, side) {
     const m = bm[matchupId];
@@ -2713,49 +2713,47 @@ function renderBracketVisual(entry) {
     const pick = bp[matchupId];
     return pick ? pick.replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA9F}]/gu,'').replace(/[\uD800-\uDFFF]/g,'').trim() : null;
   }
-  function matchCell(matchupId, homeLabel, awayLabel) {
-    const winner = pickedWinner(matchupId);
-    const homeWon = winner && winner === homeLabel;
-    const awayWon = winner && winner === awayLabel;
+  function matchCell(homeLabel, awayLabel) {
     return `<div class="bracket-match">
-      <div class="bracket-team${homeWon ? ' bracket-winner' : ''}">${homeLabel}</div>
-      <div class="bracket-team${awayWon ? ' bracket-winner' : ''}">${awayLabel}</div>
+      <div class="bracket-team">${homeLabel}</div>
+      <div class="bracket-team">${awayLabel}</div>
     </div>`;
   }
 
   let html = '<div class="bracket-visual">';
 
-  // R32
-  html += '<div class="bracket-round"><div class="bracket-round-title">R32</div>';
-  R32_ORDER.forEach(id => {
-    html += matchCell(id, teamLabel(id,'home'), teamLabel(id,'away'));
+  // R32 - ordered to align with R16 pairing (R16's m1,m2 order becomes the master sequence)
+  html += '<div class="bracket-round bracket-round-r32"><div class="bracket-round-title">R32</div>';
+  R16.forEach(({m1, m2}) => {
+    html += matchCell(teamLabel(m1,'home'), teamLabel(m1,'away'));
+    html += matchCell(teamLabel(m2,'home'), teamLabel(m2,'away'));
   });
   html += '</div>';
 
-  // R16
-  html += '<div class="bracket-round"><div class="bracket-round-title">R16</div>';
-  R16.forEach(({id, m1, m2}) => {
-    html += matchCell(id, pickedWinner(m1) || 'TBD', pickedWinner(m2) || 'TBD');
+  // R16 - one box per R16 entry, evenly distributed via CSS to align with each pair of R32 boxes above
+  html += '<div class="bracket-round bracket-round-r16"><div class="bracket-round-title">R16</div>';
+  R16.forEach(({m1, m2}) => {
+    html += matchCell(pickedWinner(m1) || 'TBD', pickedWinner(m2) || 'TBD');
   });
   html += '</div>';
 
-  // QF
-  html += '<div class="bracket-round"><div class="bracket-round-title">QF</div>';
-  QF.forEach(({id, m1, m2}) => {
-    html += matchCell(id, pickedWinner(m1) || 'TBD', pickedWinner(m2) || 'TBD');
+  // QF - one box per QF entry, evenly distributed to align with pairs of R16 boxes
+  html += '<div class="bracket-round bracket-round-qf"><div class="bracket-round-title">QF</div>';
+  QF.forEach(({m1, m2}) => {
+    html += matchCell(pickedWinner(m1) || 'TBD', pickedWinner(m2) || 'TBD');
   });
   html += '</div>';
 
   // SF
-  html += '<div class="bracket-round"><div class="bracket-round-title">SF</div>';
-  SF.forEach(({id, m1, m2}) => {
-    html += matchCell(id, pickedWinner(m1) || 'TBD', pickedWinner(m2) || 'TBD');
+  html += '<div class="bracket-round bracket-round-sf"><div class="bracket-round-title">SF</div>';
+  SF.forEach(({m1, m2}) => {
+    html += matchCell(pickedWinner(m1) || 'TBD', pickedWinner(m2) || 'TBD');
   });
   html += '</div>';
 
   // Final
   html += '<div class="bracket-round"><div class="bracket-round-title">Final</div>';
-  html += matchCell('FINAL', pickedWinner('SF1') || 'TBD', pickedWinner('SF2') || 'TBD');
+  html += matchCell(pickedWinner('SF1') || 'TBD', pickedWinner('SF2') || 'TBD');
   html += '</div>';
 
   html += '</div>';

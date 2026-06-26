@@ -205,7 +205,9 @@ select option{background:var(--card);}
 .bracket-round-title{font-family:'Bebas Neue',sans-serif;font-size:13px;color:var(--gold);text-align:center;letter-spacing:1px;margin-bottom:4px;}
 .bracket-match{background:var(--card-light);border-radius:6px;padding:6px 8px;font-size:11px;flex:1;display:flex;flex-direction:column;justify-content:center;}
 .bracket-team{padding:2px 0;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.bracket-winner{color:#7ee8a2;font-weight:700;}align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);gap:8px;}
+.bracket-winner{color:#7ee8a2;font-weight:700;}
+.bracket-champion-cell{border:1px solid var(--gold);background:rgba(240,180,41,0.08);}
+.bracket-champion-cell .bracket-team{color:var(--gold);font-weight:700;text-align:center;}align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);gap:8px;}
 .match-row:last-child{border-bottom:none;}
 .match-teams{display:flex;align-items:center;gap:8px;flex:1;}
 .match-team{display:flex;align-items:center;gap:5px;font-size:13px;min-width:0;}
@@ -2607,7 +2609,6 @@ async function adminViewProfile(username) {
   html += `<div class="alert alert-warn" style="margin-bottom:14px;font-size:12px;">Admin view: picks visible regardless of lock date.</div>`;
   html += `<div class="profile-header"><div class="profile-avatar">${(entry.name||'?')[0].toUpperCase()}</div><div><div class="profile-name">${entry.name}</div><div class="profile-meta">@${entry.username} · ${entry.submitted?'Submitted':'Draft/Autosaved'} ${new Date(entry.submittedAt||entry.savedAt||Date.now()).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}</div></div></div>`;
   html += `<div class="card"><div class="card-title">🏆 Champion Pick</div><div style="font-size:18px;font-weight:600;">${entry.bracket?.picks?.['FINAL'] || entry.knockout?.champion?.[0] || 'Not picked'}</div></div>`;
-  html += `<div class="card"><div class="card-title">🏆 Bracket</div>${renderBracketVisual(entry)}</div>`;
   html += `<div class="card" style="padding:11px 13px;">
     <div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;margin-bottom:8px;">GROUP PICK COLOR KEY (based on YOUR pick earning points)</div>
     <div style="display:flex;flex-direction:column;gap:5px;font-size:11px;">
@@ -2697,6 +2698,7 @@ async function adminViewProfile(username) {
     });
     html += `</div>`;
   });
+  html += `<div class="card"><div class="card-title">🏆 Bracket</div>${renderBracketVisual(entry)}</div>`;
   document.getElementById('profile-content').innerHTML = html;
 }
 
@@ -2756,6 +2758,11 @@ function renderBracketVisual(entry) {
   html += matchCell(pickedWinner('SF1') || 'TBD', pickedWinner('SF2') || 'TBD');
   html += '</div>';
 
+  // Champion
+  html += '<div class="bracket-round"><div class="bracket-round-title">🏆 Champion</div>';
+  html += `<div class="bracket-match bracket-champion-cell"><div class="bracket-team">${pickedWinner('FINAL') || 'TBD'}</div></div>`;
+  html += '</div>';
+
   html += '</div>';
   return html;
 }
@@ -2771,8 +2778,6 @@ async function viewProfile(username) {
     // Champion at top
     const champ = entry.bracket?.picks?.['FINAL'] || entry.knockout?.champion?.[0] || 'None';
     html+=`<div class="card"><div class="card-title">🏆 Champion Pick</div><div style="font-size:18px;font-weight:600;">${champ}</div></div>`;
-    // Bracket visual
-    html+=`<div class="card"><div class="card-title">🏆 Bracket</div>${renderBracketVisual(entry)}</div>`;
     // Color code legend
     html+=`<div class="card" style="padding:11px 13px;">
       <div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;margin-bottom:8px;">GROUP PICK COLOR KEY (based on YOUR pick earning points)</div>
@@ -2862,6 +2867,8 @@ async function viewProfile(username) {
       roundPicks.forEach(t=>{ html+=`<div class="team-chip selected">${t}</div>`; });
       html+=`</div></div>`;
     });
+    // Bracket visual, placed after the detailed round-by-round list
+    html+=`<div class="card"><div class="card-title">🏆 Bracket</div>${renderBracketVisual(entry)}</div>`;
     // Champion again at bottom
     html+=`<div class="card" style="border-color:var(--gold);"><div class="card-title" style="color:var(--gold);">🏆 Champion Pick</div><div style="font-size:22px;font-weight:700;color:var(--gold);">${champ}</div></div>`;
   } else {

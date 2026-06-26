@@ -2721,6 +2721,11 @@ function renderBracketVisual(entry) {
   // Determine real-world status of a team, regardless of which bracket box it appears in.
   // Returns 'eliminated', 'alive', or 'unknown'.
   function teamStatus(displayName) {
+  // Determine real-world status of a team for a SPECIFIC round, since group qualification
+  // only proves a team is alive for R32, not for any round beyond that.
+  // roundIndex: 0=R32, 1=R16, 2=QF, 3=SF, 4=Final/Champion
+  const koRoundOrder = ['r32','r16','qf','sf','champion'];
+  function teamStatus(displayName, roundIndex) {
     if (!displayName || displayName === 'TBD') return 'unknown';
 
     // Check against every group's full team list to find the matching original (with flag) string,
@@ -2737,41 +2742,47 @@ function renderBracketVisual(entry) {
     // Eliminated takes priority, confirmed by admin regardless of round
     if (eliminatedTeams.includes(originalTeam)) return 'eliminated';
 
-    // Check group position: confirmed 1st or 2nd in a fully entered group = alive
+    // Determine group-stage qualification (this only confirms alive status for R32, roundIndex 0)
+    let groupQualified = null; // null = undetermined, true = qualified for R32, false = eliminated in groups
     for (const letter of Object.keys(GROUPS)) {
       const confirmed = results.groups[letter];
       if (!confirmed) continue;
       const pos = confirmed.indexOf(originalTeam);
       if (pos === -1) continue;
-      if (pos === 0 || pos === 1) return 'alive';
+      if (pos === 0 || pos === 1) { groupQualified = true; break; }
       if (pos === 2) {
-        if (qualifiedThirdPlace.includes(originalTeam)) return 'alive';
-        if (results.thirdPlaceFinalized) return 'eliminated'; // qualification fully decided, this team did not make it
-        return 'unknown'; // confirmed 3rd, qualification still pending
+        if (qualifiedThirdPlace.includes(originalTeam)) { groupQualified = true; break; }
+        if (results.thirdPlaceFinalized) { groupQualified = false; break; }
+        groupQualified = null; break; // still pending
       }
-      if (pos === 3) return 'eliminated'; // confirmed 4th, always eliminated regardless of third place qualification
+      if (pos === 3) { groupQualified = false; break; } // confirmed 4th, always eliminated
     }
+    if (groupQualified === false) return 'eliminated';
 
-    // Check knockout rounds: if this team is a confirmed winner of any round, they're alive
-    const koRounds = ['r32','r16','qf','sf','champion'];
-    for (const r of koRounds) {
-      if ((results.knockout?.[r] || []).includes(originalTeam)) return 'alive';
+    // For R32 (roundIndex 0): alive status comes purely from group qualification
+    if (roundIndex === 0) return groupQualified === true ? 'alive' : 'unknown';
+
+    // For R16 and beyond, the team must have actually WON every prior knockout round to be confirmed alive here.
+    // Check each prior round in sequence; if any is missing, status is unknown (not yet determined), not alive.
+    for (let r = 0; r < roundIndex; r++) {
+      const roundKey = koRoundOrder[r];
+      const wonThisRound = (results.knockout?.[roundKey] || []).includes(originalTeam);
+      if (!wonThisRound) return 'unknown';
     }
-
-    return 'unknown';
+    return 'alive';
   }
 
-  function statusClass(displayName) {
-    const status = teamStatus(displayName);
+  function statusClass(displayName, roundIndex) {
+    const status = teamStatus(displayName, roundIndex);
     if (status === 'alive') return ' bracket-team-alive';
     if (status === 'eliminated') return ' bracket-team-eliminated';
     return '';
   }
 
-  function matchCell(homeLabel, awayLabel) {
+  function matchCell(homeLabel, awayLabel, roundIndex) {
     return `<div class="bracket-match">
-      <div class="bracket-team${statusClass(homeLabel)}">${homeLabel}</div>
-      <div class="bracket-team${statusClass(awayLabel)}">${awayLabel}</div>
+      <div class="bracket-team${statusClass(homeLabel, roundIndex)}">${homeLabel}</div>
+      <div class="bracket-team${statusClass(awayLabel, roundIndex)}">${awayLabel}</div>
     </div>`;
   }
 
@@ -2780,40 +2791,40 @@ function renderBracketVisual(entry) {
   // R32 - ordered to align with R16 pairing (R16's m1,m2 order becomes the master sequence)
   html += '<div class="bracket-round bracket-round-r32"><div class="bracket-round-title">R32</div>';
   R16.forEach(({m1, m2}) => {
-    html += matchCell(teamLabel(m1,'home'), teamLabel(m1,'away'));
-    html += matchCell(teamLabel(m2,'home'), teamLabel(m2,'away'));
+    html += matchCell(teamLabel(m1,'home'), teamLabel(m1,'away'), 0);
+    html += matchCell(teamLabel(m2,'home'), teamLabel(m2,'away'), 0);
   });
   html += '</div>';
 
   // R16 - one box per R16 entry, evenly distributed via CSS to align with each pair of R32 boxes above
   html += '<div class="bracket-round bracket-round-r16"><div class="bracket-round-title">R16</div>';
   R16.forEach(({m1, m2}) => {
-    html += matchCell(pickedWinner(m1) || 'TBD', pickedWinner(m2) || 'TBD');
+    html += matchCell(pickedWinner(m1) || 'TBD', pickedWinner(m2) || 'TBD', 1);
   });
   html += '</div>';
 
   // QF - one box per QF entry, evenly distributed to align with pairs of R16 boxes
   html += '<div class="bracket-round bracket-round-qf"><div class="bracket-round-title">QF</div>';
   QF.forEach(({m1, m2}) => {
-    html += matchCell(pickedWinner(m1) || 'TBD', pickedWinner(m2) || 'TBD');
+    html += matchCell(pickedWinner(m1) || 'TBD', pickedWinner(m2) || 'TBD', 2);
   });
   html += '</div>';
 
   // SF
   html += '<div class="bracket-round bracket-round-sf"><div class="bracket-round-title">SF</div>';
   SF.forEach(({m1, m2}) => {
-    html += matchCell(pickedWinner(m1) || 'TBD', pickedWinner(m2) || 'TBD');
+    html += matchCell(pickedWinner(m1) || 'TBD', pickedWinner(m2) || 'TBD', 3);
   });
   html += '</div>';
 
   // Final
   html += '<div class="bracket-round"><div class="bracket-round-title">Final</div>';
-  html += matchCell(pickedWinner('SF1') || 'TBD', pickedWinner('SF2') || 'TBD');
+  html += matchCell(pickedWinner('SF1') || 'TBD', pickedWinner('SF2') || 'TBD', 4);
   html += '</div>';
 
   // Champion
   html += '<div class="bracket-round"><div class="bracket-round-title">🏆 Champion</div>';
-  html += `<div class="bracket-match bracket-champion-cell"><div class="bracket-team${statusClass(pickedWinner('FINAL') || 'TBD')}">${pickedWinner('FINAL') || 'TBD'}</div></div>`;
+  html += `<div class="bracket-match bracket-champion-cell"><div class="bracket-team${statusClass(pickedWinner('FINAL') || 'TBD', 4)}">${pickedWinner('FINAL') || 'TBD'}</div></div>`;
   html += '</div>';
 
   html += '</div>';

@@ -2619,9 +2619,6 @@ async function adminViewProfile(username) {
       <div><span style="color:#a83a3a;font-weight:700;">●</span> <span style="color:var(--muted);">You picked the wrong spot for this team, but you still correctly predicted they would not advance. Zero points.</span></div>
       <div><span style="color:#7aa2f7;font-weight:700;">●</span> <span style="color:var(--muted);">Got third place exactly right but predicted they would NOT advance, that prediction was wrong, they did advance.</span></div>
       <div><span style="color:#bb86fc;font-weight:700;">●</span> <span style="color:var(--muted);">Got third place exactly right and predicted them to be one of the 8 to advance, but that prediction was wrong, they did not advance.</span></div>
-      <div><span style="color:var(--white);font-weight:700;">●</span> <span style="color:var(--muted);">Group not yet decided.</span></div>
-        <div><span style="color:#a0703a;font-weight:700;">●</span> <span style="color:var(--muted);">Exact 3rd place pick, still waiting to see if they qualify as one of the 8.</span></div>
-        <div><span style="color:#ff7a1a;font-weight:700;">●</span> <span style="color:var(--muted);">Wrong position, but they finished 3rd, still waiting to see if they qualify as one of the 8.</span></div>
     </div>
   </div>`;
   html += `<div class="card"><div class="card-title">🏁 Group Picks</div><div class="groups-grid">`;
@@ -2666,7 +2663,7 @@ async function adminViewProfile(username) {
       }
       html += `<div style="font-size:12px;padding:3px 0;display:flex;gap:5px;align-items:center;">
         <span style="color:var(--muted);font-family:'DM Mono',monospace;font-size:10px;width:12px;">${i+1}</span>
-        <span style="color:${color};font-weight:${color==='#7ee8a2'?'700':'400'};">${t}${icon}</span>
+        <span style="color:${color};font-weight:${color==='#7ee8a2'?'700':'400'};">${t}</span>
       </div>`;
     });
     html += `</div>`;
@@ -2850,9 +2847,6 @@ async function viewProfile(username) {
         <div><span style="color:#a83a3a;font-weight:700;">●</span> <span style="color:var(--muted);">You picked the wrong spot for this team, but you still correctly predicted they would not advance. Zero points.</span></div>
         <div><span style="color:#7aa2f7;font-weight:700;">●</span> <span style="color:var(--muted);">Got third place exactly right but predicted they would NOT advance, that prediction was wrong, they did advance.</span></div>
         <div><span style="color:#bb86fc;font-weight:700;">●</span> <span style="color:var(--muted);">Got third place exactly right and predicted them to be one of the 8 to advance, but that prediction was wrong, they did not advance.</span></div>
-        <div><span style="color:var(--white);font-weight:700;">●</span> <span style="color:var(--muted);">Group not yet decided.</span></div>
-        <div><span style="color:#a0703a;font-weight:700;">●</span> <span style="color:var(--muted);">Exact 3rd place pick, still waiting to see if they qualify as one of the 8.</span></div>
-        <div><span style="color:#ff7a1a;font-weight:700;">●</span> <span style="color:var(--muted);">Wrong position, but they finished 3rd, still waiting to see if they qualify as one of the 8.</span></div>
       </div>
     </div>`;
     // Group picks with color coding
@@ -2902,7 +2896,7 @@ async function viewProfile(username) {
           // Some positions confirmed but this team not found among them yet, partial group
           color='var(--white)';
         }
-        html+=`<div style="font-size:12px;padding:3px 0;display:flex;gap:5px;align-items:center;"><span style="color:var(--muted);font-family:'DM Mono',monospace;font-size:10px;width:12px;">${i+1}</span><span style="color:${color};font-weight:${color==='#7ee8a2'?'700':'400'};">${t}${icon}</span></div>`;
+        html+=`<div style="font-size:12px;padding:3px 0;display:flex;gap:5px;align-items:center;"><span style="color:var(--muted);font-family:'DM Mono',monospace;font-size:10px;width:12px;">${i+1}</span><span style="color:${color};font-weight:${color==='#7ee8a2'?'700':'400'};">${t}</span></div>`;
       });
       html+=`</div>`;
     });

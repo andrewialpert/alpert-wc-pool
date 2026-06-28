@@ -278,6 +278,11 @@ select option{background:var(--card);}
       </div>
       <div id="matches-list"><div class="loading">Loading matches...</div></div>
     </div>
+    <div class="card" id="home-bracket-card">
+      <div class="card-title">🏆 The Official Bracket</div>
+      <p style="color:var(--muted);font-size:11px;margin-bottom:11px;line-height:1.6;">This is the real tournament bracket, generated from official group results and confirmed third-place qualifiers. Green means that team has been confirmed to win that match. Red means they've been eliminated from that spot.</p>
+      <div id="home-bracket-list"><div class="loading">Loading bracket...</div></div>
+    </div>
     <div class="card" id="standings-card">
       <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;">
         <span>📊 Live Group Standings <span class="live-badge">LIVE</span></span>
@@ -1593,6 +1598,7 @@ async function init() {
   await migrateScotlandFlag();
   // Load results first since renderStandings depends on results.qualifiedThirdPlace being populated
   await loadResults();
+  renderHomeBracket();
   // Then load everything else in parallel
   await Promise.all([
     loadEntries(),
@@ -1870,6 +1876,184 @@ function groupThird(letter) {
 
 function getSelectedThirdGroups() {
   return [...document.querySelectorAll('#tp-chips .team-chip.selected')].map(c => c.dataset.grp);
+}
+
+function generateOfficialBracketMatchups() {
+  // Same engine as generateBracketMatchups, but reads from official results instead of a person's live picks
+  function officialWinner(letter) {
+    return (results.groups[letter] && results.groups[letter][0]) || `W-${letter}`;
+  }
+  function officialRunnerUp(letter) {
+    return (results.groups[letter] && results.groups[letter][1]) || `RU-${letter}`;
+  }
+  function officialThird(letter) {
+    return (results.groups[letter] && results.groups[letter][2]) || `3rd-${letter}`;
+  }
+  // Which groups' third-place teams are officially confirmed qualifiers
+  const qualifiedThirdPlace = results.qualifiedThirdPlace || [];
+  const tpGroups = Object.keys(GROUPS).filter(letter => {
+    const third = officialThird(letter);
+    return qualifiedThirdPlace.includes(third);
+  });
+  const tpKey = [...tpGroups].sort().join('');
+  const combo = ANNEX_C[tpKey] || null;
+
+  function resolve3rd(slot) {
+    if (!slot) return 'TBD';
+    const g = slot.replace('3','');
+    return officialThird(g);
+  }
+
+  const fixed = {
+    M73: { home: officialRunnerUp('A'), away: officialRunnerUp('B'), label: 'RU-A vs RU-B' },
+    M75: { home: officialWinner('F'), away: officialRunnerUp('C'), label: 'W-F vs RU-C' },
+    M76: { home: officialWinner('C'), away: officialRunnerUp('F'), label: 'W-C vs RU-F' },
+    M78: { home: officialRunnerUp('E'), away: officialRunnerUp('I'), label: 'RU-E vs RU-I' },
+    M83: { home: officialRunnerUp('K'), away: officialRunnerUp('L'), label: 'RU-K vs RU-L' },
+    M84: { home: officialWinner('H'), away: officialRunnerUp('J'), label: 'W-H vs RU-J' },
+    M86: { home: officialWinner('J'), away: officialRunnerUp('H'), label: 'W-J vs RU-H' },
+    M88: { home: officialRunnerUp('D'), away: officialRunnerUp('G'), label: 'RU-D vs RU-G' },
+  };
+
+  let variable;
+  if (combo) {
+    variable = {
+      M79: { home: officialWinner('A'), away: resolve3rd(combo[0]), label: `W-A vs ${combo[0]}` },
+      M85: { home: officialWinner('B'), away: resolve3rd(combo[1]), label: `W-B vs ${combo[1]}` },
+      M81: { home: officialWinner('D'), away: resolve3rd(combo[2]), label: `W-D vs ${combo[2]}` },
+      M74: { home: officialWinner('E'), away: resolve3rd(combo[3]), label: `W-E vs ${combo[3]}` },
+      M82: { home: officialWinner('G'), away: resolve3rd(combo[4]), label: `W-G vs ${combo[4]}` },
+      M77: { home: officialWinner('I'), away: resolve3rd(combo[5]), label: `W-I vs ${combo[5]}` },
+      M87: { home: officialWinner('K'), away: resolve3rd(combo[6]), label: `W-K vs ${combo[6]}` },
+      M80: { home: officialWinner('L'), away: resolve3rd(combo[7]), label: `W-L vs ${combo[7]}` },
+    };
+  } else {
+    // Combo not yet determinable (fewer or more than 8 confirmed qualifiers so far)
+    const tpTeams = tpGroups.map(g => officialThird(g));
+    let tpIdx = 0;
+    const nextTp = () => tpTeams[tpIdx++] || 'TBD';
+    variable = {
+      M74: { home: officialWinner('E'), away: nextTp(), label: 'W-E vs 3rd (A/B/C/D/F)' },
+      M77: { home: officialWinner('I'), away: nextTp(), label: 'W-I vs 3rd (C/D/F/G/H)' },
+      M79: { home: officialWinner('A'), away: nextTp(), label: 'W-A vs 3rd (C/E/F/H/I)' },
+      M80: { home: officialWinner('L'), away: nextTp(), label: 'W-L vs 3rd (E/H/I/J/K)' },
+      M81: { home: officialWinner('D'), away: nextTp(), label: 'W-D vs 3rd (B/E/F/I/J)' },
+      M82: { home: officialWinner('G'), away: nextTp(), label: 'W-G vs 3rd (A/E/H/I/J)' },
+      M85: { home: officialWinner('B'), away: nextTp(), label: 'W-B vs 3rd (E/F/G/I/J)' },
+      M87: { home: officialWinner('K'), away: nextTp(), label: 'W-K vs 3rd (D/E/I/J/L)' },
+    };
+  }
+
+  return { ...fixed, ...variable };
+}
+
+function renderHomeBracket() {
+  const el = document.getElementById('home-bracket-list');
+  if (!el) return;
+  const bm = generateOfficialBracketMatchups();
+
+  function stripFlag(name) {
+    return (name || 'TBD').replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA9F}]/gu,'').replace(/[\uD800-\uDFFF]/g,'').trim();
+  }
+
+  // Resolve the confirmed winner's display name for a given round + the two candidate team names feeding into it.
+  // Returns the winner's name if confirmed, otherwise null.
+  function confirmedWinner(roundKey, candidateA, candidateB) {
+    const winners = (results.knockout?.[roundKey] || []).map(stripFlag);
+    if (candidateA !== 'TBD' && winners.includes(candidateA)) return candidateA;
+    if (candidateB !== 'TBD' && winners.includes(candidateB)) return candidateB;
+    return null;
+  }
+  // Class for a team cell: green if confirmed winner of this round, red if the other team won (so this one's out), neutral otherwise.
+  function cellClass(label, winner, roundHasAnyWinners) {
+    if (label === 'TBD') return '';
+    if (winner === label) return ' bracket-team-alive';
+    if (winner && winner !== label) return ' bracket-team-eliminated';
+    return '';
+  }
+
+  // R32: home/away come directly from official group results (already real team names, or TBD)
+  const r32Results = {};
+  R16.forEach(({m1, m2}) => {
+    [m1, m2].forEach(id => {
+      const m = bm[id];
+      const home = stripFlag(m.home);
+      const away = stripFlag(m.away);
+      const winner = confirmedWinner('r32', home, away);
+      r32Results[id] = { home, away, winner };
+    });
+  });
+
+  // R16: each match's two candidates are the confirmed R32 winners feeding into it (or TBD if not yet decided)
+  const r16Results = {};
+  R16.forEach(({id, m1, m2}) => {
+    const home = r32Results[m1].winner || 'TBD';
+    const away = r32Results[m2].winner || 'TBD';
+    const winner = confirmedWinner('r16', home, away);
+    r16Results[id] = { home, away, winner };
+  });
+
+  // QF: candidates are confirmed R16 winners
+  const qfResults = {};
+  QF.forEach(({id, m1, m2}) => {
+    const home = r16Results[m1].winner || 'TBD';
+    const away = r16Results[m2].winner || 'TBD';
+    const winner = confirmedWinner('qf', home, away);
+    qfResults[id] = { home, away, winner };
+  });
+
+  // SF: candidates are confirmed QF winners
+  const sfResults = {};
+  SF.forEach(({id, m1, m2}) => {
+    const home = qfResults[m1].winner || 'TBD';
+    const away = qfResults[m2].winner || 'TBD';
+    const winner = confirmedWinner('sf', home, away);
+    sfResults[id] = { home, away, winner };
+  });
+
+  // Final: candidates are confirmed SF winners
+  const finalHome = sfResults['SF1'].winner || 'TBD';
+  const finalAway = sfResults['SF2'].winner || 'TBD';
+  const champion = confirmedWinner('champion', finalHome, finalAway);
+
+  function renderCell(home, away, winner) {
+    return `<div class="bracket-match">
+      <div class="bracket-team${cellClass(home, winner)}">${home}</div>
+      <div class="bracket-team${cellClass(away, winner)}">${away}</div>
+    </div>`;
+  }
+
+  let html = '<div class="bracket-visual">';
+
+  html += '<div class="bracket-round bracket-round-r32"><div class="bracket-round-title">R32</div>';
+  R16.forEach(({m1, m2}) => {
+    html += renderCell(r32Results[m1].home, r32Results[m1].away, r32Results[m1].winner);
+    html += renderCell(r32Results[m2].home, r32Results[m2].away, r32Results[m2].winner);
+  });
+  html += '</div>';
+
+  html += '<div class="bracket-round bracket-round-r16"><div class="bracket-round-title">R16</div>';
+  R16.forEach(({id}) => { html += renderCell(r16Results[id].home, r16Results[id].away, r16Results[id].winner); });
+  html += '</div>';
+
+  html += '<div class="bracket-round bracket-round-qf"><div class="bracket-round-title">QF</div>';
+  QF.forEach(({id}) => { html += renderCell(qfResults[id].home, qfResults[id].away, qfResults[id].winner); });
+  html += '</div>';
+
+  html += '<div class="bracket-round bracket-round-sf"><div class="bracket-round-title">SF</div>';
+  SF.forEach(({id}) => { html += renderCell(sfResults[id].home, sfResults[id].away, sfResults[id].winner); });
+  html += '</div>';
+
+  html += '<div class="bracket-round"><div class="bracket-round-title">Final</div>';
+  html += renderCell(finalHome, finalAway, champion);
+  html += '</div>';
+
+  html += '<div class="bracket-round"><div class="bracket-round-title">🏆 Champion</div>';
+  html += `<div class="bracket-match"><div class="bracket-team${champion ? ' bracket-team-alive' : ''}">${champion || 'TBD'}</div></div>`;
+  html += '</div>';
+
+  html += '</div>';
+  el.innerHTML = html;
 }
 
 function generateBracketMatchups() {

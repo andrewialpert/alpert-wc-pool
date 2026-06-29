@@ -207,7 +207,8 @@ select option{background:var(--card);}
 .bracket-team{padding:2px 0;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .bracket-winner{color:#7ee8a2;font-weight:700;}
 .bracket-team-alive{color:#7ee8a2 !important;font-weight:700;}
-.bracket-team-eliminated{color:#ff4040 !important;text-decoration:line-through;}align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);gap:8px;}
+.bracket-team-eliminated{color:#ff4040 !important;text-decoration:line-through;}
+.bracket-team-correctly-eliminated{color:#7ee8a2 !important;text-decoration:line-through;font-weight:700;}align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);gap:8px;}
 .match-row:last-child{border-bottom:none;}
 .match-teams{display:flex;align-items:center;gap:8px;flex:1;}
 .match-team{display:flex;align-items:center;gap:5px;font-size:13px;min-width:0;}
@@ -2950,17 +2951,26 @@ function renderBracketVisual(entry) {
     return 'alive';
   }
 
-  function statusClass(displayName, roundIndex) {
+  function statusClass(displayName, roundIndex, matchupId) {
     const status = teamStatus(displayName, roundIndex);
     if (status === 'alive') return ' bracket-team-alive';
-    if (status === 'eliminated') return ' bracket-team-eliminated';
+    if (status === 'eliminated') {
+      // Check if this person correctly predicted this exact team's elimination in this exact matchup,
+      // i.e. they picked the OTHER team (the one that actually won) as the winner of this match.
+      const pickedWinnerHere = matchupId ? pickedWinner(matchupId) : null;
+      if (pickedWinnerHere && pickedWinnerHere !== displayName && pickedWinnerHere !== 'TBD') {
+        // They picked someone else to win this match, and this team lost, so their prediction was correct
+        return ' bracket-team-correctly-eliminated';
+      }
+      return ' bracket-team-eliminated';
+    }
     return '';
   }
 
-  function matchCell(homeLabel, awayLabel, roundIndex) {
+  function matchCell(homeLabel, awayLabel, roundIndex, matchupId) {
     return `<div class="bracket-match">
-      <div class="bracket-team${statusClass(homeLabel, roundIndex)}">${homeLabel}</div>
-      <div class="bracket-team${statusClass(awayLabel, roundIndex)}">${awayLabel}</div>
+      <div class="bracket-team${statusClass(homeLabel, roundIndex, matchupId)}">${homeLabel}</div>
+      <div class="bracket-team${statusClass(awayLabel, roundIndex, matchupId)}">${awayLabel}</div>
     </div>`;
   }
 
@@ -2969,40 +2979,40 @@ function renderBracketVisual(entry) {
   // R32 - ordered to align with R16 pairing (R16's m1,m2 order becomes the master sequence)
   html += '<div class="bracket-round bracket-round-r32"><div class="bracket-round-title">R32</div>';
   R16.forEach(({m1, m2}) => {
-    html += matchCell(teamLabel(m1,'home'), teamLabel(m1,'away'), 0);
-    html += matchCell(teamLabel(m2,'home'), teamLabel(m2,'away'), 0);
+    html += matchCell(teamLabel(m1,'home'), teamLabel(m1,'away'), 0, m1);
+    html += matchCell(teamLabel(m2,'home'), teamLabel(m2,'away'), 0, m2);
   });
   html += '</div>';
 
   // R16 - one box per R16 entry, evenly distributed via CSS to align with each pair of R32 boxes above
   html += '<div class="bracket-round bracket-round-r16"><div class="bracket-round-title">R16</div>';
-  R16.forEach(({m1, m2}) => {
-    html += matchCell(pickedWinner(m1) || 'TBD', pickedWinner(m2) || 'TBD', 1);
+  R16.forEach(({id, m1, m2}) => {
+    html += matchCell(pickedWinner(m1) || 'TBD', pickedWinner(m2) || 'TBD', 1, id);
   });
   html += '</div>';
 
   // QF - one box per QF entry, evenly distributed to align with pairs of R16 boxes
   html += '<div class="bracket-round bracket-round-qf"><div class="bracket-round-title">QF</div>';
-  QF.forEach(({m1, m2}) => {
-    html += matchCell(pickedWinner(m1) || 'TBD', pickedWinner(m2) || 'TBD', 2);
+  QF.forEach(({id, m1, m2}) => {
+    html += matchCell(pickedWinner(m1) || 'TBD', pickedWinner(m2) || 'TBD', 2, id);
   });
   html += '</div>';
 
   // SF
   html += '<div class="bracket-round bracket-round-sf"><div class="bracket-round-title">SF</div>';
-  SF.forEach(({m1, m2}) => {
-    html += matchCell(pickedWinner(m1) || 'TBD', pickedWinner(m2) || 'TBD', 3);
+  SF.forEach(({id, m1, m2}) => {
+    html += matchCell(pickedWinner(m1) || 'TBD', pickedWinner(m2) || 'TBD', 3, id);
   });
   html += '</div>';
 
   // Final
   html += '<div class="bracket-round"><div class="bracket-round-title">Final</div>';
-  html += matchCell(pickedWinner('SF1') || 'TBD', pickedWinner('SF2') || 'TBD', 4);
+  html += matchCell(pickedWinner('SF1') || 'TBD', pickedWinner('SF2') || 'TBD', 4, 'FINAL');
   html += '</div>';
 
   // Champion
   html += '<div class="bracket-round"><div class="bracket-round-title">🏆 Champion</div>';
-  html += `<div class="bracket-match bracket-champion-cell"><div class="bracket-team${statusClass(pickedWinner('FINAL') || 'TBD', 4)}">${pickedWinner('FINAL') || 'TBD'}</div></div>`;
+  html += `<div class="bracket-match bracket-champion-cell"><div class="bracket-team${statusClass(pickedWinner('FINAL') || 'TBD', 4, 'FINAL')}">${pickedWinner('FINAL') || 'TBD'}</div></div>`;
   html += '</div>';
 
   html += '</div>';

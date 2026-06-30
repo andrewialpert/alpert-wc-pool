@@ -2956,6 +2956,29 @@ function renderBracketVisual(entry) {
     return 'alive';
   }
 
+  function madeR32(displayName) {
+    // A team made R32 if they qualified from their group (finished 1st, 2nd, or as a qualified 3rd place).
+    // We check results.groups for their finishing position.
+    let originalTeam = null;
+    Object.values(GROUPS).forEach(teams => {
+      teams.forEach(t => {
+        const stripped = t.replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA9F}]/gu,'').replace(/[\uD800-\uDFFF]/g,'').trim();
+        if (stripped === displayName) originalTeam = t;
+      });
+    });
+    if (!originalTeam) return false;
+    for (const letter of Object.keys(GROUPS)) {
+      const confirmed = results.groups[letter];
+      if (!confirmed) continue;
+      const pos = confirmed.indexOf(originalTeam);
+      if (pos === -1) continue;
+      if (pos === 0 || pos === 1) return true;
+      if (pos === 2) return (results.qualifiedThirdPlace || []).includes(originalTeam);
+      return false; // pos === 3, 4th place never qualifies
+    }
+    return false;
+  }
+
   function statusClass(displayName, roundIndex, matchupId) {
     const status = teamStatus(displayName, roundIndex);
     if (status === 'alive') return ' bracket-team-alive';
@@ -2963,18 +2986,16 @@ function renderBracketVisual(entry) {
       // Green strikethrough is ONLY valid in R32 (roundIndex === 0).
       // In R16+, any eliminated team means the person was wrong, so always red.
       if (roundIndex === 0) {
-        // A team qualifies for R32 if they are NOT in results.eliminatedTeams
-        // (eliminatedTeams = teams eliminated in the group stage, never made R32).
-        // If they're not in eliminatedTeams, they made it to R32 and lost there.
-        const neverMadeR32 = (results.eliminatedTeams || []).includes(displayName);
-        if (!neverMadeR32) {
-          // They made R32 but lost. Green strikethrough only if person picked the other team to win.
+        // Check if team actually made it to R32 via group qualification.
+        // If they did, and the person picked the OTHER team to win, it's a correct prediction: green strikethrough.
+        // If they did, and the person picked THEM to win, they were wrong: red strikethrough.
+        // If they never made R32 at all (group stage exit): always red.
+        if (madeR32(displayName)) {
           const pickedWinnerHere = matchupId ? pickedWinner(matchupId) : null;
           if (pickedWinnerHere && pickedWinnerHere !== displayName && pickedWinnerHere !== 'TBD') {
             return ' bracket-team-correctly-eliminated';
           }
         }
-        // neverMadeR32===true, or person picked them to win but they lost: always red
       }
       return ' bracket-team-eliminated';
     }

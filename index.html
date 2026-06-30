@@ -2811,7 +2811,7 @@ async function adminViewProfile(username) {
       <div><span style="color:#bb86fc;font-weight:700;">●</span> <span style="color:var(--muted);">Got third place exactly right and predicted them to be one of the 8 to advance, but that prediction was wrong, they did not advance.</span></div>
     </div>
   </div>`;
-  html += `<div class="card"><div class="card-title">🏁 Group Picks</div><div class="groups-grid">`;
+  html += `<div class="card"><div class="card-title">🏁 Group Picks</div><div style="color:var(--muted);font-size:11px;margin-bottom:10px;line-height:1.7;">8 points for exact 1st &nbsp;·&nbsp; 6 points for exact 2nd &nbsp;·&nbsp; 4 points for exact 3rd &nbsp;·&nbsp; 2 points for exact 4th &nbsp;·&nbsp; 2 points for any team you got advancing but in the wrong spot &nbsp;·&nbsp; +5 point bonus for a perfect group</div><div class="groups-grid">`;
   const qualifiedThirdPlaceAdmin = results.qualifiedThirdPlace || [];
   Object.entries(GROUPS).forEach(([l]) => {
     const picks = entry.groupPicks?.[l] || [];
@@ -2861,21 +2861,21 @@ async function adminViewProfile(username) {
   html += `</div></div>`;
   // Third place picks
   const tp = entry.thirdPlacePicks || [];
-  html += `<div class="card"><div class="card-title">🥉 Third Place Qualifiers (${tp.length}/8)</div><div class="team-chips">`;
+  html += `<div class="card"><div class="card-title">🥉 Third Place Qualifiers (${tp.length}/8)</div><div style="color:var(--muted);font-size:11px;margin-bottom:10px;">1 point for each correct pick</div><div class="team-chips">`;
   tp.forEach(t => { html += `<div class="team-chip selected">${t}</div>`; });
   if (!tp.length) html += '<span style="color:var(--muted);font-size:13px;">Not picked</span>';
   html += `</div></div>`;
   // Bracket picks
   const bp = entry.bracket?.picks || {};
   const rounds = [
-    {label:'R32 Picks (advancing to R16)', ids:['M73','M74','M75','M76','M77','M78','M79','M80','M81','M82','M83','M84','M85','M86','M87','M88']},
-    {label:'R16 Picks (advancing to QF)', ids:['R16-1','R16-2','R16-3','R16-4','R16-5','R16-6','R16-7','R16-8']},
-    {label:'QF Picks (advancing to SF)', ids:['QF1','QF2','QF3','QF4']},
-    {label:'SF Picks (advancing to Final)', ids:['SF1','SF2']},
-    {label:'Final', ids:['FINAL']},
+    {label:'R32 Picks (advancing to R16)', pts:'4 points for each correct pick', ids:['M73','M74','M75','M76','M77','M78','M79','M80','M81','M82','M83','M84','M85','M86','M87','M88']},
+    {label:'R16 Picks (advancing to QF)', pts:'8 points for each correct pick', ids:['R16-1','R16-2','R16-3','R16-4','R16-5','R16-6','R16-7','R16-8']},
+    {label:'QF Picks (advancing to SF)', pts:'16 points for each correct pick', ids:['QF1','QF2','QF3','QF4']},
+    {label:'SF Picks (advancing to Final)', pts:'28 points for each correct pick', ids:['SF1','SF2']},
+    {label:'Final', pts:'55 points for the correct pick', ids:['FINAL']},
   ];
-  rounds.forEach(({label, ids}) => {
-    html += `<div class="card"><div class="card-title">${label}</div>`;
+  rounds.forEach(({label, pts, ids}) => {
+    html += `<div class="card"><div class="card-title">${label}</div><div style="color:var(--muted);font-size:11px;margin-bottom:10px;">${pts}</div>`;
     ids.forEach(id => {
       const pick = bp[id];
       html += `<div style="font-size:12px;padding:4px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;">

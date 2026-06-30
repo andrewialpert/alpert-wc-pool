@@ -2672,25 +2672,22 @@ async function renderLeaderboard() {
   // Sort
   if (lbSortMode === 'name') {
     scored.sort((a,b) => (a.name||'').localeCompare(b.name||''));
-  } else if (lbSortMode === 'live') {
-    scored.sort((a,b) => b.liveTotal - a.liveTotal || (a.name||'').localeCompare(b.name||''));
   } else {
     // official (default)
-    scored.sort((a,b) => b.total - a.total || b.liveTotal - a.liveTotal || (a.name||'').localeCompare(b.name||''));
+    scored.sort((a,b) => b.total - a.total || (a.name||'').localeCompare(b.name||''));
   }
 
   let html = '';
 
   // Explanatory note
   html += `<div class="alert alert-info" style="margin-bottom:12px;font-size:12px;line-height:1.7;">
-    <strong>Live</strong> score is calculated automatically from current match data and updates every 3 minutes. It includes group position points based on current standings, plus knockout points for any team that has actually won a match. It does not yet include advancement points, perfect group bonuses, or third place qualifiers, those are only awarded once groups are officially finalized.<br><br>
-    <strong>Official</strong> score is locked in after each group is finalized and is what determines the actual winner.
+    <strong>Official</strong> score is locked in after each group is finalized and is what determines the actual winner.<br><br>
+    <strong>Max Possible</strong> is the highest score a person can still reach based on their remaining picks. Any team that has been eliminated cannot earn more points.
   </div>`;
 
   // Sort buttons
   html += `<div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
     <button onclick="setLbSort('official')" style="flex:1;min-width:80px;padding:8px;border-radius:8px;font-size:12px;font-family:'DM Mono',monospace;cursor:pointer;border:1px solid ${lbSortMode==='official'?'var(--gold)':'var(--border)'};background:${lbSortMode==='official'?'rgba(240,180,41,0.12)':'var(--card-light)'};color:${lbSortMode==='official'?'var(--gold)':'var(--muted)'};">Official</button>
-    <button onclick="setLbSort('live')" style="flex:1;min-width:80px;padding:8px;border-radius:8px;font-size:12px;font-family:'DM Mono',monospace;cursor:pointer;border:1px solid ${lbSortMode==='live'?'var(--gold)':'var(--border)'};background:${lbSortMode==='live'?'rgba(240,180,41,0.12)':'var(--card-light)'};color:${lbSortMode==='live'?'var(--gold)':'var(--muted)'};">Live</button>
     <button onclick="setLbSort('name')" style="flex:1;min-width:80px;padding:8px;border-radius:8px;font-size:12px;font-family:'DM Mono',monospace;cursor:pointer;border:1px solid ${lbSortMode==='name'?'var(--gold)':'var(--border)'};background:${lbSortMode==='name'?'rgba(240,180,41,0.12)':'var(--card-light)'};color:${lbSortMode==='name'?'var(--gold)':'var(--muted)'};">Name</button>
   </div>`;
 
@@ -2699,7 +2696,7 @@ async function renderLeaderboard() {
     <th>Name</th>
     <th>Champion</th>
     <th>Official</th>
-    <th style="color:var(--red);">Live ⚡</th>
+    <th style="color:var(--muted);">Max Possible</th>
     <th>Group</th>
     <th>KO</th>
   </tr></thead><tbody>`;
@@ -2727,13 +2724,14 @@ async function renderLeaderboard() {
       ? champPick.replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu,'').trim()
       : picksLocked ? '<span style="color:var(--muted);">?</span>'
       : '<span style="color:var(--muted);">🔒</span>';
-    const liveDisplay = `<span style="color:var(--red);font-family:'DM Mono',monospace;font-weight:700;">${e.liveTotal}</span>`;
+    const maxPossible = maxPossibleScore(e);
+    const maxDisplay = `<span style="color:var(--muted);font-family:'DM Mono',monospace;font-size:12px;">${maxPossible}</span>`;
     html+=`<tr onclick="viewProfile('${e.username}')">
       <td><span class="rank-cell">${rank}</span></td>
       <td><strong>${e.name}</strong>${statusBadge}${paidBadge}</td>
       <td style="font-size:12px;color:var(--gold);">${champDisplay}</td>
       <td><span class="pts-badge">${e.total}</span></td>
-      <td>${liveDisplay}</td>
+      <td>${maxDisplay}</td>
       <td style="color:var(--muted);font-size:12px;">${e.breakdown?.groups||0}</td>
       <td style="color:var(--muted);font-size:12px;">${e.koScore||0}</td>
     </tr>`;
@@ -2955,12 +2953,44 @@ function renderBracketVisual(entry) {
     const status = teamStatus(displayName, roundIndex);
     if (status === 'alive') return ' bracket-team-alive';
     if (status === 'eliminated') {
-      // Check if this person correctly predicted this exact team's elimination in this exact matchup,
-      // i.e. they picked the OTHER team (the one that actually won) as the winner of this match.
-      const pickedWinnerHere = matchupId ? pickedWinner(matchupId) : null;
-      if (pickedWinnerHere && pickedWinnerHere !== displayName && pickedWinnerHere !== 'TBD') {
-        // They picked someone else to win this match, and this team lost, so their prediction was correct
-        return ' bracket-team-correctly-eliminated';
+      // Green strikethrough is ONLY valid in R32 (roundIndex === 0).
+      // In R16+, any eliminated team means the person was wrong (they predicted that team survived R32),
+      // so it's always red strikethrough.
+      if (roundIndex === 0) {
+        // Additional guard: team must have actually QUALIFIED for R32 (made it out of groups).
+        // If they never qualified, it's always red -- you can't get credit for "correctly predicting"
+        // a team to lose in R32 if they were never even in R32.
+        let originalTeam = null;
+        Object.values(GROUPS).forEach(teams => {
+          teams.forEach(t => {
+            const stripped = t.replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA9F}]/gu,'').replace(/[\uD800-\uDFFF]/g,'').trim();
+            if (stripped === displayName) originalTeam = t;
+          });
+        });
+        let groupQualified = null;
+        if (originalTeam) {
+          for (const letter of Object.keys(GROUPS)) {
+            const confirmed = results.groups[letter];
+            if (!confirmed) continue;
+            const pos = confirmed.indexOf(originalTeam);
+            if (pos === -1) continue;
+            if (pos === 0 || pos === 1) { groupQualified = true; break; }
+            if (pos === 2) {
+              if ((results.qualifiedThirdPlace || []).includes(originalTeam)) { groupQualified = true; break; }
+              if (results.thirdPlaceFinalized) { groupQualified = false; break; }
+              groupQualified = null; break;
+            }
+            if (pos === 3) { groupQualified = false; break; }
+          }
+        }
+        if (groupQualified === true) {
+          // Team made R32 but lost there. Green strikethrough only if person picked the other team.
+          const pickedWinnerHere = matchupId ? pickedWinner(matchupId) : null;
+          if (pickedWinnerHere && pickedWinnerHere !== displayName && pickedWinnerHere !== 'TBD') {
+            return ' bracket-team-correctly-eliminated';
+          }
+        }
+        // groupQualified===false or null: never made R32, or picked wrong -- always red
       }
       return ' bracket-team-eliminated';
     }

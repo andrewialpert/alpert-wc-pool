@@ -2923,11 +2923,8 @@ function renderBracketVisual(entry) {
     });
     if (!originalTeam) return 'unknown';
 
-    // Eliminated takes priority, confirmed by admin regardless of round
-    if (eliminatedTeams.includes(originalTeam)) return 'eliminated';
-
-    // Determine group-stage qualification (this only confirms alive status for R32, roundIndex 0)
-    let groupQualified = null; // null = undetermined, true = qualified for R32, false = eliminated in groups
+    // Determine group-stage qualification first -- this tells us if they made it to R32 at all
+    let groupQualified = null;
     for (const letter of Object.keys(GROUPS)) {
       const confirmed = results.groups[letter];
       if (!confirmed) continue;
@@ -2937,14 +2934,19 @@ function renderBracketVisual(entry) {
       if (pos === 2) {
         if (qualifiedThirdPlace.includes(originalTeam)) { groupQualified = true; break; }
         if (results.thirdPlaceFinalized) { groupQualified = false; break; }
-        groupQualified = null; break; // still pending
+        groupQualified = null; break;
       }
-      if (pos === 3) { groupQualified = false; break; } // confirmed 4th, always eliminated
+      if (pos === 3) { groupQualified = false; break; }
     }
     if (groupQualified === false) return 'eliminated';
 
-    // For R32 (roundIndex 0): alive status comes purely from group qualification
+    // For R32 (roundIndex 0): if they qualified from groups, they ARE in R32 regardless of
+    // whether they won or lost there. eliminatedTeams includes R32 losers too, so we must
+    // not check it before returning alive for R32.
     if (roundIndex === 0) return groupQualified === true ? 'alive' : 'unknown';
+
+    // For R16+: now check eliminatedTeams -- if they're in it, they lost somewhere in knockout
+    if (eliminatedTeams.includes(originalTeam)) return 'eliminated';
 
     // For R16 and beyond, the team must have actually WON every prior knockout round to be confirmed alive here.
     // Check each prior round in sequence; if any is missing, status is unknown (not yet determined), not alive.

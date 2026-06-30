@@ -2457,7 +2457,9 @@ function scoreEntry(entry) {
 }
 
 function maxPossibleScore(entry) {
-  let max = 0;
+  // Start with what's already been officially scored -- max possible can never be less than current score
+  const alreadyScored = scoreEntry(entry).total;
+  let remaining = 0;
   const {pos1,pos2,pos3,pos4,adv,perf} = SCORING;
 
   // GROUPS: for each group not yet officially decided, calculate true upside
@@ -2475,7 +2477,7 @@ function maxPossibleScore(entry) {
       if (confirmedPositions && confirmedPositions[i]) return;
       if (!liveOrder) {
         // No live data yet, assume full credit available (group hasn't started)
-        max += [pos1,pos2,pos3,pos4][i];
+        remaining += [pos1,pos2,pos3,pos4][i];
         return;
       }
       const liveNames = liveOrder.map(t => t.team);
@@ -2483,17 +2485,17 @@ function maxPossibleScore(entry) {
       const teamGames = liveOrder.find(t => t.team === pick)?.p || 0;
       if (teamGames >= 3) {
         // Team has finished all group games, position is fixed
-        if (actualPos === i) max += [pos1,pos2,pos3,pos4][i];
-        else if (actualPos <= 1 && i <= 1) max += adv;
+        if (actualPos === i) remaining += [pos1,pos2,pos3,pos4][i];
+        else if (actualPos <= 1 && i <= 1) remaining += adv;
         // else 0, no possible points left for this pick
       } else {
         // Still mid-group, give credit for full potential (can't rule out yet)
-        max += [pos1,pos2,pos3,pos4][i];
+        remaining += [pos1,pos2,pos3,pos4][i];
       }
     });
     // Perfect group bonus only possible if no position has been confirmed yet at all
     const anyConfirmed = confirmedPositions && confirmedPositions.some(p => p);
-    if (picks.length === 4 && !anyConfirmed) max += perf;
+    if (picks.length === 4 && !anyConfirmed) remaining += perf;
   });
 
   // KNOCKOUT: for each bracket pick, check if the team is still alive
@@ -2536,17 +2538,17 @@ function maxPossibleScore(entry) {
       const pick = bp[id];
       if (!pick) return;
       if (eliminated.has(pick)) return; // team is out, no points possible
-      max += pts;
+      remaining += pts;
     });
   });
 
   // Champion
   if (!officialDone.champion) {
     const champPick = bp['FINAL'];
-    if (champPick && !eliminated.has(champPick)) max += SCORING.champ;
+    if (champPick && !eliminated.has(champPick)) remaining += SCORING.champ;
   }
 
-  return max;
+  return alreadyScored + remaining;
 }
 
 // ================================================================
@@ -2662,16 +2664,20 @@ async function renderLeaderboard() {
   const scored = submitted.map(e => {
     const official = scoreEntry(e);
     const liveTotal = liveStandings ? scoreLiveEntry(e, liveStandings, matchesCache) : 0;
+    const maxPoss = maxPossibleScore(e);
     return {
       ...e,
       ...official,
       liveTotal,
+      maxPoss,
     };
   });
 
   // Sort
   if (lbSortMode === 'name') {
     scored.sort((a,b) => (a.name||'').localeCompare(b.name||''));
+  } else if (lbSortMode === 'max') {
+    scored.sort((a,b) => b.maxPoss - a.maxPoss || b.total - a.total || (a.name||'').localeCompare(b.name||''));
   } else {
     // official (default)
     scored.sort((a,b) => b.total - a.total || (a.name||'').localeCompare(b.name||''));
@@ -2688,6 +2694,7 @@ async function renderLeaderboard() {
   // Sort buttons
   html += `<div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
     <button onclick="setLbSort('official')" style="flex:1;min-width:80px;padding:8px;border-radius:8px;font-size:12px;font-family:'DM Mono',monospace;cursor:pointer;border:1px solid ${lbSortMode==='official'?'var(--gold)':'var(--border)'};background:${lbSortMode==='official'?'rgba(240,180,41,0.12)':'var(--card-light)'};color:${lbSortMode==='official'?'var(--gold)':'var(--muted)'};">Official</button>
+    <button onclick="setLbSort('max')" style="flex:1;min-width:80px;padding:8px;border-radius:8px;font-size:12px;font-family:'DM Mono',monospace;cursor:pointer;border:1px solid ${lbSortMode==='max'?'var(--gold)':'var(--border)'};background:${lbSortMode==='max'?'rgba(240,180,41,0.12)':'var(--card-light)'};color:${lbSortMode==='max'?'var(--gold)':'var(--muted)'};">Max Possible</button>
     <button onclick="setLbSort('name')" style="flex:1;min-width:80px;padding:8px;border-radius:8px;font-size:12px;font-family:'DM Mono',monospace;cursor:pointer;border:1px solid ${lbSortMode==='name'?'var(--gold)':'var(--border)'};background:${lbSortMode==='name'?'rgba(240,180,41,0.12)':'var(--card-light)'};color:${lbSortMode==='name'?'var(--gold)':'var(--muted)'};">Name</button>
   </div>`;
 
@@ -2724,7 +2731,7 @@ async function renderLeaderboard() {
       ? champPick.replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu,'').trim()
       : picksLocked ? '<span style="color:var(--muted);">?</span>'
       : '<span style="color:var(--muted);">🔒</span>';
-    const maxPossible = maxPossibleScore(e);
+    const maxPossible = e.maxPoss;
     const maxDisplay = `<span style="color:var(--muted);font-family:'DM Mono',monospace;font-size:12px;">${maxPossible}</span>`;
     html+=`<tr onclick="viewProfile('${e.username}')">
       <td><span class="rank-cell">${rank}</span></td>

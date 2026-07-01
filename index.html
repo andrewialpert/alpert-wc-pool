@@ -2679,9 +2679,10 @@ async function renderLeaderboard() {
   } else if (lbSortMode === 'max') {
     scored.sort((a,b) => b.maxPoss - a.maxPoss || b.total - a.total || (a.name||'').localeCompare(b.name||''));
   } else if (lbSortMode === 'champion') {
+    const stripFlag = s => s.replace(/[\u{1F1E0}-\u{1F1FF}]{2}|🏴[\u{E0000}-\u{E007F}]+\u{E007F}/gu, '').trim();
     scored.sort((a,b) => {
-      const ca = a.bracket?.picks?.['FINAL'] || '';
-      const cb = b.bracket?.picks?.['FINAL'] || '';
+      const ca = stripFlag(a.bracket?.picks?.['FINAL'] || '');
+      const cb = stripFlag(b.bracket?.picks?.['FINAL'] || '');
       return ca.localeCompare(cb) || b.total - a.total || (a.name||'').localeCompare(b.name||'');
     });
   } else {

@@ -2678,6 +2678,12 @@ async function renderLeaderboard() {
     scored.sort((a,b) => (a.name||'').localeCompare(b.name||''));
   } else if (lbSortMode === 'max') {
     scored.sort((a,b) => b.maxPoss - a.maxPoss || b.total - a.total || (a.name||'').localeCompare(b.name||''));
+  } else if (lbSortMode === 'champion') {
+    scored.sort((a,b) => {
+      const ca = a.bracket?.picks?.['FINAL'] || '';
+      const cb = b.bracket?.picks?.['FINAL'] || '';
+      return ca.localeCompare(cb) || b.total - a.total || (a.name||'').localeCompare(b.name||'');
+    });
   } else {
     // official (default)
     scored.sort((a,b) => b.total - a.total || (a.name||'').localeCompare(b.name||''));
@@ -2695,6 +2701,7 @@ async function renderLeaderboard() {
   html += `<div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
     <button onclick="setLbSort('official')" style="flex:1;min-width:80px;padding:8px;border-radius:8px;font-size:12px;font-family:'DM Mono',monospace;cursor:pointer;border:1px solid ${lbSortMode==='official'?'var(--gold)':'var(--border)'};background:${lbSortMode==='official'?'rgba(240,180,41,0.12)':'var(--card-light)'};color:${lbSortMode==='official'?'var(--gold)':'var(--muted)'};">Official</button>
     <button onclick="setLbSort('max')" style="flex:1;min-width:80px;padding:8px;border-radius:8px;font-size:12px;font-family:'DM Mono',monospace;cursor:pointer;border:1px solid ${lbSortMode==='max'?'var(--gold)':'var(--border)'};background:${lbSortMode==='max'?'rgba(240,180,41,0.12)':'var(--card-light)'};color:${lbSortMode==='max'?'var(--gold)':'var(--muted)'};">Max Possible</button>
+    <button onclick="setLbSort('champion')" style="flex:1;min-width:80px;padding:8px;border-radius:8px;font-size:12px;font-family:'DM Mono',monospace;cursor:pointer;border:1px solid ${lbSortMode==='champion'?'var(--gold)':'var(--border)'};background:${lbSortMode==='champion'?'rgba(240,180,41,0.12)':'var(--card-light)'};color:${lbSortMode==='champion'?'var(--gold)':'var(--muted)'};">Champion</button>
     <button onclick="setLbSort('name')" style="flex:1;min-width:80px;padding:8px;border-radius:8px;font-size:12px;font-family:'DM Mono',monospace;cursor:pointer;border:1px solid ${lbSortMode==='name'?'var(--gold)':'var(--border)'};background:${lbSortMode==='name'?'rgba(240,180,41,0.12)':'var(--card-light)'};color:${lbSortMode==='name'?'var(--gold)':'var(--muted)'};">Name</button>
   </div>`;
 
@@ -2710,7 +2717,7 @@ async function renderLeaderboard() {
 
   scored.forEach((e,i)=>{
     const medals=['🥇','🥈','🥉'];
-    const rank = lbSortMode==='name' ? `<span style="color:var(--muted);font-size:12px;">${i+1}</span>` : (medals[i]||`<span style="color:var(--muted);font-size:12px;">${i+1}</span>`);
+    const rank = (lbSortMode==='name'||lbSortMode==='champion') ? `<span style="color:var(--muted);font-size:12px;">${i+1}</span>` : (medals[i]||`<span style="color:var(--muted);font-size:12px;">${i+1}</span>`);
     const allBracketIds = ['M73','M74','M75','M76','M77','M78','M79','M80','M81','M82','M83','M84','M85','M86','M87','M88',
       'R16-1','R16-2','R16-3','R16-4','R16-5','R16-6','R16-7','R16-8',
       'QF1','QF2','QF3','QF4','SF1','SF2','FINAL'];

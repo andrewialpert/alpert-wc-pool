@@ -2701,14 +2701,14 @@ async function renderLeaderboard() {
   html += `<div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
     <button onclick="setLbSort('official')" style="flex:1;min-width:80px;padding:8px;border-radius:8px;font-size:12px;font-family:'DM Mono',monospace;cursor:pointer;border:1px solid ${lbSortMode==='official'?'var(--gold)':'var(--border)'};background:${lbSortMode==='official'?'rgba(240,180,41,0.12)':'var(--card-light)'};color:${lbSortMode==='official'?'var(--gold)':'var(--muted)'};">Official</button>
     <button onclick="setLbSort('max')" style="flex:1;min-width:80px;padding:8px;border-radius:8px;font-size:12px;font-family:'DM Mono',monospace;cursor:pointer;border:1px solid ${lbSortMode==='max'?'var(--gold)':'var(--border)'};background:${lbSortMode==='max'?'rgba(240,180,41,0.12)':'var(--card-light)'};color:${lbSortMode==='max'?'var(--gold)':'var(--muted)'};">Max Possible</button>
-    <button onclick="setLbSort('champion')" style="flex:1;min-width:80px;padding:8px;border-radius:8px;font-size:12px;font-family:'DM Mono',monospace;cursor:pointer;border:1px solid ${lbSortMode==='champion'?'var(--gold)':'var(--border)'};background:${lbSortMode==='champion'?'rgba(240,180,41,0.12)':'var(--card-light)'};color:${lbSortMode==='champion'?'var(--gold)':'var(--muted)'};">Champion</button>
+    <button onclick="setLbSort('champion')" style="flex:1;min-width:80px;padding:8px;border-radius:8px;font-size:12px;font-family:'DM Mono',monospace;cursor:pointer;border:1px solid ${lbSortMode==='champion'?'var(--gold)':'var(--border)'};background:${lbSortMode==='champion'?'rgba(240,180,41,0.12)':'var(--card-light)'};color:${lbSortMode==='champion'?'var(--gold)':'var(--muted)'};">Picked Winner</button>
     <button onclick="setLbSort('name')" style="flex:1;min-width:80px;padding:8px;border-radius:8px;font-size:12px;font-family:'DM Mono',monospace;cursor:pointer;border:1px solid ${lbSortMode==='name'?'var(--gold)':'var(--border)'};background:${lbSortMode==='name'?'rgba(240,180,41,0.12)':'var(--card-light)'};color:${lbSortMode==='name'?'var(--gold)':'var(--muted)'};">Name</button>
   </div>`;
 
   html+=`<div class="card" style="padding:0;overflow:hidden;"><table class="lb-table"><thead><tr>
     <th style="width:40px;">#</th>
     <th>Name</th>
-    <th>Champion</th>
+    <th>Picked Winner</th>
     <th>Official</th>
     <th style="color:var(--muted);">Max Possible</th>
     <th>Group</th>

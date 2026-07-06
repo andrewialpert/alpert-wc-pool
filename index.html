@@ -1543,11 +1543,10 @@ function renderStandings(matches) {
     rows.forEach((r, i) => {
       const name = r.team.replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA9F}]/gu,'').replace(/[\uD800-\uDFFF]/g,'').trim();
       const qualifiedThirdPlace = results.qualifiedThirdPlace || [];
-      const eliminatedTeams = results.eliminatedTeams || [];
-      const isEliminated = eliminatedTeams.includes(r.team);
-      const isConfirmedThirdPlaceQualifier = (i === 2 && qualifiedThirdPlace.includes(r.team));
       const groupFinalized = !!(results.groups[letter] && results.groups[letter].every(p => p));
+      const isConfirmedThirdPlaceQualifier = (i === 2 && qualifiedThirdPlace.includes(r.team));
       const isAdvancing = (i < 2 || isConfirmedThirdPlaceQualifier);
+      const isEliminated = groupFinalized && !isAdvancing;
       let rowStyle = '';
       if (isEliminated) {
         rowStyle = ' style="color:#ff4040;font-weight:700;"';

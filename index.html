@@ -2952,17 +2952,27 @@ function renderBracketVisual(entry) {
     // not check it before returning alive for R32.
     if (roundIndex === 0) return groupQualified === true ? 'alive' : 'unknown';
 
-    // For R16+: now check eliminatedTeams -- if they're in it, they lost somewhere in knockout
-    if (eliminatedTeams.includes(originalTeam)) return 'eliminated';
-
-    // For R16 and beyond, the team must have actually WON every prior knockout round to be confirmed alive here.
-    // Check each prior round in sequence; if any is missing, status is unknown (not yet determined), not alive.
+    // For R16+: check if they won each prior round. If they won all prior rounds,
+    // they ARE in this round (alive), even if they're in eliminatedTeams (which just means
+    // they lost AT SOME POINT in knockout -- but we need to know WHICH round they lost in).
+    // A team is alive at roundIndex R if they won all rounds 0..R-1.
+    // A team is eliminated at roundIndex R if they won rounds 0..R-2 but lost round R-1.
+    // A team is unknown at roundIndex R if round R-1 hasn't been entered yet.
     for (let r = 0; r < roundIndex; r++) {
       const roundKey = koRoundOrder[r];
-      const wonThisRound = (results.knockout?.[roundKey] || []).includes(originalTeam);
-      if (!wonThisRound) return 'unknown';
+      const winners = results.knockout?.[roundKey] || [];
+      if (winners.length === 0) return 'unknown'; // round not entered yet
+      const wonThisRound = winners.includes(originalTeam);
+      if (!wonThisRound) return 'eliminated'; // lost in a prior round, so can't be here
     }
-    return 'alive';
+    // Won all prior rounds -- they're in this round
+    // Now check if they also won THIS round (to distinguish alive vs eliminated-in-this-round)
+    const thisRoundKey = koRoundOrder[roundIndex];
+    const thisRoundWinners = results.knockout?.[thisRoundKey] || [];
+    if (thisRoundWinners.length > 0 && !thisRoundWinners.includes(originalTeam)) {
+      return 'eliminated'; // they lost in this exact round
+    }
+    return 'alive'; // either won this round or it hasn't been played yet
   }
 
   function madeR32(displayName) {

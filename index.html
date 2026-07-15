@@ -2952,17 +2952,17 @@ function renderBracketVisual(entry) {
     // not check it before returning alive for R32.
     if (roundIndex === 0) return groupQualified === true ? 'alive' : 'unknown';
 
-    // For R16+: walk through each prior round to confirm they won it.
-    // roundIndex=1 means R16: check they won r32 (r=0 only)
-    // roundIndex=2 means QF: check they won r32 AND r16
+    const roundSizes = {r32:16, r16:8, qf:4, sf:2, champion:1};
     for (let r = 0; r < roundIndex; r++) {
       const roundKey = koRoundOrder[r];
       const winners = results.knockout?.[roundKey] || [];
       if (winners.length === 0) return 'unknown'; // round not entered yet
-      if (!winners.includes(originalTeam)) return 'eliminated'; // lost before reaching this round
+      if (!winners.includes(originalTeam)) {
+        // Only mark eliminated if this round is fully complete
+        if (winners.length >= roundSizes[roundKey]) return 'eliminated';
+        return 'unknown'; // round still in progress, can't confirm eliminated yet
+      }
     }
-    // They won all prior rounds -- they ARE in this round, so show as alive (green no strikethrough)
-    // even if they lost IN this round. Losing in this round means red in the NEXT round.
     return 'alive';
   }
 

@@ -3411,6 +3411,7 @@ async function wipepicks() {
 
 async function autoSave() {
   if (!currentUser) return;
+  if (new Date() >= LOCK_DATE) return; // never autosave after picks are locked
   const picks = collectPicks();
   const entry = {username:currentUser.username,name:currentUser.name,draft:true,submitted:false,savedAt:new Date().toISOString(),...picks};
   try {
